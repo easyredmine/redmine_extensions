@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.version     = RedmineExtensions::VERSION
   s.authors     = ["EasySoftware, ltd"]
   s.email       = ["ondrej.ezr@easy.cz"]
-  s.homepage    = "www.easyredmine.com"
+  s.homepage    = "http://www.easyredmine.com"
   s.summary     = "RedmineExtensions is set of usefull features for Redmine. Main focus is on development helpers, but many users can find it helpfull"
   s.description = "RedmineExtensions provide many extended functionalities for Redmine project."
   s.license     = 'GPL-2'
