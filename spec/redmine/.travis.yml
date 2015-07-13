@@ -1,0 +1,97 @@
+# Redmine runs tests on own continuous integration server.
+# http://www.redmine.org/projects/redmine/wiki/Continuous_integration
+# You can also run tests on your environment.
+language: ruby
+rvm:
+  - 1.9.3
+  - 2.0
+  - 2.1
+  - 2.2
+  - jruby
+env:
+  - "SUITE=units       DB=postgresql"
+  - "SUITE=functionals DB=postgresql"
+  - "SUITE=integration DB=postgresql"
+  - "SUITE=ui          DB=postgresql"
+  - "SUITE=units       DB=mysql-5.5"
+  - "SUITE=functionals DB=mysql-5.5"
+  - "SUITE=integration DB=mysql-5.5"
+  - "SUITE=ui          DB=mysql-5.5"
+  - "SUITE=units       DB=mysql-5.6"
+  - "SUITE=functionals DB=mysql-5.6"
+  - "SUITE=integration DB=mysql-5.6"
+  - "SUITE=ui          DB=mysql-5.6"
+  - "SUITE=units       DB=mysql-5.7-dmr"
+  - "SUITE=functionals DB=mysql-5.7-dmr"
+  - "SUITE=integration DB=mysql-5.7-dmr"
+  - "SUITE=ui          DB=mysql-5.7-dmr"
+  - "SUITE=units       DB=mariadb-5.5"
+  - "SUITE=functionals DB=mariadb-5.5"
+  - "SUITE=integration DB=mariadb-5.5"
+  - "SUITE=ui          DB=mariadb-5.5"
+  - "SUITE=units       DB=mariadb-10.0"
+  - "SUITE=functionals DB=mariadb-10.0"
+  - "SUITE=integration DB=mariadb-10.0"
+  - "SUITE=ui          DB=mariadb-10.0"
+  - "SUITE=units       DB=sqlite3"
+  - "SUITE=functionals DB=sqlite3"
+  - "SUITE=integration DB=sqlite3"
+  - "SUITE=ui          DB=sqlite3"
+matrix:
+  allow_failures:
+    # http://www.redmine.org/issues/20251
+    - env: "SUITE=ui          DB=postgresql"
+    # SCM tests fail randomly due to IO.popen().
+    # http://www.redmine.org/issues/19091
+    # https://github.com/jruby/jruby/issues/779
+    - rvm: jruby
+    # http://www.redmine.org/issues/17460
+    # http://www.redmine.org/issues/19344
+    - env: "SUITE=units       DB=mysql-5.6"
+    - env: "SUITE=units       DB=mysql-5.7-dmr"
+    - env: "SUITE=units       DB=mariadb-5.5"
+    - env: "SUITE=units       DB=mariadb-10.0"
+before_install:
+  - "sudo apt-get update -qq"
+  - "sudo apt-get --no-install-recommends install bzr cvs git mercurial subversion"
+  - dpkg -l *mysql*
+  - if [[ $DB =~ (mariadb|mysql-5\.[67]) ]] ;
+    then
+      sudo service mysql stop ;
+      sudo apt-get install python-software-properties ;
+      if [[ $DB =~ mariadb ]] ;
+      then
+        sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db ;
+        MARIADB_VER=`echo $DB | sed -e 's/mariadb-//'` ;
+        sudo add-apt-repository ''"deb http://ftp.osuosl.org/pub/mariadb/repo/${MARIADB_VER}/ubuntu precise main"'' ;
+        sudo cp test/travis/mariadb.pref /etc/apt/preferences.d/mariadb.pref ;
+        sudo apt-get update ;
+        sudo DEBIAN_FRONTEND=noninteractive apt-get -q --yes --force-yes -f --option DPkg::Options::=--force-confnew install mariadb-server ;
+        sudo apt-get install libmariadbd-dev ;
+      else
+        echo mysql-apt-config mysql-apt-config/enable-repo select $DB | sudo debconf-set-selections ;
+        wget http://dev.mysql.com/get/mysql-apt-config_0.2.1-1ubuntu12.04_all.deb ;
+        sudo dpkg --install mysql-apt-config_0.2.1-1ubuntu12.04_all.deb ;
+        sudo apt-get update -q ;
+        sudo apt-get install -q -y -o Dpkg::Options::=--force-confnew mysql-server ;
+      fi
+    elif [[ $DB =~ postgresql ]] ;
+    then
+      psql --version ;
+      psql -c "SHOW SERVER_VERSION" -U postgres ;
+      psql -c "SHOW SERVER_ENCODING" -U postgres ;
+      psql -c "SHOW DateStyle" -U postgres ;
+    fi
+script:
+  - export DATABASE_ADAPTER=${DB}
+  - "SCMS=bazaar,cvs,subversion,git,mercurial,filesystem"
+  - "export SCMS"
+  - "git --version"
+  - "bundle install"
+  - "RUN_ON_NOT_OFFICIAL='' RUBY_VER=1.9 BRANCH=trunk bundle exec rake config/database.yml"
+  - "bundle install"
+  - "bundle exec rake ci:setup"
+  - phantomjs --webdriver 4444 &
+  - JRUBY_OPTS=-J-Xmx1024m bundle exec rake test:${SUITE}
+notifications:
+  email: false
