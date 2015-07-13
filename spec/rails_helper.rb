@@ -2,7 +2,7 @@
 ENV['RAILS_ENV'] ||= 'test'
 
 require 'spec_helper'
-require File.expand_path("../dummy/config/environment.rb",  __FILE__)
+require File.expand_path("../redmine/config/environment.rb",  __FILE__)
 require 'rspec/rails'
 require 'factory_girl_rails'
 # Add additional requires below this line. Rails is not loaded until this point!

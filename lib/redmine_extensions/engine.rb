@@ -17,5 +17,11 @@ module RedmineExtensions
       end
     end
 
+    initializer :add_html_formatting do |app|
+      require "redmine_extensions/html_formatting"
+
+      Redmine::WikiFormatting.register(:HTML, RedmineExtensions::HTMLFormatting::Formatter, RedmineExtensions::HTMLFormatting::Helper)
+    end
+
   end
 end

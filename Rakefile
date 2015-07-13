@@ -11,7 +11,7 @@ begin
   desc "Generate documentation for the plugin."
   Rake::RDocTask.new do |rdoc|
     rdoc.rdoc_dir = "rdoc"
-    rdoc.title = "bullet #{Bullet::VERSION}"
+    rdoc.title = "RedmineExtensions #{RedmineExtensions::VERSION}"
     rdoc.rdoc_files.include("README*")
     rdoc.rdoc_files.include("lib/**/*.rb")
   end
@@ -19,13 +19,10 @@ rescue LoadError
   puts 'RDocTask is not supported for this platform'
 end
 
-APP_RAKEFILE = File.expand_path("../spec/dummy/Rakefile", __FILE__)
+APP_RAKEFILE = File.expand_path("../spec/redmine/Rakefile", __FILE__)
 load 'rails/tasks/engine.rake'
 
-
-load 'rails/tasks/statistics.rake'
-
-
+# load 'rails/tasks/statistics.rake'
 
 Bundler::GemHelper.install_tasks
 
@@ -36,6 +33,9 @@ require 'rspec/core/rake_task'
 
 desc "Run all specs in spec directory (excluding plugin specs)"
 
-RSpec::Core::RakeTask.new(:spec => 'app:db:test:prepare')
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.pattern = 'spec/**/*_spec.rb'
+  spec.exclude_pattern = 'spec/redmine/**/*_spec.rb'
+end
 
 task :default => :spec

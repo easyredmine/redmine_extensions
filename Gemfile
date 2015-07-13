@@ -12,4 +12,9 @@ gemspec
 
 # To use a debugger
 # gem 'byebug', group: [:development, :test]
-
+group :development, :test do
+  gem 'pry-rails'
+  Dir.glob File.expand_path("../spec/redmine/Gemfile", __FILE__) do |file|
+    eval_gemfile file
+  end
+end
