@@ -6,3 +6,4 @@ spec/{dummy,redmine}/db/*.sqlite3-journal
 spec/{dummy,redmine}/log/*.log
 spec/{dummy,redmine}/tmp/
 spec/{dummy,redmine}/.sass-cache
+Gemfile.lock
