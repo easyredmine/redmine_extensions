@@ -1,3 +1,4 @@
+
 module RedmineExtensions
   class Engine < ::Rails::Engine
     isolate_namespace RedmineExtensions
@@ -9,7 +10,11 @@ module RedmineExtensions
       g.helper false
     end
 
-    initializer :append_migrations do |app|
+    initializer 'redmine_extensions.initialize_environment' do |app|
+      RedmineExtensions.app_root = app.root
+    end
+
+    initializer 'redmine_extensions.append_migrations' do |app|
       unless app.root.to_s.match root.to_s
         config.paths['db/migrate'].expanded.each do |expanded_path|
           app.config.paths['db/migrate'] << expanded_path
