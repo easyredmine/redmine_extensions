@@ -1,0 +1,16 @@
+<% if easy_query.entities.blank? %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+  <div id="<%= container_id %>">
+    <%= render :partial => 'easy_queries/easy_query_entities_list', :locals => {:entities => easy_query.entities, :query => easy_query,
+      :block_name => block_name, :modul_uniq_id => modul_uniq_id,
+      :groups_url => groups_url,
+      :options => options} %>
+
+    <% if easy_query.entity_pages && easy_query.entity_count %>
+      <p class="pagination">
+        <%= pagination_links_full(easy_query.entity_pages, easy_query.entity_count, :query => easy_query, :entities => easy_query.entities) %>
+      </p>
+    <% end %>
+  </div>
+<% end %>
