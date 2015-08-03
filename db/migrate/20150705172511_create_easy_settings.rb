@@ -1,6 +1,6 @@
 class CreateEasySettings < ActiveRecord::Migration
   def up
-    unless table_exists?(:easy_setting)
+    unless table_exists?(:easy_settings)
       create_table :easy_settings do |t|
         t.string :name
         t.text :value
@@ -8,7 +8,7 @@ class CreateEasySettings < ActiveRecord::Migration
       end
     end
 
-    unless index_exists?(:easy_setting, [:name, :project_id], unique: true)
+    unless index_exists?(:easy_settings, [:name, :project_id], unique: true)
       add_index :easy_settings, [:name, :project_id], unique: true
     end
 

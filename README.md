@@ -4,6 +4,9 @@
 
 This gem provides an extended funcionality for a Redmine project
 
+## Provided funcionalities
+* EasySetting - per project settings
+
 
 ## Licence
 This is published under GPL-2 license.
