@@ -1,7 +1,6 @@
 
 module RedmineExtensions
   class Engine < ::Rails::Engine
-    isolate_namespace RedmineExtensions
 
     def self.automount!(path = nil)
       engine = self
@@ -41,7 +40,7 @@ module RedmineExtensions
     # include helpers
     initializer 'redmine_extensions.action_controller' do |app|
       ActiveSupport.on_load :action_controller do
-        helper RedmineExtensions::RenderingHelper
+        helper RedmineExtensions::ApplicationHelper
       end
     end
 

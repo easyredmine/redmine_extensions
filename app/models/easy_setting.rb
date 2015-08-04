@@ -11,22 +11,7 @@ class EasySetting < ActiveRecord::Base
   after_destroy :invalidate_cache
 
   def self.boolean_keys
-    [:project_calculate_start_date, :project_calculate_due_date, :timelog_comment_editor_enabled,
-      :time_entry_spent_on_at_issue_update_enabled, :commit_logtime_enabled, :project_fixed_activity,
-      :enable_activity_roles, :show_issue_id, :commit_cross_project_ref, :issue_recalculate_attributes,
-      :quick_jump_to_an_issue, :use_easy_cache, :avatar_enabled, :show_personal_statement, :show_bulk_time_entry,
-      :enable_private_issues, :use_personal_theme, :display_issue_relations_on_new_form, :milestone_effective_date_from_issue_due_date,
-      :allow_log_time_to_closed_issue, :project_display_identifiers, :issue_set_done_after_close, :allow_repeating_issues,
-      :just_one_issue_mail, :required_issue_id_at_time_entry, :close_subtask_after_parent, :show_time_entry_range_select,
-      :easy_contact_toolbar_is_enabled, :issue_private_note_as_default, :show_easy_resource_booking,
-      :skip_workflow_for_admin, :hide_login_quotes, :display_project_field_on_issue_detail,
-      :easy_invoicing_use_estimated_time_for_issues, :hide_imagemagick_warning,
-      :time_entries_locking_enabled,
-      :easy_webdav_enabled,
-      :show_avatars_on_query,
-      :easy_user_allocation_by_project_enabled,
-      :ckeditor_syntax_highlight_enabled
-    ]
+    []
   end
 
   def self.copy_all_project_settings(source_project, target_project)

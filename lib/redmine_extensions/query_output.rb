@@ -47,3 +47,5 @@ module RedmineExtensions
 
   end
 end
+# alias for convinience
+EasyQueryOutput = RedmineExtensions::QueryOutput
