@@ -1,7 +1,14 @@
 
 module RedmineExtensions
   class Engine < ::Rails::Engine
-    isolate_namespace RedmineExtensions
+
+    def self.automount!(path = nil)
+      engine = self
+      path ||= engine.to_s.underscore.split('/').first
+      Rails.application.routes.draw do
+        mount engine => path
+      end
+    end
 
     config.generators do |g|
       g.test_framework      :rspec,        :fixture => false
@@ -11,9 +18,11 @@ module RedmineExtensions
     end
 
     config.autoload_paths << config.root.join('lib')
+    config.eager_load_paths << config.root.join('app', 'models', 'easy_queries')
 
     initializer 'redmine_extensions.initialize_environment' do |app|
       RedmineExtensions.app_root = app.root
+      ActionDispatch::Routing::RouteSet::Generator.send(:include, RedmineExtensions::RailsPatches::RouteSetGeneratorPatch)
     end
 
     initializer 'redmine_extensions.append_migrations' do |app|
@@ -31,7 +40,7 @@ module RedmineExtensions
     # include helpers
     initializer 'redmine_extensions.action_controller' do |app|
       ActiveSupport.on_load :action_controller do
-        helper RedmineExtensions::RenderingHelper
+        helper RedmineExtensions::ApplicationHelper
       end
     end
 

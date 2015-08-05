@@ -7,9 +7,13 @@ module RedmineExtensions
       super(@model)
     end
 
+    def to_model
+      @model || self
+    end
+
     #TODO: little nasty hack
     def class
-      @model.class
+      @model && @model.class || super
     end
 
     def h
