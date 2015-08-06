@@ -24,12 +24,12 @@ module RedmineExtensions
     def initialize(settings_params={}, project = nil)
       @settings = settings_params || {}
       @settings = @settings.dup.symbolize_keys
-      @model = EasySetting.new
+      super(EasySetting.new, nil)
     end
 
     def plugin=(plugin)
       @plugin = plugin
-      @model = plugin
+      self.model = plugin
     end
 
     def unsaved_settings

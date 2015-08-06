@@ -22,7 +22,9 @@ class EasySettingsController < ApplicationController
 
   def update
     @settings.plugin = Redmine::Plugin.find(params[:id])
+    Setting.send "plugin_#{@plugin.id}=", params[:settings] if params[:settings]
     if @settings.save
+      flash[:notice] = l(:notice_successful_update)
       redirect_to redmine_extensions_engine.edit_easy_setting_path(@settings)
     else
       render :edit

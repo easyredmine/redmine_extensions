@@ -5,7 +5,7 @@ module RedmineExtensions
 
     def plugin_settings_path(plugin, *attrs)
       if plugin.settings[:only_easy]
-        redmine_extensions.edit_easy_setting_path(plugin, *attrs)
+        redmine_extensions_engine.edit_easy_setting_path(plugin, *attrs)
       else
         super
       end
