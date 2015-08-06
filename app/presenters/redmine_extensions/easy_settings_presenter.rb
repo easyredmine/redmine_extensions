@@ -45,7 +45,7 @@ module RedmineExtensions
     end
 
     def prefix
-      @plugin && @plugin.id.to_s || ''
+      @plugin && (@plugin.id.to_s + '_') || ''
     end
 
     # TODO: form rendering methods. Maybe push them to the parent?
