@@ -1,0 +1,30 @@
+module <%= plugin_title %>
+  module IssuePatch
+
+    def self.included(base)
+      base.extend(ClassMethods)
+      base.send(:include, InstanceMethods)
+
+      base.class_eval do
+
+        alias_method_chain :to_s, :<%= plugin_name_underscored %>
+
+      end
+    end
+
+    module InstanceMethods
+
+      def to_s_with_<%= plugin_name_underscored %>
+        'issue'
+      end
+
+    end
+
+    module ClassMethods
+
+    end
+
+  end
+
+end
+RedmineExtensions::PatchManager.register_model_patch 'Issue', '<%= plugin_title %>::IssuePatch'

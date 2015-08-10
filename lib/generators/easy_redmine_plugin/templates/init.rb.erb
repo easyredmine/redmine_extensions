@@ -1,0 +1,12 @@
+Redmine::Plugin.register :<%= plugin_name_underscored %> do
+  name :<%= plugin_name_underscored %>_plugin_name
+  author :<%= plugin_name_underscored %>_plugin_author
+  author_url :<%= plugin_name_underscored %>_plugin_author_url
+  description :<%= plugin_name_underscored %>_plugin_description
+  version '2014'
+
+  #into easy_settings goes available setting as a symbol key, default value as a value
+  settings easy_settings: {  }
+end
+
+# No more lines here!

@@ -1,0 +1,5 @@
+en:
+  <%= plugin_name_underscored %>_plugin_name: "<%= plugin_pretty_name %>"
+  <%= plugin_name_underscored %>_plugin_author: "Easy Software"
+  <%= plugin_name_underscored %>_plugin_author_url: "http://www.easyproject.cz/en"
+  <%= plugin_name_underscored %>_plugin_description: ""
