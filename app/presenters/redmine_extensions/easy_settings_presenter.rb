@@ -24,12 +24,12 @@ module RedmineExtensions
     def initialize(settings_params={}, project = nil)
       @settings = settings_params || {}
       @settings = @settings.dup.symbolize_keys
-      @model = EasySetting.new
+      super(EasySetting.new, nil)
     end
 
     def plugin=(plugin)
       @plugin = plugin
-      @model = plugin
+      self.model = plugin
     end
 
     def unsaved_settings
@@ -45,7 +45,7 @@ module RedmineExtensions
     end
 
     def prefix
-      @plugin && @plugin.id.to_s || ''
+      @plugin && (@plugin.id.to_s + '_') || ''
     end
 
     # TODO: form rendering methods. Maybe push them to the parent?
@@ -111,7 +111,7 @@ module RedmineExtensions
 
     def method_missing(meth, *attrs)
       if @plugin && @plugin.settings[:easy_settings] && @plugin.settings[:easy_settings].keys.include?(meth.to_sym)
-        EasySetting.value(prefix+meth.to_s, project)
+        EasySetting.value(prefix+meth.to_s, project) || @plugin.settings[:easy_settings][meth.to_sym]
       else
         super
       end

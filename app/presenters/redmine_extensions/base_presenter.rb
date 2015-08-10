@@ -20,5 +20,11 @@ module RedmineExtensions
       @view
     end
 
+    protected
+      def model=(model)
+        @model = model
+        __setobj__(model)
+      end
+
   end
 end
