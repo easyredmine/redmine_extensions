@@ -95,26 +95,27 @@ module RedmineExtensions
     end
 
     def self.register_easy_page_helper(*helper_or_helpers_klass_name)
-      @@registered_easy_page_helpers ||= []
+      @registered_easy_page_helpers ||= []
       helper_or_helpers_klass_name.each do |helper_klass_name|
-        @@registered_easy_page_helpers << helper_klass_name if !@@registered_easy_page_helpers.include?(helper_klass_name)
+        @registered_easy_page_helpers << helper_klass_name if !@registered_easy_page_helpers.include?(helper_klass_name)
       end
-      @@registered_easy_page_helpers
+      @registered_easy_page_helpers
     end
 
     def self.register_easy_page_controller(*controller_or_controllers_klass_name)
-      @@registered_easy_page_controllers ||= []
+      @registered_easy_page_controllers ||= []
       controller_or_controllers_klass_name.each do |controller_klass_name|
-        @@registered_easy_page_controllers << controller_klass_name if !@@registered_easy_page_controllers.include?(controller_klass_name)
+        @registered_easy_page_controllers << controller_klass_name if !@registered_easy_page_controllers.include?(controller_klass_name)
       end
-      @@registered_easy_page_controllers
+      @registered_easy_page_controllers
     end
 
     def self.apply_easy_page_patches
-      @@registered_easy_page_controllers.each do |controller_klass_name|
+      return if @registered_easy_page_controllers.nil? || @registered_easy_page_helpers.nil?
+      @registered_easy_page_controllers.each do |controller_klass_name|
         controller_klass = controller_klass_name.constantize
 
-        @@registered_easy_page_helpers.each do |helper_klass_name|
+        @registered_easy_page_helpers.each do |helper_klass_name|
           if m = helper_klass_name.match(/\A(\S+)Helper\z/)
             helper_klass_symbol = m[1]
           end

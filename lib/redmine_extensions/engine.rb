@@ -1,3 +1,4 @@
+require 'redmine_extensions/patch_manager'
 
 module RedmineExtensions
   class Engine < ::Rails::Engine
@@ -19,6 +20,12 @@ module RedmineExtensions
 
     config.autoload_paths << config.root.join('lib')
     config.eager_load_paths << config.root.join('app', 'models', 'easy_queries')
+
+    config.after_initialize do
+      unless Redmine::Plugin.installed?(:easy_extensions)
+        ActiveSupport.run_load_hooks(:easyproject, self)
+      end
+    end
 
     initializer 'redmine_extensions.initialize_environment' do |app|
       RedmineExtensions.app_root = app.root

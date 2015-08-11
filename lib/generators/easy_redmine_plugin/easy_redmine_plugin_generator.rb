@@ -36,9 +36,6 @@ class EasyRedminePluginGenerator < Rails::Generators::NamedBase
 
     template 'Gemfile', "#{plugin_path}/Gemfile"
     template 'init.rb.erb', "#{plugin_path}/init.rb"
-    template 'after_init.rb.erb', "#{plugin_path}/after_init.rb"
-    template 'after_activation.rb.erb', "#{plugin_path}/after_activation.rb"
-    template 'after_deactivation.rb.erb', "#{plugin_path}/after_deactivation.rb"
     template 'cs.yml', "#{plugin_path}/config/locales/cs.yml"
     template 'en.yml', "#{plugin_path}/config/locales/en.yml"
     template 'routes.rb.erb', "#{plugin_path}/config/routes.rb"
