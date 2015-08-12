@@ -21,14 +21,12 @@ module RedmineExtensions
     config.autoload_paths << config.root.join('lib')
     config.eager_load_paths << config.root.join('app', 'models', 'easy_queries')
 
-    config.after_initialize do
-      unless Redmine::Plugin.installed?(:easy_extensions)
-        ActiveSupport.run_load_hooks(:easyproject, self)
-      end
+    config.to_prepare do
+      RedmineExtensions::QueryOutput.register_output :table, RedmineExtensions::QueryOutputs::TableOutput
+      ApplicationController.send :include, RedmineExtensions::RailsPatches::ControllerQueryHelpers
     end
 
     initializer 'redmine_extensions.initialize_environment' do |app|
-      RedmineExtensions.app_root = app.root
       ActionDispatch::Routing::RouteSet::Generator.send(:include, RedmineExtensions::RailsPatches::RouteSetGeneratorPatch)
     end
 
@@ -40,8 +38,12 @@ module RedmineExtensions
       end
     end
 
-    initializer 'redmine_extensions.register_easy_query_otputs' do |app|
-      RedmineExtensions::QueryOutput.register_output :table, RedmineExtensions::QueryOutputs::TableOutput
+    initializer 'redmine_extensions.initialize_easy_plugins', after: :load_config_initializers do
+      RedmineExtensions.load_easy_plugins
+
+      unless Redmine::Plugin.installed?(:easy_extensions)
+        ActiveSupport.run_load_hooks(:easyproject, self)
+      end
     end
 
     # include helpers

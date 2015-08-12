@@ -1,7 +1,6 @@
 module RedmineExtensions
   class QueryOutput
 
-    unloadable # or it loose registered outputs, do the registering either on reload by standart, or solve it better
 
     attr_accessor :query
 

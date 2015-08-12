@@ -35,13 +35,81 @@ class EasyQuery < ActiveRecord::Base
     raise NotImplementedError.new('entity method has to be implemented in EasyQuery ancestor: ' + self.class.name)
   end
 
-  include EasyQueryParts::Columns
+  def entity_scope
+    if !@entity_scope.nil?
+      @entity_scope
+    elsif self.entity.respond_to?(:visible)
+      self.entity.visible
+    else
+      self.entity
+    end
+  end
+
+  def entity_count(options={})
+    super
+  rescue ::ActiveRecord::StatementInvalid => e
+    raise StatementInvalid.new(e.message)
+  end
+
+  # Returns a Hash of columns and the key for sorting
+  def sortable_columns
+    self.available_columns.inject({}) { |h, column|
+      h[column.name.to_s] = column.sortable
+      h
+    }
+  end
+
+  # return type = :sql || :array
+  def joins_for_order_statement(order_options, return_type = :sql)
+
+    joins = []
+
+    order_options.scan(/cf_\d+/).uniq.each do |name|
+      column = available_columns.detect { |c| c.name.to_s == name }
+      join = column && column.additional_joins(self.entity, return_type)
+      joins.concat(join) if join
+    end if order_options
+
+    additional_joins = Array.wrap(add_additional_order_statement_joins(order_options))
+    joins.concat(additional_joins) if additional_joins.present?
+
+    case return_type
+      when :sql
+        joins.any? ? joins.join(' ') : nil
+      when :array
+        joins
+      else
+        raise ArgumentError, 'return_type has to be either :sql or :array'
+    end
+  end
+
+  def add_additional_order_statement_joins(order_options)
+    ''
+  end
+
+  def default_find_include
+    []
+  end
+
+  def default_find_joins
+    []
+  end
+
+  def default_find_preload
+    []
+  end
+
+  include EasyQueryParts::Entities
+  include EasyQueryParts::Columns #define column methods - available_columns, column options
   include EasyQueryParts::Filters
   include EasyQueryParts::Groupable
+  include EasyQueryParts::Statement
+  include EasyQueryParts::Searchable
+  include EasyQueryParts::Deprecated # to_params, from_params
 end
 
 begin
   require_dependency Rails.root.join('plugins', 'easyproject', 'easy_plugins', 'easy_extensions', 'app', 'models', 'easy_queries', 'easy_query')
 rescue LoadError
-  Rails.logger.warn 'EasyRedmine is not installed, please visit a easyredmine.com and consider installation.'
+  Rails.logger.warn 'EasyRedmine is not installed, please visit a www.easyredmine.com for feature preview and consider installation.'
 end

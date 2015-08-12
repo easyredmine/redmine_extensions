@@ -6,7 +6,7 @@ variables = {
   groups_url: params,
   options: {}, form_options: {}
 }.merge(local_assigns)
-variables[:options][:hascontextmenu] = true if !options.key?(:hascontextmenu)
+variables[:options][:hascontextmenu] = true if !variables[:options].key?(:hascontextmenu)
 variables[:modul_uniq_id] ||= variables[:container_id]
 %>
 
