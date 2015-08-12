@@ -44,6 +44,7 @@ module RedmineExtensions
     end
 
     def present(model, options={} &block)
+      return model.update_options(options.merge(view_context: self)) if model.is_a?(RedmineExtensions::BasePresenter)
       presenter_klass = nil
       hiearchy_for_ar(model).each do |klass|
         begin

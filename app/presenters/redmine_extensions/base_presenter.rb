@@ -7,6 +7,12 @@ module RedmineExtensions
       super(@model)
     end
 
+    def update_options(options={})
+      @view = options[:view_context] if options.key?(:view_context)
+      @options.merge(options)
+      self
+    end
+
     def to_model
       @model || self
     end

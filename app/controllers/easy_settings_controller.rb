@@ -2,14 +2,15 @@
 # it uses a presenter, wich prefixes the settings name by a plugin id automatically
 class EasySettingsController < ApplicationController
 
-  before_filter :find_optional_project, only: [:edit, :update]
+  before_filter :find_optional_project
   before_filter :prepare_presenter
+  before_filter :find_plugin, only: [:edit, :update]
 
   def new
   end
 
   def create
-    if @settings.save
+    if @easy_settings.save
       redirect_to :back
     else
       render :new
@@ -17,15 +18,14 @@ class EasySettingsController < ApplicationController
   end
 
   def edit
-    @settings.plugin = Redmine::Plugin.find(params[:id])
+    @settings = Setting.send "plugin_#{@plugin.id}"
   end
 
   def update
-    @settings.plugin = Redmine::Plugin.find(params[:id])
     Setting.send "plugin_#{@plugin.id}=", params[:settings] if params[:settings]
-    if @settings.save
+    if @easy_settings.save
       flash[:notice] = l(:notice_successful_update)
-      redirect_to redmine_extensions_engine.edit_easy_setting_path(@settings)
+      redirect_to redmine_extensions_engine.edit_easy_setting_path(@easy_settings)
     else
       render :edit
     end
@@ -37,7 +37,17 @@ class EasySettingsController < ApplicationController
     end
 
     def prepare_presenter
-      @settings = RedmineExtensions::EasySettingsPresenter.new(params[:easy_setting], @project)
+      @easy_settings = RedmineExtensions::EasySettingsPresenter.new(params[:easy_setting], @project)
     end
 
+    def find_plugin
+      @plugin = Redmine::Plugin.find(params[:id])
+
+      return render_404 unless @plugin.settings.is_a?(Hash)
+
+      @easy_settings.plugin = @plugin
+
+    rescue Redmine::PluginNotFound
+      render_404
+    end
 end

@@ -1,4 +1,4 @@
-<%= form_for([redmine_extensions_engine, @settings]) do |f| %>
+<%= form_for([redmine_extensions_engine, @easy_settings]) do |f| %>
   <%= render "easy_settings/#{@settings.plugin.id}", settings: @settings, form: f %>
 
   <%= f.submit class: 'button-2' %>
