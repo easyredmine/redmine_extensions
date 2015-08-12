@@ -99,9 +99,16 @@ class EasyQuery < ActiveRecord::Base
     []
   end
 
+  def sort_criteria_to_sql_order(criterias=sort_criteria)
+    sortable_columns_sql = self.available_columns.select { |c| c.sortable? }.inject({}) { |h, c| h[c.name.to_s] = c.sortable; h }
+    criterias.select { |field_name, asc_desc| !!sortable_columns_sql[field_name] }.collect { |field_name, asc_desc| (sortable_columns_sql[field_name].is_a?(Array) ? sortable_columns_sql[field_name].join(" #{asc_desc}, ") : sortable_columns_sql[field_name]) + ' ' + (asc_desc || 'asc') }.join(', ')
+  end
+
   include EasyQueryParts::Entities
   include EasyQueryParts::Columns #define column methods - available_columns, column options
+  include EasyQueryParts::CustomFields
   include EasyQueryParts::Filters
+  include EasyQueryParts::Settings
   include EasyQueryParts::Groupable
   include EasyQueryParts::Statement
   include EasyQueryParts::Searchable

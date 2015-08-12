@@ -76,6 +76,10 @@ module EasyQueryParts
       Array.new
     end
 
+    def has_default_columns?
+      self.column_names.blank?
+    end
+
     def columns_with_me
       ['assigned_to_id', 'author_id', 'watcher_id']
     end
@@ -93,10 +97,18 @@ module EasyQueryParts
       sumable_columns.any?
     end
 
-    def has_default_columns?
-      self.column_names.blank?
+    def inline_columns
+      @inline_columns ||= columns.select { |c| c.inline? && c.visible? }
     end
 
+    def block_columns
+      @block_columns ||= columns.select { |c| !c.inline? && c.visible? }
+    end
+
+
+    def column(name)
+      self.available_columns.detect { |c| c.name.to_s == name }
+    end
 
     def columns
       columns = if self.has_default_columns?
@@ -104,7 +116,7 @@ module EasyQueryParts
                   if self.display_project_column_if_project_missing && self.project.nil? && (project_column = self.available_columns.detect { |c| c.name == :project })
                     def_columns << project_column
                   end
-                  self.default_list_columns.each { |cname| def_columns << self.get_column(cname) }
+                  self.default_list_columns.each { |cname| def_columns << self.column(cname) }
                   def_columns.compact.uniq
                 else
                   # preserve the column_names order

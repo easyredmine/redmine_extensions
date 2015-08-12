@@ -22,5 +22,9 @@ module EasyQueryParts
       end
     end
 
+    def searchable_columns
+      []
+    end
+
   end
 end

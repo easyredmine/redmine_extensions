@@ -14,6 +14,27 @@ module RedmineExtensions
       end
 
 
+      # *file_type = :csv | :pdf | :ical | ...
+      # * args[0] = query | string | symbol
+      # * args[1] = optional default string if query entity name is not in langfile
+      def get_export_filename(file_type, *args)
+        obj = args.first
+        if obj.respond_to?(:entity)
+          query = obj
+          entity = query.entity.name
+          if query.new_record?
+            name = l("label_#{entity.underscore}_plural", :default => args[1] || entity.underscore.humanize)
+          else
+            name = query.name
+          end
+        else
+          name = obj && l(obj, :default => obj.to_s.humanize) || 'export'
+        end
+
+        return name + ".#{file_type}"
+      end
+
+
       def set_pagination(query=nil, options={})
         return @entity_pages if @entity_pages
         query ||= @query
@@ -161,7 +182,7 @@ module RedmineExtensions
           format.html { render_easy_query_html(query, options[:action], options[:html_locals] || {}) }
           format.csv  { send_data(export_to_csv(@entities, @query), filename: csv_title) }
           format.pdf  { render_easy_query_pdf( query: query, filename: title, title: pdf_title) }
-          format.xlsx { render_easy_query_xlsx(query: query, title: xlsx_title ) }
+          #TODO: hook? format.xlsx { render_easy_query_xlsx(query: query, title: xlsx_title ) }
           format.api
         end
       end

@@ -3,7 +3,7 @@ module RedmineExtensions
     class TableOutput < RedmineExtensions::QueryOutput
 
       def render_data
-        h.render 'easy_queries/easy_query_table', variables
+        h.render partial: 'easy_queries/easy_query_table', locals: variables
       end
 
     end

@@ -4,6 +4,7 @@ module EasyQueryParts
 
     included do
       define_setting :show_sum_row, false
+      define_setting :show_avatars, false
       define_setting :load_groups_opened, true
     end
 
@@ -13,6 +14,9 @@ module EasyQueryParts
       def define_setting(name, default)
         define_method(name) do
           settings[name.to_s] || default
+        end
+        define_method("#{name}?") do
+          !!send(name)
         end
         define_method("#{name}=") do |value|
           settings[name.to_s] = value

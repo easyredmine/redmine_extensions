@@ -2,7 +2,7 @@ module RedmineExtensions
   class EasyQueryPresenter < BasePresenter
 
     # --- GETTERS ---
-    attr_accessor :loading_group
+    attr_accessor :loading_group, :page_module
 
     def entities(options={})
       @entities ||= h.instance_variable_get(:@entities) || model.entities(options)
@@ -20,21 +20,41 @@ module RedmineExtensions
     end
 
     def outputs
-      @outputs ||= Outputs.new(self, h, @options)
+      @outputs ||= Outputs.new(self, @options)
+    end
+
+    def display_save_button
+      true
+    end
+
+
+    # ----- RENDERING HELPERS ----
+    def name
+      model.new_record? ? options[:easy_query_name] : model.name
+    end
+
+    def show_free_search?
+      options.key?(:show_free_search) ? options[:show_free_search] : options[:page_module].nil? && model.searchable_columns.any?
     end
 
     def render_exports?
       outputs.table?
     end
 
+    def render_zoom_links?
+      false # @model.period_columns? || @model.grouped_by_date_column? || @model.chart_grouped_by_date_column?
+    end
+
+    def to_model
+      self
+    end
+
     def to_partial_path
       'easy_queries/easy_query'
     end
 
-    # ----- RENDERING HELPERS ----
-
     def render_zoom_links
-      return unless @model.period_columns? || @model.grouped_by_date_column? || @model.chart_grouped_by_date_column?
+      return unless render_zoom_links?
       # TODO: it should give a presenter itself to the partial and there decide what and how to render
       if self.easy_page_module
         h.render(:partial => 'easy_queries/zoom_links', :locals => {:query => self, :base_url => {}, :block_name => self.easy_page_module.page_zone_module.module_name})
@@ -45,6 +65,65 @@ module RedmineExtensions
 
     def prepare_table_render
       #prepared for a period settings before render
+    end
+
+    def entity_list
+      if model.entity.class.respond_to?(:each_with_easy_level)
+        model.entity.class.each_with_easy_level(entities) do |entity, level|
+          yield entity, level
+        end
+      else
+        entities.each do |entity|
+          yield entity, nil
+        end
+      end
+    end
+
+    def entity_css_classes(entity, options={})
+      entity.css_classes if entity.respond_to?(:css_classes)
+    end
+
+
+    # Returns a additional fast-icons buttons
+    # - entity - instance of ...
+    # - query - easy_query
+    # - options - :no_link => true - no html links will be rendered
+    #
+    def additional_beginning_buttons(entity, options={})
+      return ''.html_safe if model.nil? || entity.nil?
+      easy_query_additional_buttons_method = "#{model.class.name.underscore}_additional_beginning_buttons".to_sym
+
+      additional_buttons = ''
+      if h.respond_to?(easy_query_additional_buttons_method)
+        additional_buttons = h.send(easy_query_additional_buttons_method, entity, options)
+      end
+
+      return additional_buttons.html_safe
+    end
+
+    def additional_ending_buttons(entity, options={})
+      return ''.html_safe if model.nil? || entity.nil?
+      easy_query_additional_buttons_method = "#{model.class.name.underscore}_additional_ending_buttons".to_sym
+
+      additional_buttons = ''
+      if h.respond_to?(easy_query_additional_buttons_method)
+        additional_buttons = h.send(easy_query_additional_buttons_method, entity, options)
+      end
+
+      return additional_buttons.html_safe
+    end
+
+
+    def column_header(column, options={})
+      if !options[:disable_sort] && column.sortable
+        if page_module
+          h.easy_page_module_sort_header_tag(page_module, query, column.name.to_s, {:class => column.css_classes, :caption => column.caption, :default_order => column.default_order})
+        else
+          h.sort_header_tag(column.name.to_s, {:class => column.css_classes, :caption => column.caption, :default_order => column.default_order})
+        end
+      else
+        h.content_tag(:th, column.caption, {:class => column.css_classes})
+      end
     end
 
     #------ MIDDLE LAYER ------
@@ -176,10 +255,10 @@ module RedmineExtensions
     class Outputs
       include Enumerable
 
-      def initialize(presenter, view_context, options={})
+      def initialize(presenter, options={})
         @presenter = presenter
         @query = presenter.model
-        @outputs = @query.outputs.map{|o| RedmineExtensions::QueryOutput.output_klass_for(o).new(presenter, view_context, options) }
+        @outputs = @query.outputs.map{|o| RedmineExtensions::QueryOutput.output_klass_for(o).new(presenter, options) }
       end
 
       def each(&block)
