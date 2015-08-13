@@ -1,7 +1,6 @@
 module RedmineExtensions
   class QueryOutput
 
-    unloadable # or it loose registered outputs, do the registering either on reload by standart, or solve it better
 
     attr_accessor :query
 
@@ -29,8 +28,8 @@ module RedmineExtensions
       true
     end
 
-    def initialize(query_presenter, view_context, options={})
-      @query, @view, @options = query_presenter, view_context, options
+    def initialize(query_presenter, options={})
+      @query, @options = query_presenter, options
     end
 
     def render_data;
@@ -42,7 +41,7 @@ module RedmineExtensions
     end
 
     def h
-      @view
+      @query.h
     end
 
   end

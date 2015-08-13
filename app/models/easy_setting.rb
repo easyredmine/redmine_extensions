@@ -41,6 +41,16 @@ class EasySetting < ActiveRecord::Base
     end
   end
 
+  def self.plugin_defaults
+    @plugin_defaults ||= Plugin.all.inject({}) do |res, p|
+      if p.settings && p.settings[:easy_settings].is_a?(Hash)
+        p.settings[:easy_settings].each do |key, value|
+          res["#{p.id}_#{key}"] = value
+        end
+      end
+    end
+  end
+
   def self.value(key, project_or_project_id = nil, use_fallback = true)
     if project_or_project_id.is_a?(Project)
       project_id = project_or_project_id.id
@@ -59,7 +69,7 @@ class EasySetting < ActiveRecord::Base
 
     if use_fallback && (cached_value.nil? || cached_value == '')
       Rails.cache.fetch fallback_cache_key do
-        EasySetting.where(name: key, project_id: nil).pluck(:value).first
+        EasySetting.where(name: key, project_id: nil).pluck(:value).first || plugin_defaults[key.to_s]
       end
     else
       return cached_value

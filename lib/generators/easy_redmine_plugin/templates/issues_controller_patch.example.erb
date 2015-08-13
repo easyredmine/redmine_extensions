@@ -1,0 +1,30 @@
+module <%= plugin_title %>
+  module IssuesControllerPatch
+
+    def self.included(base)
+      base.extend(ClassMethods)
+      base.send(:include, InstanceMethods)
+
+      base.class_eval do
+
+        alias_method_chain :index, :<%= plugin_name_underscored %>
+
+      end
+    end
+
+    module InstanceMethods
+
+      def index_with_<%= plugin_name_underscored %>
+        index_without_<%= plugin_name_underscored %>
+      end
+
+    end
+
+    module ClassMethods
+
+    end
+
+  end
+
+end
+RedmineExtensions::PatchManager.register_controller_patch 'IssuesController', '<%= plugin_title %>::IssuesControllerPatch'

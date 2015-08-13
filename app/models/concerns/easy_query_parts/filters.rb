@@ -1,3 +1,13 @@
+class EasyQueryFilter
+
+  def initialize(column, options={})
+    @options = options
+    @column = column
+  end
+
+end
+
+
 module EasyQueryParts
   module Filters
 
@@ -43,6 +53,19 @@ module EasyQueryParts
     def add_filter_error(field, message)
       m = label_for(field) + " " + l(message, :scope => 'activerecord.errors.messages')
       errors.add(:base, m)
+    end
+
+    def default_filter
+      {}
+    end
+
+    def available_filters
+      return @available_filters if @available_filters
+      @available_filters = {}
+      entity.columns.each do |column|
+        @available_filters[column.name] = EasyQueryFilter.new(column, attribute_options(column.name)) unless attribute_options(column.name)[:reject]
+      end
+      @available_filters
     end
 
   end

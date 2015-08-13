@@ -1,12 +1,11 @@
 <%
   easy_query ||= @easy_query
 variables = {
-  easy_query_name: easy_query.name,
   block_name: 'easy_query', container_id: easy_query.entity.name.pluralize.underscore,
   groups_url: params,
   options: {}, form_options: {}
 }.merge(local_assigns)
-variables[:options][:hascontextmenu] = true if !options.key?(:hascontextmenu)
+variables[:options][:hascontextmenu] = true if !variables[:options].key?(:hascontextmenu)
 variables[:modul_uniq_id] ||= variables[:container_id]
 %>
 
@@ -17,22 +16,22 @@ variables[:modul_uniq_id] ||= variables[:container_id]
     <%= easy_render_xlsx_format_options_dialog(easy_query, params) if easy_query.new_record? %>
   <% end %>
 
-  <%= render :partial => 'easy_queries/easy_query_index', :locals => {:query => easy_query, :easy_query_name => easy_query_name, :options => variables[:options]}.merge(variables[:form_options]) %>
+  <%= render :partial => 'easy_queries/easy_query_index', :locals => {:query => presenter, :options => variables[:options]}.merge(variables[:form_options]) %>
 
   <%= presenter.render_zoom_links %>
 
-  <% if easy_query.chart_support? && easy_query.chart? %>
-    <%= render :partial => 'easy_queries/easy_query_chart', :locals => {:block_name => variables[:block_name], :easy_query => easy_query} %>
+  <% if false && easy_query.chart_support? && easy_query.chart? %>
+    <%= render :partial => 'easy_queries/easy_query_chart', :locals => {:block_name => variables[:block_name], :easy_query => presenter} %>
   <% end %>
-  <% if easy_query.calendar_support? && easy_query.calendar? %>
-    <%= render :partial => 'easy_queries/easy_query_calendar', :locals => {:block_name => variables[:block_name], :easy_query => easy_query} %>
+  <% if false && easy_query.calendar_support? && easy_query.calendar? %>
+    <%= render :partial => 'easy_queries/easy_query_calendar', :locals => {:block_name => variables[:block_name], :easy_query => presenter} %>
   <% end %>
   <% presenter.outputs.each do |output| %>
     <%= output.render_data %>
   <% end %>
 
-  <% if presenter.render_exports? %>
-    <%= render(:partial => 'easy_queries/easy_query_export_format_links', :locals => {:query => easy_query}) -%>
+  <% if false && presenter.render_exports? %>
+    <%= render(:partial => 'easy_queries/easy_query_export_format_links', :locals => {:query => presenter}) -%>
   <% end %>
 
 <% end %>
