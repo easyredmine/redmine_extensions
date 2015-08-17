@@ -6,15 +6,9 @@ class EasyEntityAttribute
 
     def initialize(*attrs)
       options = attrs.last.is_a?(Hash) ? attrs.pop : {}
-      column = attrs.shift
-      if column.is_a?(ActiveRecord::ConnectionAdapters::Column)
-        @column = column
-        self.name = column.name.to_sym
-        @type = column.type
-      else
-        self.name = column.to_sym
-      end
-      @type ||= options[:type]
+      name = attrs.shift
+      self.name = name.to_sym
+      @type = options[:type]
       @caption_key = options[:caption] || "field_#{name}"
       @title = options[:title]
       @no_link = options[:no_link].nil? ? false : options[:no_link]

@@ -104,12 +104,19 @@ class EasyQuery < ActiveRecord::Base
     criterias.select { |field_name, asc_desc| !!sortable_columns_sql[field_name] }.collect { |field_name, asc_desc| (sortable_columns_sql[field_name].is_a?(Array) ? sortable_columns_sql[field_name].join(" #{asc_desc}, ") : sortable_columns_sql[field_name]) + ' ' + (asc_desc || 'asc') }.join(', ')
   end
 
+  def entity_sum(*attrs)
+    super
+  rescue ::ActiveRecord::StatementInvalid => e
+    raise StatementInvalid.new(e.message)
+  end
+
   include EasyQueryParts::Entities
   include EasyQueryParts::Columns #define column methods - available_columns, column options
   include EasyQueryParts::CustomFields
   include EasyQueryParts::Filters
   include EasyQueryParts::Settings
   include EasyQueryParts::Groupable
+  include EasyQueryParts::Summable
   include EasyQueryParts::Statement
   include EasyQueryParts::Searchable
   include EasyQueryParts::Deprecated # to_params, from_params

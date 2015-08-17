@@ -1,5 +1,0 @@
-
-class EasyIssueQuery < EasyQuery
-
-
-end

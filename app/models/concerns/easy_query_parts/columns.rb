@@ -2,9 +2,19 @@ class EasyQueryColumn
   include EasyEntityAttribute::AttributeCore
 
   # sumable => :top || :bottom || :both
-  attr_accessor :sortable, :groupable, :default_order
+  attr_accessor :sortable, :groupable, :default_order, :assoc, :sumable_sql
 
   def initialize(name, options={})
+    if name.is_a?(ActiveRecord::ConnectionAdapters::Column)
+      @column = name
+      name = @column.name.to_sym
+      options[:type] = @column.type
+      if @column.name.ends_with?('_id')
+        @association = options[:entity].reflect_on_all_associations(:belongs_to).detect{|as| as.foreign_key == @column.name }
+        @assoc = @association && @association.name
+      end
+    end
+
     super(name, options)
     self.sortable = options[:sortable].is_a?(Proc) ? options[:sortable].call : options[:sortable]
     self.groupable = options[:groupable] || false
@@ -16,13 +26,45 @@ class EasyQueryColumn
       end
     end
     self.default_order = options[:default_order]
+    self.sumable_sql = options[:sumable_sql]
+    @sumable = options[:sumable]
+  end
+
+  def polymorphic?
+    assoc && !!@association.options[:polymorphic]
   end
 
   def sortable?
     !sortable.nil?
   end
-end
 
+  # TODO: deprecate and ask the type
+  def date?
+    false
+  end
+
+  def sumable_top?
+    @sumable == :top || @sumable == :both
+  end
+
+  def additional_joins(entity_cls, type=nil)
+    self.joins
+  end
+
+  def sumable_bottom?
+    @sumable == :bottom || @sumable == :both
+  end
+
+  def sum(query, options={})
+    scope = query.merge_scope(query.new_entity_scope, options).joins(additional_joins(query.entity))
+    if @association
+      raise NotImplemented if polymorphic?
+      @association.class_name.constantize.where(id: scope.pluck(@association.foreign_key)).sum(self.name)
+    else
+      scope.sum(self.sumable_sql || self.name)
+    end
+  end
+end
 module EasyQueryParts
   module Columns
     extend ActiveSupport::Concern
@@ -35,7 +77,7 @@ module EasyQueryParts
     def load_entity_columns
       result = []
       entity.columns.each do |column|
-        result << EasyQueryColumn.new(column, attribute_options(column.name)) unless attribute_options(column.name)[:reject]
+        result << EasyQueryColumn.new(column, {entity: self.entity}.merge(attribute_options(column.name)) ) unless attribute_options(column.name)[:reject]
       end
       result
     end
