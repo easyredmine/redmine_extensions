@@ -42,12 +42,13 @@ class EasySetting < ActiveRecord::Base
   end
 
   def self.plugin_defaults
-    @plugin_defaults ||= Plugin.all.inject({}) do |res, p|
+    @plugin_defaults ||= Redmine::Plugin.all.inject({}) do |res, p|
       if p.settings && p.settings[:easy_settings].is_a?(Hash)
         p.settings[:easy_settings].each do |key, value|
           res["#{p.id}_#{key}"] = value
         end
       end
+      res
     end
   end
 
