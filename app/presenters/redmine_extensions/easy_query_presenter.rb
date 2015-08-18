@@ -67,7 +67,7 @@ module RedmineExtensions
       #prepared for a period settings before render
     end
 
-    def entity_list
+    def entity_list(entities=self.entities)
       if model.entity.class.respond_to?(:each_with_easy_level)
         model.entity.class.each_with_easy_level(entities) do |entity, level|
           yield entity, level
@@ -148,16 +148,16 @@ module RedmineExtensions
         return model.entities(options)
       end
     end
-    alias_method :prepare_export_result, :entities_for_html
+    alias_method :prepare_html_result, :entities_for_html
 
     def entities_for_export(options={})
       if model.grouped?
         return model.groups(options.merge(:include_entities => true))
       else
-        return {nil => {:entities => model.entities(options), :sums => summarize_entities(entities)}}
+        return {nil => {:entities => model.entities(options), :sums => model.send(:summarize_entities, entities)}}
       end
     end
-    alias_method :prepare_html_result, :entities_for_export
+    alias_method :prepare_export_result, :entities_for_export
 
     #------ MIDDLE LAYER ------
 
