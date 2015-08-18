@@ -38,6 +38,10 @@ class EasyQueryColumn
     !sortable.nil?
   end
 
+  def assoc_column?
+    @assoc.present?
+  end
+
   # TODO: deprecate and ask the type
   def date?
     false
@@ -80,6 +84,38 @@ module EasyQueryParts
         result << EasyQueryColumn.new(column, {entity: self.entity}.merge(attribute_options(column.name)) ) unless attribute_options(column.name)[:reject]
       end
       result
+    end
+
+
+    def add_associated_columns(easy_query_class, options ={})
+      @available_columns ||= []
+      q = easy_query_class.new
+
+      association_name = options[:association_name] || q.entity.name.underscore.to_sym
+      column_name_prefix = options[:column_name_prefix] || "#{association_name}."
+
+      q.available_columns.each do |origin_column|
+        next if origin_column.assoc_column? && !options[:all]
+
+        new_column = origin_column.dup
+        new_column.name = "#{column_name_prefix}#{origin_column.name}".to_sym
+
+        if origin_column.caption.to_s =~ /\A.+ \(.+\)\z/
+          new_column.title = origin_column.caption
+        else
+          new_column.title = "#{origin_column.caption} (#{q.default_name})"
+        end
+
+        new_column.assoc = association_name
+
+        new_column.includes = Array.wrap(new_column.includes).map {|i| {association_name => i}} << association_name
+        new_column.preload = (Array.wrap(new_column.preload).map {|i| {association_name => i}} << association_name) if !new_column.preload.blank?
+  #      new_column.joins = (Array.wrap(new_column.joins).map {|i| {association_name => i}} << association_name) if !new_column.joins.blank?
+
+        @available_columns << new_column
+      end
+
+      @available_columns
     end
 
     def columns_from_associations

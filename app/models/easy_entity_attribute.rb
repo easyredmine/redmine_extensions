@@ -2,7 +2,7 @@ class EasyEntityAttribute
   module AttributeCore
     include Redmine::I18n
 
-    attr_accessor :name, :no_link, :includes, :joins, :preload, :type
+    attr_accessor :name, :no_link, :includes, :joins, :preload, :type, :title
 
     def initialize(*attrs)
       options = attrs.last.is_a?(Hash) ? attrs.pop : {}
