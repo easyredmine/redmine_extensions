@@ -11,6 +11,7 @@ options[:hascontextmenu] = false if !options.key?(:hascontextmenu)
 unless options.key?(:hide_sums_in_group_by)
   options[:hide_sums_in_group_by] = true
 end
+output ||= query.outputs.first
 # available *options*
 # * :disable_sort  => true - change header from sorting_link to plain text
 # * :modal_selector => true - display view as lookup window, with selectable rows. Require parameters for modal selector

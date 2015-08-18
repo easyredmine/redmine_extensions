@@ -46,12 +46,16 @@ class EasyQueryColumn < EasyEntityAttribute
     false
   end
 
-  def sumable_top?
-    @sumable == :top || @sumable == :both
-  end
-
   def additional_joins(entity_cls, type=nil)
     self.joins
+  end
+
+  def sumable?
+    sumable_top? || sumable_bottom?
+  end
+
+  def sumable_top?
+    @sumable == :top || @sumable == :both
   end
 
   def sumable_bottom?

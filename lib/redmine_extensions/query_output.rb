@@ -1,8 +1,8 @@
 module RedmineExtensions
   class QueryOutput
 
-
     attr_accessor :query
+    delegate :options, to: :query
 
     def self.register_output(name, klass, options={})
       registered_outputs[name] = klass
@@ -28,16 +28,25 @@ module RedmineExtensions
       true
     end
 
-    def initialize(query_presenter, options={})
-      @query, @options = query_presenter, options
+    def initialize(query_presenter)
+      @query = query_presenter
     end
 
     def render_data;
       raise NotImplemented
     end
 
+    def key
+      self.class.name.split('::').last.sub(/Output$/, '').underscore
+    end
+
     def variables
-      @options.merge(easy_query: @query, output: self)
+      options.merge(easy_query: @query, output: self)
+    end
+
+    def header
+      content = options["#{key}_header".to_sym]
+      h.content_tag(:h3, content.html_safe) unless content.blank?
     end
 
     def h

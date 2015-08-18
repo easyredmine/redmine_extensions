@@ -18,10 +18,7 @@ module RedmineExtensions
       if model.is_a?(RedmineExtensions::BasePresenter)
         yield model.update_options(options.merge(view_context: self))
       else
-        presenter_klass = RedmineExtensions::BasePresenter.presenter_for(model)
-        raise NameError, 'there is no presenter available for ' + model.class.name unless presenter_klass
-
-        yield( presenter_klass.new(model, self, options) )
+        yield( RedmineExtensions::BasePresenter.present(model, self, options) )
       end
     end
 

@@ -30,8 +30,4 @@ variables[:modul_uniq_id] ||= variables[:container_id]
     <%= output.render_data %>
   <% end %>
 
-  <% if false && presenter.render_exports? %>
-    <%= render(:partial => 'easy_queries/easy_query_export_format_links', :locals => {:query => presenter}) -%>
-  <% end %>
-
 <% end %>

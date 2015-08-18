@@ -20,7 +20,7 @@ module RedmineExtensions
     end
 
     def outputs
-      @outputs ||= Outputs.new(self, @options)
+      @outputs ||= Outputs.new(self)
     end
 
     def display_save_button
@@ -288,11 +288,11 @@ module RedmineExtensions
     class Outputs
       include Enumerable
 
-      def initialize(presenter, options={})
+      def initialize(presenter)
         @presenter = presenter
         @query = presenter.model
         @query.outputs = ['table'] unless @query.outputs.any?
-        @outputs = @query.outputs.map{|o| RedmineExtensions::QueryOutput.output_klass_for(o).new(presenter, options) }
+        @outputs = @query.outputs.map{|o| RedmineExtensions::QueryOutput.output_klass_for(o).new(presenter) }
       end
 
       def each(&block)
