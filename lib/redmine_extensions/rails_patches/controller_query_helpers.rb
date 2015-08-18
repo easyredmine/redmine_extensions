@@ -188,7 +188,7 @@ module RedmineExtensions
       end
 
       def index_for_easy_query(entity_klass, default_sort = [[]], options = {})
-        retrieve_query(entity_klass)
+        retrieve_easy_query(entity_klass)
 
         options[:query] = @query
 
@@ -214,7 +214,7 @@ module RedmineExtensions
 
       # -----------------------------------------
       # retrieve query for entity - EasyIssueQuery, EasyUserQuery ...
-      def retrieve_query(entity_query, options={})
+      def retrieve_easy_query(entity_query, options={})
         entity_session = entity_query.name.underscore
         load_params = false
         if !params[:query_id].blank?
