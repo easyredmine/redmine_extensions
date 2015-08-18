@@ -2,7 +2,7 @@ module RedmineExtensions
   class EasyQueryPresenter < BasePresenter
 
     # --- GETTERS ---
-    attr_accessor :loading_group, :page_module
+    attr_accessor :loading_group, :page_module, :row_limit
 
     def entities(options={})
       @entities ||= h.instance_variable_get(:@entities) || model.entities(options)
@@ -125,6 +125,39 @@ module RedmineExtensions
         h.content_tag(:th, column.caption, {:class => column.css_classes})
       end
     end
+
+    #------- DATA FOR RESULTS -------
+
+    # Returns count of entities on the list action
+    # returns groups_count if query is grouped and entity_count otherwise
+    def entity_count_for_list(options={})
+      if model.grouped?
+        return model.groups_count(options)
+      else
+        return model.entity_count(options)
+      end
+    end
+
+    def entities_for_html(options={})
+      options[:limit] ||= row_limit
+      return model.entities_for_group(loading_group, options) if loading_group
+
+      if model.grouped?
+        return model.groups(options)
+      else
+        return model.entities(options)
+      end
+    end
+    alias_method :prepare_export_result, :entities_for_html
+
+    def entities_for_export(options={})
+      if model.grouped?
+        return model.groups(options.merge(:include_entities => true))
+      else
+        return {nil => {:entities => model.entities(options), :sums => summarize_entities(entities)}}
+      end
+    end
+    alias_method :prepare_html_result, :entities_for_export
 
     #------ MIDDLE LAYER ------
 
@@ -258,6 +291,7 @@ module RedmineExtensions
       def initialize(presenter, options={})
         @presenter = presenter
         @query = presenter.model
+        @query.outputs = ['table'] unless @query.outputs.any?
         @outputs = @query.outputs.map{|o| RedmineExtensions::QueryOutput.output_klass_for(o).new(presenter, options) }
       end
 

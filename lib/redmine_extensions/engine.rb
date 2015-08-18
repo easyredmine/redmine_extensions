@@ -24,6 +24,7 @@ module RedmineExtensions
     config.to_prepare do
       RedmineExtensions::QueryOutput.register_output :table, RedmineExtensions::QueryOutputs::TableOutput
       ApplicationController.send :include, RedmineExtensions::RailsPatches::ControllerQueryHelpers
+      ApplicationController.send :include, RedmineExtensions::RenderingHelper
     end
 
     initializer 'redmine_extensions.initialize_environment' do |app|

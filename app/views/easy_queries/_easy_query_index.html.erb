@@ -31,7 +31,7 @@ if !defined?(additional_elements_to_serialize) || additional_elements_to_seriali
       </div>
     <% end %>
 
-    <%#= render :partial => 'easy_queries/easy_query_index_form', :locals => { :query => query, :filter_active => @filter_active, :query_heading => (query.new_record? ? easy_query_name : h(query.name)), :modul_uniq_id => options[:modul_uniq_id], :options => options, :back_url => back_url } %>
+    <%= render :partial => 'easy_queries/easy_query_index_form', :locals => { :query => query, :filter_active => @filter_active, :query_heading => h(query.name), :modul_uniq_id => options[:modul_uniq_id], :options => options, :back_url => back_url } %>
 
     <% if query.page_module.nil? %>
       <p id="<%= options[:modul_uniq_id] -%>filter_buttons" style="display: none;">
