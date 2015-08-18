@@ -255,7 +255,7 @@ module RedmineExtensions
           @query.project = @project unless options[:dont_use_project]
         end
 
-        @query = EasyQueryPresenter.new(@query, view_context)
+        @query = BasePresenter.present(@query, view_context)
         @query.from_params(options[:query_param] ? params[options[:query_param]] : params) if load_params
 
         @query.loading_group = loading_group

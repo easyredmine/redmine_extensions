@@ -2,7 +2,7 @@
   <p class="nodata"><%= l(:label_no_data) %></p>
 <% else %>
   <div id="<%= container_id %>">
-    <%= render :partial => 'easy_queries/easy_query_entities_list', :locals => {:query => easy_query,
+    <%= render :partial => 'easy_queries/easy_query_entities_list', :locals => {:query => easy_query, output: output,
       :block_name => block_name, :modul_uniq_id => modul_uniq_id,
       :groups_url => groups_url,
       :options => options} %>

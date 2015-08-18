@@ -1,5 +1,4 @@
-class EasyQueryColumn
-  include EasyEntityAttribute::AttributeCore
+class EasyQueryColumn < EasyEntityAttribute
 
   # sumable => :top || :bottom || :both
   attr_accessor :sortable, :groupable, :default_order, :assoc, :sumable_sql

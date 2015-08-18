@@ -22,20 +22,7 @@ end
   <table class="list entities <%= query.entity.name.pluralize.downcase %> <%= modul_uniq_id %> <%= sort_css_classes %>" data-hascontextmenu="<%= !!options[:hascontextmenu] -%>">
   <%# easy_cache ['easy_query_header', block_name, I18n.locale] do  %>
     <thead>
-      <% if false && query.period_columns? %>
-        <tr>
-          <%= content_tag(:th, nil, :class => 'hide-when-print') if options[:hascontextmenu].to_s == 'true' -%>
-          <th class="hide-when-print"></th>
-          <% query.non_period_inline_columns.each do |column| -%>
-            <th></th>
-          <% end -%>
-          <% 0.upto(query.number_of_periods_by_zoom - 1) do |idx| %>
-            <th colspan="<%= query.period_columns.size %>"><%= query_period_name(query, idx) %></th>
-          <% end %>
-          <%= content_tag(:th, nil, :class => 'hide-when-print') if options[:modal_selector].to_s == 'true' -%>
-          <th class="hide-when-print"></th>
-        </tr>
-      <% end %>
+      <%= output.render_period_header %>
       <%= call_hook :easy_query_table_render_before, query: query, options: options %>
       <tr>
         <%= content_tag(:th, link_to('', 'javascript:void(0)', :onclick => 'toggleIssuesSelection(this)',

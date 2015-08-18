@@ -21,13 +21,15 @@ module RedmineExtensions
     config.autoload_paths << config.root.join('lib')
     config.eager_load_paths << config.root.join('app', 'models', 'easy_queries')
 
-    config.to_prepare do
+    #config.to_prepare goes after Reloader.to_prepare
+    ActionDispatch::Reloader.to_prepare do
       RedmineExtensions::QueryOutput.register_output :table, RedmineExtensions::QueryOutputs::TableOutput
+      RedmineExtensions::BasePresenter.register 'RedmineExtensions::EasyQueryPresenter', 'EasyQuery'
       ApplicationController.send :include, RedmineExtensions::RailsPatches::ControllerQueryHelpers
       ApplicationController.send :include, RedmineExtensions::RenderingHelper
     end
 
-    initializer 'redmine_extensions.initialize_environment' do |app|
+    initializer 'redmine_extensions.initialize' do |app|
       ActionDispatch::Routing::RouteSet::Generator.send(:include, RedmineExtensions::RailsPatches::RouteSetGeneratorPatch)
     end
 
@@ -48,9 +50,12 @@ module RedmineExtensions
     end
 
     # include helpers
-    initializer 'redmine_extensions.action_controller' do |app|
+    initializer 'redmine_extensions.rails_patching' do |app|
       ActiveSupport.on_load :action_controller do
         helper RedmineExtensions::ApplicationHelper
+      end
+      ActiveSupport.on_load(:active_record) do
+        include RedmineExtensions::RailsPatches::ActiveRecord
       end
     end
 

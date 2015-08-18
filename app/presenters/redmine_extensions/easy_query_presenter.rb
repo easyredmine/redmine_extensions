@@ -42,7 +42,7 @@ module RedmineExtensions
     end
 
     def render_zoom_links?
-      false # @model.period_columns? || @model.grouped_by_date_column? || @model.chart_grouped_by_date_column?
+      false
     end
 
     def to_model

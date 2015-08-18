@@ -18,15 +18,7 @@ module RedmineExtensions
       if model.is_a?(RedmineExtensions::BasePresenter)
         yield model.update_options(options.merge(view_context: self))
       else
-        presenter_klass = nil
-        hiearchy_for_ar(model).each do |klass|
-          begin
-            presenter_klass = "RedmineExtensions::#{klass}Presenter".constantize
-            break
-          rescue NameError
-            next
-          end
-        end
+        presenter_klass = RedmineExtensions::BasePresenter.presenter_for(model)
         raise NameError, 'there is no presenter available for ' + model.class.name unless presenter_klass
 
         yield( presenter_klass.new(model, self, options) )
