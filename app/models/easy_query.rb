@@ -35,6 +35,10 @@ class EasyQuery < ActiveRecord::Base
     raise NotImplementedError.new('entity method has to be implemented in EasyQuery ancestor: ' + self.class.name)
   end
 
+  def entity_scope=(scope)
+    @entity_scope = scope
+  end
+
   def entity_scope
     if !@entity_scope.nil?
       @entity_scope
