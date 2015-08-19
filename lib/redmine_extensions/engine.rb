@@ -41,21 +41,21 @@ module RedmineExtensions
       end
     end
 
-    initializer 'redmine_extensions.initialize_easy_plugins', after: :load_config_initializers do
-      RedmineExtensions.load_easy_plugins
-
-      unless Redmine::Plugin.installed?(:easy_extensions)
-        ActiveSupport.run_load_hooks(:easyproject, self)
-      end
-    end
-
     # include helpers
-    initializer 'redmine_extensions.rails_patching' do |app|
+    initializer 'redmine_extensions.rails_patching', before: :load_config_initializers do |app|
       ActiveSupport.on_load :action_controller do
         helper RedmineExtensions::ApplicationHelper
       end
       ActiveSupport.on_load(:active_record) do
         include RedmineExtensions::RailsPatches::ActiveRecord
+      end
+    end
+
+    initializer 'redmine_extensions.initialize_easy_plugins', after: :load_config_initializers do
+      RedmineExtensions.load_easy_plugins
+
+      unless Redmine::Plugin.installed?(:easy_extensions)
+        ActiveSupport.run_load_hooks(:easyproject, self)
       end
     end
 

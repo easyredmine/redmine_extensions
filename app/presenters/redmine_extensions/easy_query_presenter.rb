@@ -5,7 +5,7 @@ module RedmineExtensions
     attr_accessor :loading_group, :page_module, :row_limit
 
     def entities(options={})
-      @entities ||= h.instance_variable_get(:@entities) || model.entities(options)
+      @entities ||= @options[:entities] || h.instance_variable_get(:@entities) || model.entities(options)
     end
 
     def entity_count(options={})
@@ -117,7 +117,7 @@ module RedmineExtensions
     def column_header(column, options={})
       if !options[:disable_sort] && column.sortable
         if page_module
-          h.easy_page_module_sort_header_tag(page_module, query, column.name.to_s, {:class => column.css_classes, :caption => column.caption, :default_order => column.default_order})
+          h.easy_page_module_sort_header_tag(page_module, model, column.name.to_s, {:class => column.css_classes, :caption => column.caption, :default_order => column.default_order})
         else
           h.sort_header_tag(column.name.to_s, {:class => column.css_classes, :caption => column.caption, :default_order => column.default_order})
         end
@@ -309,7 +309,7 @@ module RedmineExtensions
 
       def method_missing(name, *args)
         if name.to_s.ends_with?('?')
-          output_enabled?(name.to_s[0..-1])
+          output_enabled?(name.to_s[0..-2])
         else
           super
         end
