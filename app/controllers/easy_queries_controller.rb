@@ -11,7 +11,6 @@ class EasyQueriesController < ApplicationController
 
 
   def new
-    @query = params[:type].constantize
   end
 
   def filters
@@ -56,6 +55,10 @@ class EasyQueriesController < ApplicationController
       rescue
         render_404
       end
+    end
+
+    def check_editable
+      render_403 unless @easy_query.editable_by?(User.current)
     end
 
     def from_params

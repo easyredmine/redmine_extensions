@@ -9,7 +9,7 @@ class CreateEasyQueries < ActiveRecord::Migration
       end
       add_column :easy_queries, :is_for_subprojects, :boolean unless column_exists?(:easy_queries, :is_for_subprojects)
 
-      add_column :easy_queries, :outputs, :text, null: true, default: ['table'].to_yaml unless column_exists?(:easy_queries, :outputs)
+      add_column :easy_queries, :outputs, :text, null: true unless column_exists?(:easy_queries, :outputs)
       remove_column :easy_queries, :table if column_exists?(:easy_queries, :table)
       remove_column :easy_queries, :chart if column_exists?(:easy_queries, :chart)
       remove_column :easy_queries, :calendar if column_exists?(:easy_queries, :calendar)
@@ -29,6 +29,7 @@ class CreateEasyQueries < ActiveRecord::Migration
         t.text    :column_names
         t.text    :sort_criteria
         t.string  :group_by
+        t.boolean :is_for_subprojects
 
         t.text :outputs,          null: true
         t.text :settings

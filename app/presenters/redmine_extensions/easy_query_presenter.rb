@@ -49,6 +49,10 @@ module RedmineExtensions
       self
     end
 
+    def model_name
+      EasyQuery.model_name
+    end
+
     def to_partial_path
       'easy_queries/easy_query'
     end
@@ -300,11 +304,19 @@ module RedmineExtensions
       end
 
       def available_outputs
-        QueryOutput.available_outputs_for( @query )
+        RedmineExtensions::QueryOutput.available_outputs_for( @query )
+      end
+
+      def available_output_instances
+        @available_outputs ||= available_output_klasses_for( @query ).map{|klass| klass.new(presenter) }
       end
 
       def output_enabled?(output)
         @query.outputs.include?(output.to_s)
+      end
+
+      def render_edit_selects(style=:check_box, options={})
+        available_output_instances.map{|o| o.render_edit_box(style, options) }.join('')
       end
 
       def method_missing(name, *args)

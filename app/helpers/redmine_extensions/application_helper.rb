@@ -16,9 +16,14 @@ module RedmineExtensions
 
     def present(model, options={}, &block)
       if model.is_a?(RedmineExtensions::BasePresenter)
-        yield model.update_options(options.merge(view_context: self))
+        presenter = model.update_options(options.merge(view_context: self))
       else
-        yield( RedmineExtensions::BasePresenter.present(model, self, options) )
+        presenter = RedmineExtensions::BasePresenter.present(model, self, options)
+      end
+      if block_given?
+        yield presenter
+      else
+        presenter
       end
     end
 

@@ -31,6 +31,17 @@ class EasyQuery < ActiveRecord::Base
     end
   end
 
+  # not quite right place
+  def editable_by?(user)
+    return false unless user
+    # Admin can edit them all and regular users can edit their private queries
+    return true if user.admin? || (self.is_private? && self.user_id == user.id)
+    # Members can not edit public queries that are for all project (only admin is allowed to)
+    self.is_public? && !self.is_for_all? && user.allowed_to?(:manage_public_queries, self.project)
+  end
+
+  #end
+
   def entity
     raise NotImplementedError.new('entity method has to be implemented in EasyQuery ancestor: ' + self.class.name)
   end

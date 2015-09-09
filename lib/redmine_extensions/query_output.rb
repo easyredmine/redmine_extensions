@@ -18,6 +18,13 @@ module RedmineExtensions
       end.keys
     end
 
+    def self.available_output_klasses_for(query)
+      result = []
+      registered_outputs.each do |name, output|
+        result << output if output.available_for?(query)
+      end
+    end
+
     def self.output_klass_for(output)
       registered_outputs[output.to_sym]
     end
@@ -47,6 +54,14 @@ module RedmineExtensions
     def header
       content = options["#{key}_header".to_sym]
       h.content_tag(:h3, content.html_safe) unless content.blank?
+    end
+
+    def render_edit_box(style=:check_box, options={})
+      raise 'Style of edit box is not allowed' unless [:check_box, :radio_button].include?(style)
+
+      options[:class] ||= options[:modul_uniq_id] + 'content_switch'
+      h.send("#{style}_tag" , "#{block_name}[output]", key, query.outputs.output_enabled?(key), id: options[:modul_uniq_id] + '_output_' + key, class: options[:class])
+      h.label_tag options[:modul_uniq_id] + '_output_' + key, h.l('label_my_page_issue_output.' + key), :class => 'inline'
     end
 
     def h

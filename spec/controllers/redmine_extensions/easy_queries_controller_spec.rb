@@ -1,7 +1,9 @@
 require 'rails_helper'
 
-module RedmineExtensions
-  RSpec.describe EasyQueriesController, type: :controller do
+RSpec.describe EasyQueriesController, type: :controller do
+
+  describe '#new' do
 
   end
+
 end
