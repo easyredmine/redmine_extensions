@@ -173,13 +173,18 @@ module EasyQueryParts
       {}
     end
 
+    def filter_options(name, user=nil)
+      opts = attribute_options(name, user)
+      opts[:type] = opts.delete(:filter_type)
+      opts
+    end
+
     def available_filters
       return @available_filters if @available_filters
       @available_filters = {}
       entity.columns.each do |column|
-        unless attribute_options(column.name)[:reject]
-          opts = {entity: self.entity}.merge(attribute_options(column.name))
-          opts[:type] = opts.delete(:filter_type)
+        unless filter_options(column.name)[:reject]
+          opts = {entity: self.entity}.merge(filter_options(column.name))
           @available_filters[column.name] = EasyQueryFilter.new(column, opts)
         end
       end
