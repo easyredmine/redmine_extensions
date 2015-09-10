@@ -7,12 +7,13 @@ class CreateEasyQueries < ActiveRecord::Migration
         EasyQuery.where(:is_public => true).update_all(:visibility => 2)
         remove_column :easy_queries, :is_public
       end
-      add_column :easy_queries, :is_for_subprojects, :boolean unless column_exists?(:easy_queries, :is_for_subprojects)
-
       add_column :easy_queries, :outputs, :text, null: true unless column_exists?(:easy_queries, :outputs)
       remove_column :easy_queries, :table if column_exists?(:easy_queries, :table)
       remove_column :easy_queries, :chart if column_exists?(:easy_queries, :chart)
       remove_column :easy_queries, :calendar if column_exists?(:easy_queries, :calendar)
+
+      add_column :easy_queries, :is_for_subprojects, :boolean unless column_exists?(:easy_queries, :is_for_subprojects)
+      add_column :easy_queries, :is_tagged, :boolean, null: false, default: false unless column_exists(:easy_queries, :is_tagged)
 
       add_column :easy_queries, :chart_settings, :text, null: true unless column_exists?(:easy_queries, :chart_settings)
       add_column :easy_queries, :period_settings, :text, null: true unless column_exists?(:easy_queries, :period_settings)
@@ -29,9 +30,10 @@ class CreateEasyQueries < ActiveRecord::Migration
         t.text    :column_names
         t.text    :sort_criteria
         t.string  :group_by
+        t.text    :outputs,       null: true
         t.boolean :is_for_subprojects
+        t.boolean :is_tagged,     null: false, default: false
 
-        t.text :outputs,          null: true
         t.text :settings
         t.text :chart_settings,   null: true
         t.text :period_settings,  null: true

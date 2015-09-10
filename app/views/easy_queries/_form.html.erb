@@ -1,0 +1,90 @@
+<% block_name ||= query.block_name || form.object_name.to_s %>
+
+<%= error_messages_for query.model %>
+
+<%= hidden_field_tag :confirm, 1 %>
+<%= hidden_field_tag :set_filter, 1 %>
+<%= hidden_field_tag :type , params[:type] %>
+<%= hidden_field_tag :gantt, '1' if params[:gantt] %>
+<%= hidden_field_tag :back_url , params[:back_url] %>
+<% query.settings.each do |key, value| %>
+  <%= hidden_field_tag "easy_query[settings][#{key}]", value %>
+<% end if query.settings.is_a?(Hash) %>
+
+<div class="box easy_query_edit">
+  <div class="tabular">
+    <p>
+      <%= form.label(:name, :required => true) %>
+      <%= form.text_field(:name, :size => 80, :id => '_name') -%>
+    </p>
+
+    <% if User.current.admin? || User.current.allowed_to?(:manage_public_queries, query.project, :global => true) %>
+      <p><label><%=l(:field_visible)%></label>
+        <label class="block"><%= form.radio_button :visibility, EasyQuery::VISIBILITY_PRIVATE %> <%= l(:label_visibility_private) %></label>
+        <label class="block"><%= form.radio_button :visibility, EasyQuery::VISIBILITY_PUBLIC %> <%= l(:label_visibility_public) %></label>
+        <label class="block"><%= form.radio_button :visibility, EasyQuery::VISIBILITY_ROLES %> <%= l(:label_visibility_roles) %>:</label>
+        <% Role.givable.sorted.each do |role| %>
+          <label class="inline role-visibility"><%= check_box_tag "#{block_name}[role_ids][]", role.id, query.roles.include?(role), :id => nil %> <%= role.name %></label>
+        <% end %>
+        <%= hidden_field_tag "#{block_name}[role_ids][]", '' %>
+      </p>
+    <% end %>
+
+    <p>
+      <%= label_tag :query_is_for_all, l(:field_is_for_all) -%>
+      <%= check_box_tag 'query_is_for_all', 1, query.project.nil?, :class => (User.current.admin? ? '' : 'disable-unless-private') %></p>
+    </p>
+
+    <p>
+      <%= label_tag :is_for_subprojects, l(:field_is_for_subprojects) -%>
+      <%= check_box_tag 'is_for_subprojects', 1, query.is_for_subprojects,
+        :disabled => (query.project.nil? || (!query.new_record? && query.is_public? && !User.current.admin?)) %>
+    </p>
+
+    <fieldset class="easy-query-filters-field"><legend><%= l(:label_options) %></legend>
+      <% if query.display_columns_select? -%>
+        <p>
+          <%= label_tag :default_columns, l(:label_default_columns) -%>
+          <%= check_box_tag 'default_columns', 1, query.has_default_columns?, :id => 'default_columns' %>
+        </p>
+        <%= javascript_tag("$('#default_columns').change(function(e){ if ($(this).is(':checked')) {$('#columns').hide()} else {$('#columns').show()} });") %>
+      <% end -%>
+
+      <% if params[:gantt] %>
+        <p><label><%= l(:label_gantt) %></label>
+          <label class="inline"><%= check_box_tag "#{block_name}[draw_relations]", '1', query.draw_relations %> <%= l(:label_related_issues) %></label>
+          <label class="inline"><%= check_box_tag "#{block_name}[draw_progress_line]", '1', query.draw_progress_line %> <%= l(:label_gantt_progress_line) %></label>
+        </p>
+      <% end %>
+    </fieldset>
+  </div>
+
+  <fieldset class="easy-query-filters-field">
+    <legend><%= l(:label_easy_query_outputs) %></legend>
+    <%= query.outputs.render_edit_selects %>
+  </fieldset>
+
+  <fieldset id="filters" class="easy-query-filters-field">
+    <legend><%= l(:label_filter_plural) -%></legend>
+    <%= render_with_fallback :partial => 'filters', :prefixes => query, :locals => {query: query, form: form} -%>
+  </fieldset>
+
+  <%= query.outputs.render_edit %>
+
+  <div class="clear"></div>
+
+</div>
+
+<script type="text/javascript">
+  $(function(){
+    $("<%= query.modul_uniq_id.blank? ? '' : '#'+query.modul_uniq_id %> .easy_query_edit").easy_query_edit();
+
+    $(".<%= query.modul_uniq_id %>output_switch").change(function(){
+      var $box = $('.'+ $(this).data('output') +'_settings');
+      if($(this).is(':checked'))
+        $box.show();
+      else
+        $box.hide();
+    })
+  });
+</script>

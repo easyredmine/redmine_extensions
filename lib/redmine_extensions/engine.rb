@@ -45,6 +45,7 @@ module RedmineExtensions
     initializer 'redmine_extensions.rails_patching', before: :load_config_initializers do |app|
       ActiveSupport.on_load :action_controller do
         helper RedmineExtensions::ApplicationHelper
+        helper RedmineExtensions::EasyQueryHelper
       end
       ActiveSupport.on_load(:active_record) do
         include RedmineExtensions::RailsPatches::ActiveRecord

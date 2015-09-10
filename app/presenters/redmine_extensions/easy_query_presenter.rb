@@ -41,6 +41,19 @@ module RedmineExtensions
       outputs.table?
     end
 
+    def display_columns_select?(action='edit')
+      true
+    end
+    def display_sort_options?(action='edit')
+      true
+    end
+    def display_group_by_select?(action='edit')
+      true
+    end
+    def display_settings?(action)
+      true
+    end
+
     def render_zoom_links?
       false
     end
@@ -57,11 +70,18 @@ module RedmineExtensions
       'easy_queries/easy_query'
     end
 
+    def block_name
+      options[:block_name] || ( page_module ? page_module.page_zone_module.module_name : nil )
+    end
+    def modul_uniq_id
+      ''
+    end
+
     def render_zoom_links
       return unless render_zoom_links?
       # TODO: it should give a presenter itself to the partial and there decide what and how to render
-      if self.easy_page_module
-        h.render(:partial => 'easy_queries/zoom_links', :locals => {:query => self, :base_url => {}, :block_name => self.easy_page_module.page_zone_module.module_name})
+      if self.page_module
+        h.render(:partial => 'easy_queries/zoom_links', :locals => {:query => self, :base_url => {}, :block_name => self.page_module.page_zone_module.module_name})
       else
         h.render(:partial => 'easy_queries/zoom_links', :locals => {:query => self})
       end
@@ -128,6 +148,29 @@ module RedmineExtensions
       else
         h.content_tag(:th, column.caption, {:class => column.css_classes})
       end
+    end
+
+
+    # Get values from Proc, select only valid filters, sort and cache list of filters. Return array of arrays
+    def filters_for_select
+      @filters_for_select ||= model.available_filters.select do |name, filter|
+        filter.valid?
+      end.sort { |a, b| a[1] <=> b[1] }
+
+      return @filters_for_select
+    end
+
+    def operators_for_select(filter_type)
+      EasyQueryFilter.operators_by_filter_type[filter_type].collect { |o| [l(EasyQueryFilter.operators[o]), o] }
+    end
+
+
+    def available_columns_for_select
+      h.options_for_select (model.available_columns - model.columns).reject(&:frozen?).collect {|column| [column.caption(true), column.name]}
+    end
+
+    def selected_columns_for_select
+      h.options_for_select (model.columns & model.available_columns).reject(&:frozen?).collect {|column| [column.caption(true), column.name]}
     end
 
     #------- DATA FOR RESULTS -------
@@ -308,7 +351,7 @@ module RedmineExtensions
       end
 
       def available_output_instances
-        @available_outputs ||= available_output_klasses_for( @query ).map{|klass| klass.new(presenter) }
+        @available_outputs ||= RedmineExtensions::QueryOutput.available_output_klasses_for( @query ).map{|klass| klass.new(@presenter) }
       end
 
       def output_enabled?(output)
@@ -316,7 +359,11 @@ module RedmineExtensions
       end
 
       def render_edit_selects(style=:check_box, options={})
-        available_output_instances.map{|o| o.render_edit_box(style, options) }.join('')
+        available_output_instances.map{|o| o.render_edit_box(style, options) }.join('').html_safe
+      end
+
+      def render_edit
+        @outputs.map{ |output| output.render_edit }.join('').html_safe
       end
 
       def method_missing(name, *args)

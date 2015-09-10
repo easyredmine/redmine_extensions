@@ -1,0 +1,167 @@
+<% modul_uniq_id ||= ''; fields = []; block_name ||= ''; %>
+<div class="add-filter">
+  <%= l(:label_filter_add) %>:
+  <%= select_tag '', options_for_filters(query), :include_blank => true,
+     :class => 'select-small add_filter_select', :name => nil, :id => modul_uniq_id + 'add_filter_select' %>
+</div>
+<table class="filters-table", data-enabled="<%= query.filters.keys.to_json %>">
+  <colgroup>
+      <col style="width: 200px;" />
+      <col style="width: 150px" />
+      <col />
+    </colgroup>
+  <% query.filters_for_select.each do |field, filter|
+    field_dom_id = field.gsub(/\./, '_')
+    -%>
+    <tr style="<%= 'display:none;' unless query.has_filter?(field) %>" id="<%= modul_uniq_id -%>tr_<%= field_dom_id %>" class="filter">
+      <td>
+        <%= check_box_tag (block_name.blank? ? 'fields[]' : "#{block_name}[fields][]"), field, query.has_filter?(field), id: "#{modul_uniq_id}cb_#{field_dom_id}", class: 'filters_checkbox' %>
+        <label for="<%= modul_uniq_id -%>cb_<%= field_dom_id %>"><%= filter[:name] || l(("field_"+field.to_s.gsub(/\_id$/, "")).to_sym) %></label>
+      </td>
+      <% if filter[:type] == :date_period %>
+        <td colspan="2">
+          <div id="<%= modul_uniq_id -%>operators_<%= field_dom_id %>"></div>
+          <div id="<%= modul_uniq_id -%>div_values_<%= field_dom_id %>">
+            <% period_values = query.values_for(field)
+               period_values = {} if !period_values.is_a?(Hash) || period_values.blank? %>
+            <p>
+              <%= radio_button_tag (block_name.blank? ? "operators[#{field}]" : "#{block_name}[operators][#{field}]"), 'date_period_1', (query.operator_for(field) != 'date_period_2'), :id => "#{modul_uniq_id}#{field_dom_id}_date_period_1" %>
+              <%= select_tag (block_name.blank? ? "values[#{field}][period]" : "#{block_name}[values][#{field}][period]"), options_for_period_select(period_values[:period], field, {:show_future => field =~ /cf_\d+/}.merge(query.extended_period_options)), :onfocus => "$('##{modul_uniq_id}#{field_dom_id}_date_period_1').prop('checked', true);", id:  "#{modul_uniq_id}values_#{field_dom_id}_period" %>
+              <%
+                style = 'visibility: hidden;'
+                value = 0
+                if (values = query.values_for(field)) && values[:period] && values[:period].to_s.include?('n_days')
+                  value = values[:period_days]
+                  style = ''
+                end
+              %>
+              <span style="<%= style %>" id="<%= "#{modul_uniq_id}values_#{field_dom_id}_period_days_container" %>">
+                <%= text_field_tag (block_name.blank? ? "values[#{field}][period_days]" : "#{block_name}[values][#{field}][period_days]"), value, :id => "#{modul_uniq_id}values_#{field_dom_id}_period_days", :size => 3, :class => "values_#{field}" %> <%= l(:label_day_plural) %>
+              </span>
+            </p>
+            <p>
+              <%= radio_button_tag (block_name.blank? ? "operators[#{field}]" : "#{block_name}[operators][#{field}]"), 'date_period_2', (query.operator_for(field) == 'date_period_2'), :id => "#{modul_uniq_id}#{field_dom_id}_date_period_2" %>
+              <span onclick="<%= "$('##{modul_uniq_id}#{field_dom_id}_date_period_2').prop('checked', true);" -%>">
+                <%= l(:label_date_from_to, :start => (text_field_tag((block_name.blank? ? "values[#{field}][from]" : "#{block_name}[values][#{field}][from]"), period_values[:from], :size => 10, :id => "#{modul_uniq_id}#{field_dom_id}_from", :onchange => "$(this).closest('span').click();") + calendar_for("#{modul_uniq_id}#{field_dom_id}_from")), :end => (text_field_tag((block_name.blank? ? "values[#{field}][to]" : "#{block_name}[values][#{field}][to]"), period_values[:to], :size => 10, :id => "#{modul_uniq_id}#{field_dom_id}_to", :onchange => "$(this).closest('span').click();") + calendar_for("#{modul_uniq_id}#{field_dom_id}_to"))).html_safe %>
+              </span>
+            </p>
+          </div>
+        </td>
+        <script type="text/javascript">
+          $(document).ready(function() {
+            $('#<%= "#{modul_uniq_id}values_#{field_dom_id}_period" %>').change(function(){
+              var option = $(this).find('option:selected');
+              var period_days_container = $('#<%= "#{modul_uniq_id}values_#{field_dom_id}_period_days_container" %>');
+              if (option.val().indexOf('n_days') !== -1) {
+                period_days_container.css("visibility", "initial").show();
+              } else {
+                period_days_container.hide();
+              }
+            });
+          });
+        </script>
+      <% else %>
+        <td>
+          <%
+          available_operators = query.operators_for_select(filter.type)
+          name = block_name.blank? ? "operators[#{field}]" : "#{block_name}[operators][#{field}]"
+           %>
+          <% if available_operators.count > 1 %>
+            <%= select_tag(name, options_for_select(available_operators, query.operator_for(field)), id: "#{modul_uniq_id}operators_#{field_dom_id}", class: 'select-small filter_select_operator', data: {field: field}) %>
+          <% else %>
+            <%= hidden_field_tag(name, available_operators.first[1]) %>
+          <% end -%>
+        </td>
+        <td>
+          <div id="<%= modul_uniq_id -%>div_values_<%= field_dom_id %>">
+            <% case filter[:type]
+               when :boolean %>
+                 <span class="span_values_<%= field_dom_id %>">
+                  <%
+                  bool_value = (Array(query.values_for(field)).first || true).to_s.to_boolean;
+                  name = block_name.blank? ? "values[#{field}][]" : "#{block_name}[values][#{field}][]"
+                  %>
+                  <%= radio_button_tag(name, '1', bool_value, :id => "#{modul_uniq_id}values_#{field_dom_id}_true") %>
+                  <%= label_tag("#{modul_uniq_id}values_#{field_dom_id}_true", l(:general_text_Yes)) %>
+                </span>
+                 <span>
+                  <%= radio_button_tag(name, '0', !bool_value, :id => "#{modul_uniq_id}values_#{field_dom_id}_false") %>
+                  <%= label_tag("#{modul_uniq_id}values_#{field_dom_id}_false", l(:general_text_No)) %>
+                </span>
+            <% when :list, :list_optional, :list_status, :list_subprojects %>
+              <span class="<%= modul_uniq_id -%> span_values_<%= field_dom_id %>">
+                <%= easy_multiselect_tag(
+                  block_name.blank? ? "values[#{field}][]" : "#{block_name}[values][#{field}][]",
+                  filter[:values],
+                  query.values_for(field),
+                  :id => "#{modul_uniq_id}values_#{field_dom_id}", :class => "values_#{field_dom_id}"
+                ) %>
+              </span>
+            <% when :list_autocomplete %>
+              <% tag_id = "#{modul_uniq_id}values_#{field_dom_id}"
+                 selected = Array(filter[:values]).flatten %>
+              <span class="<%= modul_uniq_id -%> span_values_<%= field_dom_id %>">
+                <%= easy_autocomplete_tag(
+                  block_name.blank? ? "values[#{field}][]" : "#{block_name}[values][#{field}][]",
+                  { name: selected.first, id: selected.last },
+                  url_for(:controller => 'easy_auto_completes',
+                    :action => filter[:source] || 'query_entities',
+                    :format => 'json',
+                    :autocomplete_options => filter[:autocomplete_options]),
+                  :html_options => {:id => tag_id, :class => "values_#{field_dom_id}"},
+                  :root_element => filter[:source] || 'entities'
+                ) %>
+              </span>
+            <% when :date, :date_past %>
+              <span class="<%= modul_uniq_id -%> span_values_<%= field_dom_id %>"><%= text_field_tag (block_name.blank? ? "values[#{field}][]" : "#{block_name}[values][#{field}][]"), query.value_for(field), :id => "#{modul_uniq_id}values_#{field_dom_id}", :size => 3, :class => "values_#{field}" %> <%= l(:label_day_plural) %></span>
+            <% when :string, :text %>
+              <span class="<%= modul_uniq_id -%> span_values_<%= field_dom_id %>"><%= text_field_tag (block_name.blank? ? "values[#{field}][]" : "#{block_name}[values][#{field}][]"), query.value_for(field), :id => "#{modul_uniq_id}values_#{field_dom_id}", :size => 30, :class => "values_#{field}" %></span>
+            <% when :integer, :float %>
+              <% (1..2).each do |num| %>
+                <span class="<%= modul_uniq_id -%> span_values_<%= field_dom_id %>"><%= text_field_tag (block_name.blank? ? "values[#{field}][]" : "#{block_name}[values][#{field}][]"), query.value_for(field, num-1), :id => "#{modul_uniq_id}values_#{field_dom_id}_#{num}", :size => 6, :class => "values_#{field}" %></span>
+              <% end %>
+            <% when :easy_lookup %>
+              <span class="<%= modul_uniq_id -%> span_values_<%= field_dom_id %>">
+                <%= easy_modal_selector_field_tag(filter[:entity_type], filter[:entity_attribute], (block_name.blank? ? "values[#{field}][]" : "#{block_name}[values][#{field}][]"), "#{modul_uniq_id}values_#{field_dom_id}", (query.values_for(field) ? EasyExtensions::FieldFormats::EasyLookup.entity_ids_to_lookup_values(filter[:entity_type], filter.values, :attribute => filter[:entity_attribute]) : {} ) ) %>
+              </span>
+            <% when :relation %>
+              <% entities_tag_id = "#{modul_uniq_id}values_#{field}_entities"
+                 projects_tag_id = "#{modul_uniq_id}values_#{field}_projects"
+                 selected = Array(query.values_for(field))
+                 if query.operator_for(field) == '='
+                    selected_entity = { name: selected.first, id: selected.last }
+                 else
+                    selected_project = { name: selected.first, id: selected.last }
+                 end
+                 selected_entity ||= {}
+                 selected_project ||= {}
+                 %>
+              <span class="<%= modul_uniq_id -%> span_values_<%= field %>">
+                <%= easy_autocomplete_tag(
+                  block_name.blank? ? "values[#{field}][]" : "#{block_name}[values][#{field}][]",
+                  selected_entity,
+                  url_for(:controller => 'easy_auto_completes',
+                    :action => 'query_entities',
+                    :format => 'json',
+                    :autocomplete_options => {:entity => query.entity.to_s}),
+                  :html_options => {:id => entities_tag_id, :class => "values_#{field}"},
+                  :root_element => 'entities', :onchange => "$('##{projects_tag_id}').val('')"
+                ) %>
+                <%= easy_autocomplete_tag(
+                  block_name.blank? ? "values[#{field}][]" : "#{block_name}[values][#{field}][]",
+                  selected_project,
+                  url_for(:controller => 'easy_auto_completes',
+                    :action => 'visible_projects',
+                    :format => 'json'),
+                  :html_options => {:id => projects_tag_id, :class => "values_#{field}"},
+                  :root_element => 'projects', :onchange => "$('##{entities_tag_id}').val('')"
+                ) %>
+              </span>
+            <% end %>
+          </div>
+        </td>
+      <% end %>
+    </tr>
+  <% end %>
+</table>
+

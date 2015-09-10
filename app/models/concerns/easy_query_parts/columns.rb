@@ -6,11 +6,12 @@ class EasyQueryColumn < EasyEntityAttribute
   def initialize(name, options={})
     if name.is_a?(ActiveRecord::ConnectionAdapters::Column)
       @column = name
-      name = @column.name.to_sym
       options[:type] = @column.type
+
       if @column.name.ends_with?('_id')
-        @association = options[:entity].reflect_on_all_associations(:belongs_to).detect{|as| as.foreign_key == @column.name }
-        @assoc = @association && @association.name
+        name = initialize_parent_column(name, options)
+      else
+        name = @column.name.to_sym
       end
     end
 
@@ -27,6 +28,19 @@ class EasyQueryColumn < EasyEntityAttribute
     self.default_order = options[:default_order]
     self.sumable_sql = options[:sumable_sql]
     @sumable = options[:sumable]
+  end
+
+  def initialize_parent_column(column, options)
+    @association = options[:entity].reflect_on_all_associations(:belongs_to).detect{|as| as.foreign_key == @column.name }
+    return column.name unless @association
+
+    @assoc = @association.name
+    options[:includes] = Array(options[:includes]).concat([@assoc])
+    options[:sortable] ||= @association.klass.fields_for_order_statement if @association.klass.respond_to?(:fields_for_order_statement)
+    ['position', 'name'].each do |col|
+      options[:sortable] ||= "#{@association.klass.quoted_table_name}.#{col}" if @association.klass.column_names.include?(col.to_s)
+    end
+    column.name.sub(/_id$/, '').to_sym
   end
 
   def polymorphic?
@@ -72,6 +86,7 @@ class EasyQueryColumn < EasyEntityAttribute
     end
   end
 end
+
 module EasyQueryParts
   module Columns
     extend ActiveSupport::Concern

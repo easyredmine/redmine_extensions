@@ -1,0 +1,19 @@
+<div class="easy_query_additional_options">
+  <p class="show_sum_row">
+    <%= hidden_field_tag((block_name.blank? ? "show_sum_row" : "#{block_name}[show_sum_row]"), '0', :id => modul_uniq_id + 'show_sum_row_0') %>
+    <%= check_box_tag((block_name.blank? ? "show_sum_row" : "#{block_name}[show_sum_row]"), '1', query.show_sum_row?, :id => modul_uniq_id + 'show_sum_row_1') %>
+    <%= label_tag(modul_uniq_id + 'show_sum_row_1', l(:field_show_sum_row)) %>
+  </p>
+
+  <p class="load_groups_opened">
+    <%= hidden_field_tag((block_name.blank? ? 'load_groups_opened' : "#{block_name}[load_groups_opened]"), '0', :id => modul_uniq_id + 'load_groups_opened_0') %>
+    <%= check_box_tag((block_name.blank? ? 'load_groups_opened' : "#{block_name}[load_groups_opened]"), '1', query.load_groups_opened?, :id => modul_uniq_id + 'load_groups_opened_1') %>
+    <%= label_tag(modul_uniq_id + 'load_groups_opened_1', l(:field_load_groups_opened)) %>
+  </p>
+
+  <p class="show_avatars">
+    <%= hidden_field_tag((block_name.blank? ? 'show_avatars' : "#{block_name}[show_avatars]"), '0', :id => modul_uniq_id + 'show_avatars_0') %>
+    <%= check_box_tag((block_name.blank? ? 'show_avatars' : "#{block_name}[show_avatars]"), '1', query.show_avatars?, :id => modul_uniq_id + 'show_avatars_1') %>
+    <%= label_tag(modul_uniq_id + 'show_avatars_1', l(:field_show_avatars)) %>
+  </p>
+</div>

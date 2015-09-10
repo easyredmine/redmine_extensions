@@ -1,0 +1,5 @@
+cs:
+  field_is_for_subprojects: Pro podprojekty
+  label_easy_query_outputs: Výstupy
+  label_easy_query_output:
+    table: 'Tabulka'
