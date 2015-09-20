@@ -15,7 +15,6 @@
             field = select.val();
 
           $('[id="' + that.modul_uniq_id + 'tr_' + field + '"]').show();
-          console.log($('[id="' + that.modul_uniq_id + 'tr_' + field + '"]'));
           $('[id="' + that.modul_uniq_id + 'cb_' + field + '"]').prop('checked', true);
           that.toggleFilter(field);
           select[0].selectedIndex = 0;

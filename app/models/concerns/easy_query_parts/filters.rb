@@ -64,6 +64,7 @@ class EasyQueryFilter < Hash
     super()
     self.entity = options[:entity]
     merge!(options)
+    return unless @column
     self[:type] ||= :date_period if [:date, :datetime].include?(@column.type)
     if @column.name.ends_with?('_id')
       @association = self.entity.reflect_on_all_associations(:belongs_to).detect{|as| as.foreign_key == @column.name }
@@ -514,6 +515,13 @@ module EasyQueryParts
           @available_filters[column.name] = EasyQueryFilter.new(column, opts)
         end
       end
+      @available_filters
+    end
+
+    # Adds an available filter
+    def add_available_filter(field, options = {})
+      @available_filters ||= ActiveSupport::OrderedHash.new
+      @available_filters[field] = EasyQueryFilter.new(nil, {entity: self.entity}.merge(options))
       @available_filters
     end
 
