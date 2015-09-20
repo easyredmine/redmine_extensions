@@ -231,14 +231,12 @@ module RedmineExtensions
           raise ::Unauthorized unless @query.visible?
           @query.project = @project
 
-          @query.set_additional_params(options[:query_param] ? params[options[:query_param]] : params)
           session[entity_session] = {:id => @query.id, :project_id => @query.project_id}
           sort_clear
         elsif params[:set_filter] || session[entity_session].nil? || entity_session_project_id_changed?(entity_query)
           # Give it a name, required to be valid
           @query = entity_query.new(:name => "_", :project => (@project unless options[:dont_use_project]))
           load_params = true
-          session[entity_session] = {:project_id => @query.project_id, :filters => @query.filters, :group_by => @query.group_by, :column_names => @query.column_names, :show_sum_row => @query.show_sum_row?, :load_groups_opened => @query.load_groups_opened?, period_start_date: @query.period_start_date, period_end_date: @query.period_end_date, period_date_period: @query.period_date_period, period_date_period_type: @query.period_date_period_type, :show_avatars => @query.show_avatars? } if options[:use_session_store]
           sort_clear if params[:set_filter] == '0'
         else
           @query = nil
@@ -256,7 +254,12 @@ module RedmineExtensions
         end
 
         @query = BasePresenter.present(@query, view_context)
-        @query.from_params(options[:query_param] ? params[options[:query_param]] : params) if load_params
+
+        if load_params
+          @query.from_params(options[:query_param] ? params[options[:query_param]] : params)
+          @query.set_additional_params(options[:query_param] ? params[options[:query_param]] : params)
+          session[entity_session] = {:project_id => @query.project_id, :filters => @query.filters, :group_by => @query.group_by, :column_names => @query.column_names, :show_sum_row => @query.show_sum_row?, :load_groups_opened => @query.load_groups_opened?, period_start_date: @query.period_start_date, period_end_date: @query.period_end_date, period_date_period: @query.period_date_period, period_date_period_type: @query.period_date_period_type, :show_avatars => @query.show_avatars? } if options[:use_session_store]
+        end
 
         @query.loading_group = loading_group
         @query

@@ -13,7 +13,11 @@ module EasyQueryParts
       EasyQueryFilter.operators_by_filter_type
     end
 
-    deprecate :from_params, :to_params, deprecator: RedmineExtensions::Deprecator.new
+    def get_custom_sql_for_field(field, operator, value)
+      nil
+    end
+
+    deprecate :from_params, :to_params, :operators_by_filter_type, deprecator: RedmineExtensions::Deprecator.new
 
   end
 end

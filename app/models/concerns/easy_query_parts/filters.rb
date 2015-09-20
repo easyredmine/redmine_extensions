@@ -54,13 +54,19 @@ class EasyQueryFilter < Hash
     :easy_lookup => ['=', '!']
   }
 
+  class_attribute :hidden_values_by_operator
+  self.hidden_values_by_operator = ['!*', '*', 't', 'w', 'o', 'c']
+
+  attr_accessor :entity
+
   def initialize(column, options={})
     @column = column
     super()
+    self.entity = options[:entity]
     merge!(options)
     self[:type] ||= :date_period if [:date, :datetime].include?(@column.type)
     if @column.name.ends_with?('_id')
-      @association = options[:entity].reflect_on_all_associations(:belongs_to).detect{|as| as.foreign_key == @column.name }
+      @association = self.entity.reflect_on_all_associations(:belongs_to).detect{|as| as.foreign_key == @column.name }
       if @association
         self[:type] ||= :list
         unless self[:values]
@@ -99,6 +105,326 @@ class EasyQueryFilter < Hash
     self[:type]
   end
 
+
+  def sql(field, operator, values)
+    if field =~ /(.+)\.(.+)$/
+      db_table = $1
+      db_field = $2
+    else
+      db_table = self.entity.table_name
+      db_field = field
+    end
+    returned_sql_for_field = self.sql_for_field(field, operator, values, db_table, db_field)
+    '(' + returned_sql_for_field + ')' if returned_sql_for_field.present?
+  end
+
+  # Returns a SQL clause for a date or datetime field.
+  def date_clause(table, field, from, to)
+    s = []
+    if from
+      if from.is_a?(Date) || from.is_a?(Time)
+        from = Time.local(from.year, from.month, from.day).yesterday.end_of_day
+      else
+        from = from - 1 # second
+      end
+      if EasyQuery.default_timezone == :utc
+        from = from.utc
+      end
+      s << ("#{table}.#{field} > '%s'" % [EasyQuery.connection.quoted_date(from)])
+    end
+    if to
+      if to.is_a?(Date) || to.is_a?(Time)
+        to = Time.local(to.year, to.month, to.day).end_of_day
+      end
+      if EasyQuery.default_timezone == :utc
+        to = to.utc
+      end
+      s << ("#{table}.#{field} <= '%s'" % [EasyQuery.connection.quoted_date(to)])
+    end
+    s.join(' AND ')
+  end
+
+  # Returns a SQL clause for a date or datetime field not in range.
+  def reversed_date_clause(table, field, from, to)
+    s = []
+    if from
+      from_yesterday = from - 1
+      from_yesterday_time = Time.local(from_yesterday.year, from_yesterday.month, from_yesterday.day)
+      if EasyQuery.default_timezone == :utc
+        from_yesterday_time = from_yesterday_time.utc
+      end
+      s << ("#{table}.#{field} <= '%s'" % [EasyQuery.connection.quoted_date(from_yesterday_time.end_of_day)])
+    end
+    if to
+      to_time = Time.local(to.year, to.month, to.day)
+      if EasyQuery.default_timezone == :utc
+        to_time = to_time.utc
+      end
+      s << ("#{table}.#{field} > '%s'" % [EasyQuery.connection.quoted_date(to_time.end_of_day)])
+    end
+    if s.empty?
+      ''
+    else
+      '('+s.join(' OR ')+')'
+    end
+  end
+
+  # Returns a SQL clause for a date or datetime field using relative dates.
+  def relative_date_clause(table, field, days_from, days_to)
+    date_clause(table, field, (days_from ? Date.today + days_from : nil), (days_to ? Date.today + days_to : nil))
+  end
+
+  # Helper method to generate the WHERE sql for a +field+, +operator+ and a +value+
+  def sql_for_field(field, operator, value, db_table, db_field, is_custom_filter=false)
+    operator = operator.to_s
+    value = Array(value) if value.is_a?(String)
+    sql = ''
+
+    if db_table.blank?
+      full_db_field_name = db_field
+    else
+      full_db_field_name = "#{db_table}.#{db_field}"
+    end
+
+    # sometimes operator is not saved
+    if operator.blank? && value.is_a?(Hash) && value.key?(:period)
+      if value[:period].blank?
+        operator = 'date_period_2'
+      else
+        operator = 'date_period_1'
+      end
+    end
+
+    case operator
+      when '='
+        if value.any?
+          case self.type
+            when :date, :date_past
+              sql = date_clause(db_table, db_field, parse_date(value.first), parse_date(value.first))
+            when :integer
+              sql = "#{full_db_field_name} = #{value.first.to_i}"
+            when :float
+              float_val = value.first.to_f
+              sql = "#{full_db_field_name} BETWEEN #{float_val - 1e-5} AND #{float_val + 1e-5}"
+            when :boolean
+              sql = "#{full_db_field_name} IN (#{(value.first.to_i == 1) ? EasyQuery.connection.quoted_true : EasyQuery.connection.quoted_false})"
+            else
+              sql = "#{full_db_field_name} IN (" + value.collect { |val| "'#{EasyQuery.connection.quote_string(val)}'" }.join(',') + ')'
+              if value.size == 1 && value[0].blank?
+                sql << " OR #{full_db_field_name} IS NULL"
+              end
+          end
+        else
+          # IN an empty set
+          sql = '1=0'
+        end
+      when '!'
+        if value.any?
+          sql = "#{db_table}.#{db_field} NOT IN (" + value.collect { |val| "'#{EasyQuery.connection.quote_string(val)}'" }.join(',') + ')'
+          if value.size == 1 && value[0].blank?
+            sql << " OR #{full_db_field_name} IS NOT NULL"
+          else
+            sql << " OR #{full_db_field_name} IS NULL"
+          end
+        else
+          # NOT IN an empty set
+          sql = '1=1'
+        end
+      when '!*'
+        sql = "#{full_db_field_name} IS NULL"
+        sql << " OR #{full_db_field_name} = ''" if is_custom_filter
+      when '*'
+        sql = "#{full_db_field_name} IS NOT NULL"
+        sql << " AND #{full_db_field_name} <> ''" if is_custom_filter
+      when '>='
+        if [:date, :date_past].include?(self.type)
+          sql = date_clause(db_table, db_field, parse_date(value.first), nil)
+        else
+          if is_custom_filter
+            sql = "CAST(#{full_db_field_name} AS decimal(60,3)) >= #{value.first.to_f}"
+          else
+            sql = "#{full_db_field_name} >= #{value.first.to_f}"
+          end
+        end
+      when '<='
+        if [:date, :date_past].include?(self.type)
+          sql = date_clause(db_table, db_field, nil, parse_date(value.first))
+        else
+          if is_custom_filter
+            sql = "CAST(#{full_db_field_name} AS decimal(60,3)) <= #{value.first.to_f}"
+          else
+            sql = "#{full_db_field_name} <= #{value.first.to_f}"
+          end
+        end
+      when '><'
+        if [:date, :date_past].include?(self.type)
+          sql = date_clause(db_table, db_field, parse_date(value[0]), parse_date(value[1]))
+        else
+          if is_custom_filter
+            sql = "CAST(#{full_db_field_name} AS decimal(60,3)) BETWEEN #{value[0].to_f} AND #{value[1].to_f}"
+          else
+            sql = "#{full_db_field_name} BETWEEN #{value[0].to_f} AND #{value[1].to_f}"
+          end
+        end
+      when 'o'
+        sql = "#{IssueStatus.table_name}.is_closed=#{EasyQuery.connection.quoted_false}" if field == "status_id"
+      when 'c'
+        sql = "#{IssueStatus.table_name}.is_closed=#{EasyQuery.connection.quoted_true}" if field == "status_id"
+      when '><t-'
+        # between today - n days and today
+        sql = self.relative_date_clause(db_table, db_field, -value.first.to_i, 0)
+      when '>t-'
+        # >= today - n days
+        sql = self.relative_date_clause(db_table, db_field, -value.first.to_i, nil)
+      when '<t-'
+        # <= today - n days
+        sql = self.relative_date_clause(db_table, db_field, nil, -value.first.to_i)
+      when 't-'
+        # = n days in past
+        sql = self.relative_date_clause(db_table, db_field, -value.first.to_i, -value.first.to_i)
+      when '><t+'
+        # between today and today + n days
+        sql = self.relative_date_clause(db_table, db_field, 0, value.first.to_i)
+      when '>t+'
+        # >= today + n days
+        sql = self.relative_date_clause(db_table, db_field, value.first.to_i, nil)
+      when '<t+'
+        # <= today + n days
+        sql = self.relative_date_clause(db_table, db_field, nil, value.first.to_i)
+      when 't+'
+        # = today + n days
+        sql = self.relative_date_clause(db_table, db_field, value.first.to_i, value.first.to_i)
+      when 't'
+        # = today
+        sql = self.relative_date_clause(db_table, db_field, 0, 0)
+      when 'w'
+        # = this week
+        first_day_of_week = EasyExtensions::Calendars::Calendar.first_wday
+        day_of_week = Date.today.cwday
+        days_ago = (day_of_week >= first_day_of_week ? day_of_week - first_day_of_week : day_of_week + 7 - first_day_of_week)
+        sql = self.relative_date_clause(db_table, db_field, -days_ago, -days_ago + 6)
+      when 'date_period_1'
+        case value[:period].to_sym
+          when :is_null
+            sql = "#{full_db_field_name} IS NULL"
+            sql << " OR #{full_db_field_name} = ''" if is_custom_filter
+          when :is_not_null
+            sql = "#{full_db_field_name} IS NOT NULL"
+            sql << " OR #{full_db_field_name} <> ''" if is_custom_filter
+          when :in_less_than_n_days
+            operator = '<t+'
+            sql = sql_for_field(field, operator, [value[:period_days]], db_table, db_field, is_custom_filter)
+          when :in_more_than_n_days
+            operator = '>t+'
+            sql = sql_for_field(field, operator, [value[:period_days]], db_table, db_field, is_custom_filter)
+          when :in_next_n_days
+            operator = '><t+'
+            sql = sql_for_field(field, operator, [value[:period_days]], db_table, db_field, is_custom_filter)
+          when :in_n_days
+            operator = 't+'
+            sql = sql_for_field(field, operator, [value[:period_days]], db_table, db_field, is_custom_filter)
+          when :less_than_ago_n_days
+            operator = '>t-'
+            sql = sql_for_field(field, operator, [value[:period_days]], db_table, db_field, is_custom_filter)
+          when :more_than_ago_n_days
+            operator = '<t-'
+            sql = sql_for_field(field, operator, [value[:period_days]], db_table, db_field, is_custom_filter)
+          when :in_past_n_days
+            operator = '><t-'
+            sql = sql_for_field(field, operator, [value[:period_days]], db_table, db_field, is_custom_filter)
+          when :ago_n_days
+            operator = 't-'
+            sql = sql_for_field(field, operator, [value[:period_days]], db_table, db_field, is_custom_filter)
+          else
+            period_dates = RedmineExtensions::DateRange.new('1', value[:period], value[:from], value[:to])
+            sql = self[:time_column] ?
+              self.date_clause(db_table, db_field, (period_dates[:from].nil? ? nil : period_dates[:from].beginning_of_day), (period_dates[:to].nil? ? nil : period_dates[:to].end_of_day)) :
+              self.date_clause(db_table, db_field, (period_dates[:from].nil? ? nil : period_dates[:from]), (period_dates[:to].nil? ? nil : period_dates[:to]))
+        end
+      when 'date_period_2'
+        period_dates = RedmineExtensions::DateRange.new('2', value[:period], value[:from], value[:to])
+        sql = self[:time_column] ?
+          self.date_clause(db_table, db_field, (period_dates[:from].nil? ? nil : period_dates[:from].beginning_of_day), (period_dates[:to].nil? ? nil : period_dates[:to].end_of_day)) :
+          self.date_clause(db_table, db_field, (period_dates[:from].nil? ? nil : period_dates[:from]), (period_dates[:to].nil? ? nil : period_dates[:to]))
+      when '~'
+        sql = "LOWER(#{db_table}.#{db_field}) LIKE '%#{EasyQuery.connection.quote_string(value.first.to_s.downcase)}%'"
+      when '!~'
+        sql = "LOWER(#{db_table}.#{db_field}) NOT LIKE '%#{EasyQuery.connection.quote_string(value.first.to_s.downcase)}%'"
+      when '^~'
+        sql = "LOWER(#{db_table}.#{db_field}) LIKE '#{EasyQuery.connection.quote_string(value.first.to_s.downcase)}%'"
+      else
+        raise "Unknown query operator #{operator}"
+    end
+
+    return sql
+  end
+
+end
+
+class EasyQueryCustomFilter
+
+  def sql(field, operator, values)
+    self.sql_for_custom_field(field, operator, values, $1)
+  end
+
+  def sql_for_custom_field(field, operator, value, custom_field_id)
+    operator = operator.to_s
+    db_table = CustomValue.table_name
+    db_field = 'value'
+    db_entity = self.entity
+    db_entity_table_name = db_entity.table_name
+    filter = self.available_filters[field]
+
+    return nil unless filter
+
+    if filter[:field].format.target_class && filter[:field].format.target_class <= User
+      if value.delete('me')
+        value.push User.current.id.to_s
+      end
+    end
+
+    not_in = nil
+
+    if operator == '!'
+      # Makes ! operator work for custom fields with multiple values
+      operator = '='
+      not_in = 'NOT'
+    end
+
+    customized_key = 'id'
+    customized_class = entity
+
+    if field =~ /^(.+)_cf_/
+      assoc = $1
+
+      assoc_klass = entity.reflect_on_association(assoc.to_sym)
+      customized_class = assoc_klass.klass.base_class rescue nil
+
+      if customized_class && assoc_klass.collection?
+        db_entity_table_name = assoc
+        customized_key = 'id'
+      else
+        customized_key = "#{assoc}_id"
+      end
+
+      raise "Unknown Entity association #{assoc}" unless customized_class
+    end
+
+    where = sql_for_field(field, operator, value, db_table, db_field, true)
+
+    if operator =~ /[<>]/
+      where = "(#{where}) AND " if where.present?
+      where << "#{db_table}.#{db_field} <> ''"
+    end
+
+    sql = "#{db_entity_table_name}.#{customized_key} #{not_in} IN (" +
+      "SELECT #{customized_class.table_name}.id FROM #{customized_class.table_name}" +
+      " LEFT OUTER JOIN #{db_table} ON #{db_table}.customized_type='#{customized_class}' AND #{db_table}.customized_id=#{customized_class.table_name}.id AND #{db_table}.custom_field_id=#{custom_field_id} WHERE"
+    sql << " (#{where}) AND" if where.present?
+    sql << " (#{filter[:field].visibility_by_project_condition}))"
+    sql
+  end
+
 end
 
 
@@ -128,7 +454,7 @@ module EasyQueryParts
     def validate_query_filters
       filters.each_key do |field|
         if values_for(field)
-          case type_for(field)
+          case self.type
             when :integer
               add_filter_error(field, :invalid) if values_for(field).detect { |v| v.present? && !v.match(/^[+-]?\d+$/) }
             when :float
@@ -212,7 +538,7 @@ module EasyQueryParts
           if e[0].match(/\d{4}/) && (from_date = Date.parse(e[0]) rescue nil)
             self.add_filter(field, 'date_period_2', {:from => from_date, :to => from_date})
           else
-            self.add_filter(field, 'date_period_1', self.get_date_range('1', e[0]).merge(:period => e[0]))
+            self.add_filter(field, 'date_period_1', RedmineExtensions::DateRange.new('1', e[0]).merge(:period => e[0]))
           end
         elsif e.size == 2 && e[0].include?('n_days')
           days = e[1].to_i

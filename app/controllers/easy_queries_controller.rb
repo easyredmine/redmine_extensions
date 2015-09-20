@@ -13,6 +13,36 @@ class EasyQueriesController < ApplicationController
   def new
   end
 
+  def create
+    if params[:confirm] && @easy_query.save
+      flash[:notice] = l(:notice_successful_create)
+
+      if params[:back_url].present?
+        separator = params[:back_url].include?('?') ? '&' : '?'
+        redirect_to "#{params[:back_url]}#{separator}query_id=#{@easy_query.id}"
+      else
+        redirect_to @easy_query.entity_easy_query_path(@easy_query.url_project_id_param => @project, :query_id => @easy_query)
+      end
+      return
+    else
+      render :action => 'new'
+    end
+  end
+
+  def edit
+    # before_filter :find_query
+  end
+
+  def update
+    # before_filter :find_query, :update_query, :from_params
+    if @easy_query.save
+      flash[:notice] = l(:notice_successful_update)
+      redirect_back_or_default @easy_query.entity_easy_query_path(@easy_query.url_project_id_param => @project, :query_id => @easy_query)
+    else
+      render :action => 'edit'
+    end
+  end
+
   def filters
     if params[:easy_page_zone_module_uuid] && (epmz = EasyPageZoneModule.where({:uuid => params[:easy_page_zone_module_uuid]}).first)
       if epmz.settings.is_a?(Hash)
@@ -48,6 +78,18 @@ class EasyQueriesController < ApplicationController
     rescue ActiveRecord::RecordNotFound
     end
 
+    def find_query
+      begin
+        @easy_query = EasyQuery.find(params[:id])
+      rescue ActiveRecord::RecordNotFound
+        @easy_query = EasyQuery.find(params[:easy_query_id])
+      end
+      @project = @easy_query.project
+      @easy_query.user ||= User.current
+    rescue ActiveRecord::RecordNotFound
+      render_404
+    end
+
     def create_query
       begin
         @easy_query = params[:type].constantize.new(params[:easy_query]) if params[:type]
@@ -61,6 +103,10 @@ class EasyQueriesController < ApplicationController
       render_403 unless @easy_query.editable_by?(User.current)
     end
 
+    def update_query
+      @easy_query.attributes = params[:easy_query]
+    end
+
     def from_params
       if params[:query_is_for_all]
         @easy_query.project = nil
@@ -69,6 +115,7 @@ class EasyQueriesController < ApplicationController
         @easy_query.project = @project
         @easy_query.is_for_subprojects = params[:is_for_subprojects]
       end
+      @easy_query = RedmineExtensions::BasePresenter.present(@easy_query, view_context)
       @easy_query.from_params(params)
       @easy_query.visibility = EasyQuery::VISIBILITY_PRIVATE unless User.current.allowed_to?(:manage_public_queries, @project, :global => true) || User.current.admin?
       @easy_query.column_names = nil if params[:default_columns]

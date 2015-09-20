@@ -32,7 +32,9 @@ variables[:modul_uniq_id] ||= variables[:container_id]
     <%= output.render_data %>
   <% end %>
 
+  <%= include_calendar_headers_tags %>
   <%= javascript_include_tag 'redmine_extensions/jquery.easy_query' %>
+  <%= javascript_include_tag 'context_menu.js' %>
   <script type="text/javascript">
     $("#<%= presenter.modul_uniq_id %>query_options").easy_query({modul_uniq_id: '<%= presenter.modul_uniq_id %>'});
   </script>

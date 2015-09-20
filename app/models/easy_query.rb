@@ -11,6 +11,8 @@ class EasyQuery < ActiveRecord::Base
   belongs_to :user
   has_and_belongs_to_many :roles, :join_table => "#{table_name_prefix}easy_queries_roles#{table_name_suffix}", :foreign_key => 'easy_query_id'
 
+  attr_protected :id
+
   serialize :filters, Hash
   serialize :column_names, Array
   serialize :sort_criteria, Array
@@ -40,7 +42,45 @@ class EasyQuery < ActiveRecord::Base
     self.is_public? && !self.is_for_all? && user.allowed_to?(:manage_public_queries, self.project)
   end
 
+  def visible?(user=User.current)
+    return true if user.admin?
+    return false unless project.nil? || user.allowed_to?(self.class.permission_view_entities, project, :global => true)
+    case visibility
+      when VISIBILITY_PUBLIC
+        true
+      when VISIBILITY_ROLES
+        if project
+          (user.roles_for_project(project) & roles).any?
+        else
+          Member.where(:user_id => user.id).joins(:roles).where(:member_roles => {:role_id => roles.map(&:id)}).any?
+        end
+      else
+        user == self.user
+    end
+  end
+
   #end
+
+  def sort_criteria=(arg)
+    c = []
+    if arg.is_a?(Hash)
+      arg = arg.keys.sort.collect { |k| arg[k] }
+    end
+
+    if arg
+      c = arg.select { |k, o| !k.to_s.blank? }.slice(0, 3).collect {|k, o| [k.to_s, (o == 'desc' || o == false) ? 'desc' : 'asc']}
+    end
+
+    write_attribute(:sort_criteria, c)
+  end
+
+  def sort_criteria
+    super || []
+  end
+
+  def url_project_id_param
+    :project_id
+  end
 
   def entity
     raise NotImplementedError.new('entity method has to be implemented in EasyQuery ancestor: ' + self.class.name)

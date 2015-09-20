@@ -14,6 +14,10 @@ module EasyQueryParts
       nil
     end
 
+    def statement_skip_fields
+      []
+    end
+
     def statement
       # filters clauses
       filters_clauses = []
@@ -25,7 +29,7 @@ module EasyQueryParts
         next if self.statement_skip_fields.include?(field)
         v = self.values_for(field)
         operator = self.operator_for(field)
-        next if !self.hidden_values_by_operator.include?(operator) && v.blank?
+        next if !EasyQueryFilter.hidden_values_by_operator.include?(operator) && v.blank?
 
         v = v.nil? ? '' : v.dup
 
@@ -44,31 +48,16 @@ module EasyQueryParts
 
         if field == 'project_id'
           if !v.blank? && v.delete('mine')
-            v.concat(User.current.memberships.map(&:project_id).map(&:to_s))
+            v.concat(User.current.memberships.puck(:project_id).collect(&:to_s))
           end
         end
 
         custom_sql = self.get_custom_sql_for_field(field, operator, v)
         if custom_sql.present?
           filters_clauses << custom_sql
-          next
-        end
-
-        if field =~ /cf_(\d+)$/
-          filters_clauses << self.sql_for_custom_field(field, operator, v, $1)
-        elsif respond_to?("sql_for_#{field}_field")
-          # specific statement
-          filters_clauses << send("sql_for_#{field}_field", field, operator, v)
         else
-          if field =~ /(.+)\.(.+)$/
-            db_table = $1
-            db_field = $2
-          else
-            db_table = self.entity.table_name
-            db_field = field
-          end
-          returned_sql_for_field = self.sql_for_field(field, operator, v, db_table, db_field)
-          filters_clauses << ('(' + returned_sql_for_field + ')') if returned_sql_for_field.present?
+          filter = available_filters[field]
+          filters_clauses << filter.sql(field, operator, v) if filter
         end
 
       end if self.filters

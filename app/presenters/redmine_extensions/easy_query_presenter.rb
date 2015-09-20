@@ -37,8 +37,13 @@ module RedmineExtensions
 
 
     # ----- RENDERING HELPERS ----
+
+    def default_name
+      h.l(self.class.name.underscore, :scope => [:easy_query, :name])
+    end
+
     def name
-      model.new_record? ? options[:easy_query_name] : model.name
+      model.new_record? ? default_name : model.name
     end
 
     def show_free_search?
@@ -227,6 +232,10 @@ module RedmineExtensions
     end
     alias_method :prepare_export_result, :entities_for_export
 
+    def filters_active?
+      model.filters.any?
+    end
+
     #------ MIDDLE LAYER ------
 
     # Returns count of entities on the list action
@@ -240,7 +249,17 @@ module RedmineExtensions
     end
 
     def path(params={})
-      h.polymorphic_path(model.entity, params)
+      if self.new_record?
+        entity_easy_query_path(self.to_params.merge(params))
+      else
+        entity_easy_query_path({:query_id => model}.merge(params))
+      end
+    end
+
+    def entity_easy_query_path(options = {})
+      options = options.dup
+
+      h.polymorphic_path([(options.delete(:project) || self.project), self.entity], options)
     end
 
 

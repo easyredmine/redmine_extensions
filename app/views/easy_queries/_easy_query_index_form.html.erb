@@ -35,9 +35,9 @@ query_heading_dup = query_heading.dup.html_safe
       <% end %>
 
       <% if !query.new_record? && query.editable_by?(User.current) %>
-        <%= link_to('', edit_easy_query_path(query, :project_id => @project, :back_url => back_url), :class => 'icon icon-edit', :title => l(:title_edit_projectquery)) %>
-        <%= link_to('', easy_query_path(query, :project_id => @project, :back_url => back_url), :data => {:confirm => l(:text_are_you_sure)}, :method => 'delete', :class => 'icon icon-del', :title => l(:title_delete_projectquery)) %>
-        <%= link_to('', easy_query_load_users_for_copy_path(query, :back_url => back_url), :class => 'icon icon-group', :title => l(:title_copy_projectquery), :remote => true) %>
+        <%= link_to('', redmine_extensions_engine.edit_easy_query_path(query, :project_id => @project, :back_url => back_url), :class => 'icon icon-edit', :title => l(:title_edit_projectquery)) %>
+        <%= link_to('', redmine_extensions_engine.easy_query_path(query, :project_id => @project, :back_url => back_url), :data => {:confirm => l(:text_are_you_sure)}, :method => 'delete', :class => 'icon icon-del', :title => l(:title_delete_projectquery)) %>
+        <%= link_to('', redmine_extensions_engine.easy_query_load_users_for_copy_path(query, :back_url => back_url), :class => 'icon icon-group', :title => l(:title_copy_projectquery), :remote => true) %>
       <% end %>
 
       <%= call_hook(:view_easy_query_index_heading, query: query, options: options) %>
