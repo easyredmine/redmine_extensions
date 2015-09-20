@@ -11,7 +11,7 @@ module EasyQueryParts
     end
 
     def group_by_column
-      self.groupable_columns.detect { |c| c.groupable && c.name.to_s == self.group_by }
+      self.groupable_columns.detect { |c| c.groupable && c.name.to_s == self.group_by } if self.group_by
     end
 
     def group_by_statement

@@ -30,5 +30,12 @@ module RedmineExtensions
       body.html_safe
     end
 
+    def easy_render_format_options_dialog(query, format, params)
+      @easy_format_options_dialog_rendered ||= []
+      return if @easy_format_options_dialog_rendered.include?(format)
+      @easy_format_options_dialog_rendered << format
+      render(:partial => 'easy_queries/format_options_dialog', :locals => {:query => query, :params => params, :format => format})
+    end
+
   end
 end

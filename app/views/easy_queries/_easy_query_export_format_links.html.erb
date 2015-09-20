@@ -1,0 +1,14 @@
+<% options ||={}; query.other_formats_links(options) do |f| %>
+  <% query.export_formats.each_pair do |format, format_options|
+    options = format_options.dup
+    condition = options.delete(:if)
+
+    url = options.delete(:url) || {}
+    if add_query_params = options.delete(:add_query_params)
+      url[add_query_params] = query.to_params.to_param
+    end
+
+    -%>
+    <%= f.link_to(format.to_s.upcase, query, {url: url, easy_query_namespace: options.delete(:add_query_params), title: l("title_other_formats_links_#{format}")}.merge(options)) if condition.nil? || condition.call(query) -%>
+  <% end if query.export_formats %>
+<% end %>

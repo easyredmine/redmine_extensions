@@ -2,7 +2,15 @@ module RedmineExtensions
   class EasyQueryPresenter < BasePresenter
 
     # --- GETTERS ---
-    attr_accessor :loading_group, :page_module, :row_limit
+    attr_accessor :loading_group, :page_module, :row_limit, :export_formats
+
+    def initialize(*attrs)
+      super
+      @export_formats = ActiveSupport::OrderedHash.new
+      @export_formats[:csv] = {}
+      @export_formats[:pdf] = {}
+      @export_formats[:xlsx] = {}
+    end
 
     def entities(options={})
       @entities ||= @options[:entities] || h.instance_variable_get(:@entities) || model.entities(options)
@@ -53,6 +61,9 @@ module RedmineExtensions
     def display_settings?(action)
       true
     end
+    def has_default_filter?
+      model.filters == model.default_filter
+    end
 
     def render_zoom_links?
       false
@@ -74,7 +85,7 @@ module RedmineExtensions
       options[:block_name] || ( page_module ? page_module.page_zone_module.module_name : nil )
     end
     def modul_uniq_id
-      ''
+      options[:modul_uniq_id] || ''
     end
 
     def render_zoom_links
@@ -164,6 +175,16 @@ module RedmineExtensions
       EasyQueryFilter.operators_by_filter_type[filter_type].collect { |o| [l(EasyQueryFilter.operators[o]), o] }
     end
 
+    def other_formats_links(options={})
+      if options[:no_container]
+        yield RedmineExtensions::Export::EasyOtherFormatsBuilder.new(h)
+      else
+        h.concat('<div class="other-formats">'.html_safe)
+        yield RedmineExtensions::Export::EasyOtherFormatsBuilder.new(h)
+        h.concat('</div>'.html_safe)
+      end
+    end
+
 
     def available_columns_for_select
       h.options_for_select (model.available_columns - model.columns).reject(&:frozen?).collect {|column| [column.caption(true), column.name]}
@@ -216,6 +237,10 @@ module RedmineExtensions
       else
         model.entity_count(options)
       end
+    end
+
+    def path(params={})
+      h.polymorphic_path(model.entity, params)
     end
 
 

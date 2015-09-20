@@ -99,7 +99,9 @@ module EasyQueryParts
     def load_entity_columns
       result = []
       entity.columns.each do |column|
-        result << EasyQueryColumn.new(column, {entity: self.entity}.merge(attribute_options(column.name)) ) unless attribute_options(column.name)[:reject]
+        next if attribute_options(column.name)[:reject]
+        result << EasyQueryColumn.new(column, {entity: self.entity}.merge(attribute_options(column.name)) )
+        default_list_columns << result.last.name.to_s if attribute_options(column.name)[:default]
       end
       result
     end
@@ -169,11 +171,15 @@ module EasyQueryParts
     end
 
     def default_list_columns
-      Array.new
+      @default_list_columns ||= Array.new
     end
 
     def has_default_columns?
       self.column_names.blank?
+    end
+
+    def has_column?(column)
+      self.column_names && self.column_names.include?(column.is_a?(EasyQueryColumn) ? column.name : column)
     end
 
     def columns_with_me

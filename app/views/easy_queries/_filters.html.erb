@@ -1,4 +1,4 @@
-<% modul_uniq_id ||= ''; fields = []; block_name ||= ''; %>
+<% modul_uniq_id ||= query.modul_uniq_id || ''; fields = []; block_name ||= ''; %>
 <div class="add-filter">
   <%= l(:label_filter_add) %>:
   <%= select_tag '', options_for_filters(query), :include_blank => true,
@@ -164,4 +164,3 @@
     </tr>
   <% end %>
 </table>
-

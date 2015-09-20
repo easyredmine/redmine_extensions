@@ -10,13 +10,15 @@ variables[:modul_uniq_id] ||= variables[:container_id]
 %>
 
 <% present(easy_query, variables) do |presenter| %>
-  <% if presenter.render_exports? %>
-    <%= easy_render_pdf_format_options_dialog(easy_query, params) if easy_query.new_record? %>
-    <%= easy_render_csv_format_options_dialog(easy_query, params) if easy_query.new_record? %>
-    <%= easy_render_xlsx_format_options_dialog(easy_query, params) if easy_query.new_record? %>
+  <% if presenter.render_exports? && easy_query.new_record? %>
+    <%= easy_render_format_options_dialog(easy_query, 'pdf', params) %>
+    <%= easy_render_format_options_dialog(easy_query, 'csv', params) %>
+    <%= easy_render_format_options_dialog(easy_query, 'xlsx', params) %>
   <% end %>
 
-  <%= render :partial => 'easy_queries/easy_query_index', :locals => {:query => presenter, :options => variables[:options]}.merge(variables[:form_options]) %>
+  <div id="<%= presenter.modul_uniq_id %>query_options">
+    <%= render :partial => 'easy_queries/easy_query_index', :locals => {:query => presenter, :options => variables[:options]}.merge(variables[:form_options]) %>
+  </div>
 
   <%= presenter.render_zoom_links %>
 
@@ -30,4 +32,8 @@ variables[:modul_uniq_id] ||= variables[:container_id]
     <%= output.render_data %>
   <% end %>
 
+  <%= javascript_include_tag 'redmine_extensions/jquery.easy_query' %>
+  <script type="text/javascript">
+    $("#<%= presenter.modul_uniq_id %>query_options").easy_query({modul_uniq_id: '<%= presenter.modul_uniq_id %>'});
+  </script>
 <% end %>

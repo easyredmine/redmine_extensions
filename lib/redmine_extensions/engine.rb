@@ -39,6 +39,13 @@ module RedmineExtensions
           app.config.paths['db/migrate'] << expanded_path
         end
       end
+      if true
+        js_dir = app.root.join('public', 'javascripts', 'redmine_extensions')
+        FileUtils.mkdir(js_dir) unless File.directory?(js_dir)
+        Dir.glob( root.join('app', 'assets', 'javascripts', 'redmine_extensions', '*.js') ) do |js_file|
+          FileUtils.cp(js_file, app.root.join('public', 'javascripts', 'redmine_extensions'))
+        end
+      end
     end
 
     # include helpers
@@ -53,6 +60,7 @@ module RedmineExtensions
     end
 
     initializer 'redmine_extensions.initialize_easy_plugins', after: :load_config_initializers do
+      require 'redmine_extensions/hooks'
       RedmineExtensions.load_easy_plugins
 
       unless Redmine::Plugin.installed?(:easy_extensions)

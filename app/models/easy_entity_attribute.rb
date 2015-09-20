@@ -47,7 +47,7 @@ class EasyEntityAttribute
   end
 
   def css_classes
-    @css_classes ||= [self.name.to_s.underscore, (self.numeric? ? ((User.current.pref.number_alignment == '0') ? 'right-alignment' : 'left-alignment') : '')].reject(&:blank?).join(' ')
+    @css_classes ||= [self.name.to_s.underscore, (self.numeric? ? 'right-alignment' : '')].reject(&:blank?).join(' ')
   end
 
 end

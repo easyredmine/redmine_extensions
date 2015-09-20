@@ -67,7 +67,7 @@ class EasyQueryFilter < Hash
           self[:values] = Proc.new do
             values = @association.klass.column_names.include?('position') ? @association.klass.order(:position) : @association.klass.all
             values = values.active if values.respond_to?(:active)
-            values.collect{|r| [r.name, r.id] }
+            values.collect{|r| [(r.is_a?(Issue) ? r.subject : r.name), r.id] }
           end
         end
       end

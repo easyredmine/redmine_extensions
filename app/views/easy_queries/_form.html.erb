@@ -77,7 +77,7 @@
 
 <script type="text/javascript">
   $(function(){
-    $("<%= query.modul_uniq_id.blank? ? '' : '#'+query.modul_uniq_id %> .easy_query_edit").easy_query_edit();
+    $("<%= query.modul_uniq_id.blank? ? '' : '#'+query.modul_uniq_id %> .easy_query_edit").easy_query();
 
     $(".<%= query.modul_uniq_id %>output_switch").change(function(){
       var $box = $('.'+ $(this).data('output') +'_settings');

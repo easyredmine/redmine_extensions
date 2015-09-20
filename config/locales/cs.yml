@@ -1,5 +1,12 @@
 cs:
-  field_is_for_subprojects: Pro podprojekty
+  button_clear_query: Smazat
+  button_save_query: Uložit
   label_easy_query_outputs: Výstupy
   label_easy_query_output:
     table: 'Tabulka'
+  label_easy_query_export_links: Export
+  field_is_for_subprojects: Pro podprojekty
+  filter_default: výchozí
+  field_show_sum_row: Zobrazit součty
+  field_load_groups_opened: Zobrazit skupiny otevřené
+  field_show_avatars: Zobrazit avatary

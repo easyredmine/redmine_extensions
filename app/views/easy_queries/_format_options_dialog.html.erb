@@ -24,7 +24,7 @@
       <%= submit_tag(l(:button_export), :name => nil) -%>
       <%= submit_tag(l(:button_cancel), :name => nil, :onclick => 'hideModal(this); return false', :type => 'button', :class => 'button-2') -%>
     </p>
-    <% if ['xlsx', 'pdf'].include?(format) && query && (groups = query.groups) %>
+    <% if ['xlsx', 'pdf'].include?(format) && query.grouped? && (groups = query.groups) %>
     <input name='easy_query[open_categories_ids][]' type="hidden"/>
     <p>
       <table>
