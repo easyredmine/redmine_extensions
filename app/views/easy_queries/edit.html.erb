@@ -1,0 +1,12 @@
+<% present(@easy_query) do |query| %>
+  <%= form_for([redmine_extensions_engine, query]) do |f| %>
+
+    <%= render 'form', form: f, query: query %>
+
+    <%= f.submit %>
+  <% end %>
+<% end %>
+
+<% content_for :header_tags do %>
+  <%= javascript_include_tag 'redmine_extensions/jquery.easy_query' %>
+<% end %>
