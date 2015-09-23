@@ -1,4 +1,5 @@
 require 'redmine_extensions/patch_manager'
+require 'redmine_extensions/redmine_patches/patches'
 
 module RedmineExtensions
   class Engine < ::Rails::Engine
