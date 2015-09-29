@@ -7,11 +7,11 @@ require "redmine_extensions/version"
 Gem::Specification.new do |s|
   s.name        = "redmine_extensions"
   s.version     = RedmineExtensions::VERSION
-  s.authors     = ["EasySoftware, ltd"]
+  s.authors     = ["Easy Software Ltd."]
   s.email       = ["ondrej.ezr@easy.cz"]
   s.homepage    = "http://www.easyredmine.com"
-  s.summary     = "RedmineExtensions is set of usefull features for Redmine. Main focus is on development helpers, but many users can find it helpfull"
-  s.description = "RedmineExtensions provide many extended functionalities for Redmine project."
+  s.summary     = "Redmine Extensions is set of usefull features for Redmine. Main focus is on development helpers, but many users can find it helpfull"
+  s.description = "Redmine Extensions provide many extended functionalities for Redmine project."
   s.license     = 'GPL-2'
 
   s.test_files = Dir["spec/**/*"]
