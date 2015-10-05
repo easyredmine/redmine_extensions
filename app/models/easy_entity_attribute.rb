@@ -51,3 +51,9 @@ class EasyEntityAttribute
   end
 
 end
+
+begin
+  require_dependency Rails.root.join('plugins', 'easyproject', 'easy_plugins', 'easy_extensions', 'app', 'models', 'easy_entity_attribute')
+rescue LoadError
+  Rails.logger.warn 'EasyRedmine is not installed, please visit a www.easyredmine.com for feature preview and consider installation.'
+end

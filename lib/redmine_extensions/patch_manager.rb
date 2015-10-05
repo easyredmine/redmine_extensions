@@ -361,6 +361,9 @@ module RedmineExtensions
 end
 
 ActiveSupport.on_load(:easyproject, yield: true) do
+  if Object.const_defined?(EasyExtensions)
+    EasyExtensions::PatchManager = RedmineExtensions::PatchManager
+  end
   RedmineExtensions::PatchManager.apply_persisting_patches
 end
 
