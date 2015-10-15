@@ -360,7 +360,7 @@ module RedmineExtensions
   end
 end
 
-ActiveSupport.on_load(:redmine_extensions, yield: true) do
+ActiveSupport.on_load(:easyproject, yield: true) do
   RedmineExtensions::PatchManager.apply_persisting_patches
 end
 
