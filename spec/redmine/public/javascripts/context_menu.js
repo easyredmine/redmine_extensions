@@ -1,6 +1,3 @@
-/* Redmine - project management software
-   Copyright (C) 2006-2015  Jean-Philippe Lang */
-
 var contextMenuObserving;
 var contextMenuUrl;
 
