@@ -10,7 +10,7 @@ Ruby 2.1.2 Pure Redmine / MySQL:
   - ''
   - ruby -v
   - ''
-  - cp .openshift/easy_scripts/mysql_database_test.yml config/database.yml
+  - cp confing/database.yml.mysql config/database.yml
   - sed "s/redmine/redmine_test_$((RANDOM))/" -i config/database.yml
   - ''
   - bundle install
@@ -20,6 +20,30 @@ Ruby 2.1.2 Pure Redmine / MySQL:
   - bundle exec rake redmine_test
   - bundle exec rake db:drop
 
+Ruby 2.1.2 EasyRedmine / MySQL:
+  script:
+  - export HOME=/home/gitlab_ci_multi_runner
+  - export LC_ALL=en_US.UTF-8
+  - export PATH=$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+  - ''
+  - source /usr/local/rvm/scripts/rvm > /dev/null 2>&1
+  - rvm use ruby 2.1.2 > /dev/null 2>&1
+  - ''
+  - ruby -v
+  - ''
+  - cp confing/database.yml.mysql config/database.yml
+  - sed "s/redmine/redmine_test_$((RANDOM))/" -i config/database.yml
+  - ''
+  - rm -rf spec/redmine
+  - git clone git@git.easy.cz:easyredmine/stable-2014.git spec/redmine
+  - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
+  - ''
+  - bundle install
+  - bundle exec rake db:drop
+  - bundle exec rake db:create
+  - bundle exec rake db:migrate
+  - bundle exec rake easyproject:tests:spec
+  - bundle exec rake db:drop
 
 #  - bundle exec rake test:prepare RAILS_ENV=test
 #  - bundle exec rake easyproject:tests:spec RAILS_ENV=test
