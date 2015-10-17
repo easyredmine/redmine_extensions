@@ -10,14 +10,15 @@ Ruby 2.1.2 Pure Redmine / MySQL:
   - ''
   - ruby -v
   - ''
-  - cp confing/database.yml.mysql config/database.yml
-  - sed "s/redmine/redmine_test_$((RANDOM))/" -i config/database.yml
+  - cp confing/database.yml.mysql spec/redmine/config/database.yml
+  - sed "s/redmine/redmine_test_$((RANDOM))/" -i spec/redmine/config/database.yml
   - ''
   - bundle install
   - bundle exec rake db:drop
   - bundle exec rake db:create
   - bundle exec rake db:migrate
   - bundle exec rake redmine_test
+  - bundle exec rake spec
   - bundle exec rake db:drop
 
 Ruby 2.1.2 EasyRedmine / MySQL:
@@ -31,8 +32,8 @@ Ruby 2.1.2 EasyRedmine / MySQL:
   - ''
   - ruby -v
   - ''
-  - cp confing/database.yml.mysql config/database.yml
-  - sed "s/redmine/redmine_test_$((RANDOM))/" -i config/database.yml
+  - cp confing/database.yml.mysql spec/redmine/config/database.yml
+  - sed "s/redmine/redmine_test_$((RANDOM))/" -i spec/redmine/config/database.yml
   - ''
   - rm -rf spec/redmine
   - git clone git@git.easy.cz:easyredmine/stable-2014.git spec/redmine
@@ -43,6 +44,7 @@ Ruby 2.1.2 EasyRedmine / MySQL:
   - bundle exec rake db:create
   - bundle exec rake db:migrate
   - bundle exec rake easyproject:tests:spec
+  - bundle exec rake spec
   - bundle exec rake db:drop
 
 #  - bundle exec rake test:prepare RAILS_ENV=test
