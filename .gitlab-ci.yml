@@ -20,6 +20,9 @@ Ruby 2.1.2 Pure Redmine / MySQL:
   - bundle exec rake redmine_test
   - bundle exec rake spec
   - bundle exec rake db:drop
+  tags:
+  except:
+  - master
 
 Ruby 2.1.2 EasyRedmine / MySQL:
   script:
@@ -32,12 +35,12 @@ Ruby 2.1.2 EasyRedmine / MySQL:
   - ''
   - ruby -v
   - ''
-  - cp confing/database.yml.mysql spec/redmine/config/database.yml
-  - sed "s/redmine/redmine_test_$((RANDOM))/" -i spec/redmine/config/database.yml
-  - ''
   - rm -rf spec/redmine
   - git clone git@git.easy.cz:easyredmine/stable-2014.git spec/redmine
   - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
+  - ''
+  - cp confing/database.yml.mysql spec/redmine/config/database.yml
+  - sed "s/redmine/redmine_test_$((RANDOM))/" -i spec/redmine/config/database.yml
   - ''
   - bundle install
   - bundle exec rake db:drop
