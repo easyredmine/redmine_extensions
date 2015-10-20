@@ -35,6 +35,11 @@ module RedmineExtensions
       true
     end
 
+    #TODO: little nasty hack
+    def class
+      @model && @model.class || super
+    end
+
 
     # ----- RENDERING HELPERS ----
 
