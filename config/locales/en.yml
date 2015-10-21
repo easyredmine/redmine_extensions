@@ -1,5 +1,2 @@
 en:
-  field_is_for_subprojects: For subprojects
-  label_easy_query_outputs: Outputs
-  label_easy_query_output:
-    table: 'List'
+  nothing: Nothing
