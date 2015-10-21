@@ -83,12 +83,11 @@ module RedmineExtensions
 
     def save
       unsaved_settings.clear
-      valid = true
       easy_settings.each do |setting|
-        valid &&= setting.save
+        setting.save
         unsaved_settings << setting unless setting.persisted?
       end
-      valid
+      unsaved_settings.any?
     end
 
     def format_value(name, value)
