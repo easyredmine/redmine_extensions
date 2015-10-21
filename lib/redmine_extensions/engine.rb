@@ -64,7 +64,10 @@ module RedmineExtensions
       require 'redmine_extensions/hooks'
       RedmineExtensions.load_easy_plugins
 
-      unless Redmine::Plugin.installed?(:easy_extensions)
+      ActiveSupport.run_load_hooks(:redmine_extensions, self)
+
+      easy_extensions = Redmine::Plugin.all.detect{|p| p.id == :easy_extensions}
+      if easy_extensions && easy_extensions.version >= '2014.06.04'
         ActiveSupport.run_load_hooks(:easyproject, self)
       end
     end

@@ -188,7 +188,11 @@ class Project < ActiveRecord::Base
       unless options[:member]
         role = user.builtin_role
         if role.allowed_to?(permission)
-          statement_by_role[role] = "#{Project.table_name}.is_public = #{connection.quoted_true}"
+          s = "#{Project.table_name}.is_public = #{connection.quoted_true}"
+          if user.id
+            s = "(#{s} AND #{Project.table_name}.id NOT IN (SELECT project_id FROM #{Member.table_name} WHERE user_id = #{user.id}))"
+          end
+          statement_by_role[role] = s
         end
       end
       user.projects_by_role.each do |role, projects|
@@ -747,7 +751,7 @@ class Project < ActiveRecord::Base
     # clear unique attributes
     attributes = project.attributes.dup.except('id', 'name', 'identifier', 'status', 'parent_id', 'lft', 'rgt')
     copy = Project.new(attributes)
-    copy.enabled_modules = project.enabled_modules
+    copy.enabled_module_names = project.enabled_module_names
     copy.trackers = project.trackers
     copy.custom_values = project.custom_values.collect {|v| v.clone}
     copy.issue_custom_fields = project.issue_custom_fields
