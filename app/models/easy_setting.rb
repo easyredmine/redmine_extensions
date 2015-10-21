@@ -42,12 +42,13 @@ class EasySetting < ActiveRecord::Base
   end
 
   def self.plugin_defaults
-    @plugin_defaults ||= Plugin.all.inject({}) do |res, p|
+    @plugin_defaults ||= Redmine::Plugin.all.inject({}) do |res, p|
       if p.settings && p.settings[:easy_settings].is_a?(Hash)
         p.settings[:easy_settings].each do |key, value|
           res["#{p.id}_#{key}"] = value
         end
       end
+      res
     end
   end
 
@@ -67,13 +68,15 @@ class EasySetting < ActiveRecord::Base
       EasySetting.where(name: key, project_id: project_id).pluck(:value).first
     end
 
-    if use_fallback && (cached_value.nil? || cached_value == '')
-      Rails.cache.fetch fallback_cache_key do
-        EasySetting.where(name: key, project_id: nil).pluck(:value).first || plugin_defaults[key.to_s]
+    result = if use_fallback && (cached_value.nil? || cached_value == '')
+        Rails.cache.fetch fallback_cache_key do
+          EasySetting.where(name: key, project_id: nil).pluck(:value).first
+        end
+      else
+        cached_value
       end
-    else
-      return cached_value
-    end
+    result = plugin_defaults[key.to_s] if result.nil?
+    result
   end
 
   def self.delete_key(key, project_or_project_id)

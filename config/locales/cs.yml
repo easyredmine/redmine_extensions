@@ -1,0 +1,19 @@
+cs:
+  button_clear_query: Smazat
+  button_save_query: Uložit
+  label_easy_query_outputs: Výstupy
+  label_easy_query_output:
+    table: 'Tabulka'
+  label_easy_query_export_links: Export
+  label_last_n_days_next_m_days: "- %{last} dnů + %{next} dnů"
+  label_older_than_n_days: "starší než %{count} dní"
+  label_last_year: minulý rok
+  label_period_future: Budoucnost
+  label_period_past: Minulost
+  label_period_present: Současnost
+  field_is_for_subprojects: Pro podprojekty
+  filter_default: výchozí
+  field_show_sum_row: Zobrazit součty
+  field_load_groups_opened: Zobrazit skupiny otevřené
+  field_show_avatars: Zobrazit avatary
+  filter_active: aktivní

@@ -1,7 +1,8 @@
 FactoryGirl.define do
   factory :easy_query do
+    name 'Test name'
     project nil
-    user
+    user nil
   end
 
 end
