@@ -3,6 +3,6 @@ Description:
     Plugin is prepared for use in Redmine and EasyRedmine as well.
 
 Example:
-    bundle exec rails generate easy_plugin NameOfNewPlugin
+    bundle exec rails generate easy_redmine_plugin NameOfNewPlugin
       create  plugins/easyproject/easy_plugins/name_of_new_plugin/app/controllers
       ...

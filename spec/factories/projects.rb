@@ -58,7 +58,7 @@ FactoryGirl.define do
 
   factory :role do
     sequence(:name){ |n| "Role ##{n}" }
-    permissions Role.new.setable_permissions.collect(&:name).uniq
+    permissions { Role.new.setable_permissions.collect(&:name).uniq }
   end
 
   factory :member_role do

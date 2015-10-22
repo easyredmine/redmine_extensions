@@ -3,9 +3,10 @@ ENV['RAILS_ENV'] ||= 'test'
 
 require 'spec_helper'
 require File.expand_path("../redmine/config/environment.rb",  __FILE__)
+# Add additional requires below this line. Rails is not loaded until this point!
 require 'rspec/rails'
 require 'factory_girl_rails'
-# Add additional requires below this line. Rails is not loaded until this point!
+require 'database_cleaner'
 
   Rails.backtrace_cleaner.remove_silencers!
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -50,4 +51,23 @@ RSpec.configure do |config|
   # The different available types are documented in the features, such as in
   # https://relishapp.com/rspec/rspec-rails/docs
   config.infer_spec_type_from_file_location!
+
+  config.before(:each) do
+    DatabaseCleaner.strategy = :transaction
+  end
+
+  config.before(:each) do
+    DatabaseCleaner.start
+    RequestStore.clear! # invalidates cache
+  end
+
+  config.before(:each, clear_cache: true) do
+    Rails.cache.clear
+  end
+
+
+
+  config.after(:each) do
+    DatabaseCleaner.clean
+  end
 end
