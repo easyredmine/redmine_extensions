@@ -33,7 +33,7 @@ Ruby 2.1.2 EasyRedmine / MySQL:
   - ''
   - ruby -v
   - ''
-  - export
+  - echo %GITLAB_FETCH_USER%
   - ''
   - rm -rf spec/redmine
   - git clone https://$GITLAB_FETCH_USER:$GITLAB_FETCH_PASSWORD@git.easy.cz/easyproject/stable-2014.git spec/redmine
