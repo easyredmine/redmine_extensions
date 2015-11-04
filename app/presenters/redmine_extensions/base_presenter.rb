@@ -40,11 +40,6 @@ module RedmineExtensions
       @model || self
     end
 
-    #TODO: little nasty hack
-    def class
-      @model && @model.class || super
-    end
-
     def h
       @view
     end

@@ -44,9 +44,6 @@ module RedmineExtensions
       end
     end
 
-    def format_html_entity_attribute(entity_class, column, unformatted_value, options={})
-      unformatted_value
-    end
 
     # Dummy multiselect for pure redmine
     def easy_multiselect_tag(name, possible_values, selected_values, options={})

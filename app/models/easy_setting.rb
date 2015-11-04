@@ -68,13 +68,15 @@ class EasySetting < ActiveRecord::Base
       EasySetting.where(name: key, project_id: project_id).pluck(:value).first
     end
 
-    if use_fallback && (cached_value.nil? || cached_value == '')
-      Rails.cache.fetch fallback_cache_key do
-        EasySetting.where(name: key, project_id: nil).pluck(:value).first
+    result = if use_fallback && (cached_value.nil? || cached_value == '')
+        Rails.cache.fetch fallback_cache_key do
+          EasySetting.where(name: key, project_id: nil).pluck(:value).first
+        end
+      else
+        cached_value
       end
-    else
-      cached_value
-    end || plugin_defaults[key.to_s]
+    result = plugin_defaults[key.to_s] if result.nil?
+    result
   end
 
   def self.delete_key(key, project_or_project_id)

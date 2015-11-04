@@ -37,7 +37,7 @@ class EasySettingsController < ApplicationController
     end
 
     def prepare_presenter
-      @easy_settings = RedmineExtensions::EasySettingsPresenter.new(params[:easy_setting], @project)
+      @easy_settings = RedmineExtensions::EasySettingPresenter.new(params[:easy_setting], @project)
     end
 
     def find_plugin
