@@ -5,7 +5,7 @@ module RedmineExtensions
     # -------= Hack methods =------
 
     def plugin_settings_path(plugin, *attrs)
-      if plugin.settings[:only_easy] || plugin.settings[:easy_settings]
+      if plugin.is_a?(Redmine::Plugin) && (plugin.settings[:only_easy] || plugin.settings[:easy_settings])
         redmine_extensions_engine.edit_easy_setting_path(plugin, *attrs)
       else
         super
