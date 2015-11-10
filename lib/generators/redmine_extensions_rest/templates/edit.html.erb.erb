@@ -1,0 +1,14 @@
+<%= '<' + "%= title l(:heading_#{model_name_pluralize_underscored}_edit) %" + '>' %>
+
+<%= '<' + "%= form_for(@#{model_name_underscored}, :html => {:id => '#{model_name_underscored}_form', :class => 'tabular'}) do |f| %" + '>' %>
+  <%= '<' + "%= error_messages_for @#{model_name_underscored} %" + '>' %>
+
+  <div class="box">
+    <%= '<' + "%= render :partial => 'form', :locals => {:#{model_name_underscored} => @#{model_name_underscored}} %" + '>' %>
+  </div>
+
+  <p>
+    <%= '<' + "%= submit_tag l(:button_update), :title => l(:button_update) %" + '>' %>
+  </p>
+
+<%= '<' + "% end %" + '>' %>

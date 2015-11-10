@@ -1,0 +1,6 @@
+class <%= model_name %> < ActiveRecord::Base
+  include Redmine::SafeAttributes
+
+  attr_protected :id
+
+end

@@ -1,4 +1,4 @@
-class RedmineExtensionsPluginGenerator < Rails::Generators::NamedBase
+class RedmineExtensionsRestGenerator < Rails::Generators::NamedBase
   source_root File.expand_path('../templates', __FILE__)
 
   attr_reader :plugin_path, :plugin_name_underscored, :plugin_pretty_name, :plugin_title
