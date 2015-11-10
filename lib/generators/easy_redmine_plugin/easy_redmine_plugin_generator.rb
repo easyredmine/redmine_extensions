@@ -24,7 +24,11 @@ class EasyRedminePluginGenerator < Rails::Generators::NamedBase
     empty_directory "#{plugin_path}/assets/stylesheets"
     empty_directory "#{plugin_path}/config/locales"
     empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}"
-    empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch"
+
+    empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/controllers"
+    empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/helpers"
+    empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/models"
+    empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/others"
 
     template '.gitkeep', "#{plugin_path}/app/controllers/.gitkeep"
     template '.gitkeep', "#{plugin_path}/app/helpers/.gitkeep"
@@ -33,10 +37,10 @@ class EasyRedminePluginGenerator < Rails::Generators::NamedBase
     template '.gitkeep', "#{plugin_path}/db/migrate/.gitkeep"
     template '.gitkeep', "#{plugin_path}/assets/images/.gitkeep"
     template '.gitkeep', "#{plugin_path}/assets/javascripts/.gitkeep"
+    template '.gitkeep', "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/others/.gitkeep"
 
     template 'Gemfile', "#{plugin_path}/Gemfile"
     template 'init.rb.erb', "#{plugin_path}/init.rb"
-    template 'cs.yml', "#{plugin_path}/config/locales/cs.yml"
     template 'en.yml', "#{plugin_path}/config/locales/en.yml"
     template 'routes.rb.erb', "#{plugin_path}/config/routes.rb"
     template 'hooks.rb.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/hooks.rb"

@@ -1,9 +1,9 @@
 Redmine::Plugin.register :<%= plugin_name_underscored %> do
-  name :<%= plugin_name_underscored %>_plugin_name
-  author :<%= plugin_name_underscored %>_plugin_author
-  author_url :<%= plugin_name_underscored %>_plugin_author_url
-  description :<%= plugin_name_underscored %>_plugin_description
-  version '2014'
+  name '<%= plugin_pretty_name %>'
+  author ''
+  author_url ''
+  description ''
+  version '<%= Date.today.strftime('%Y.01.01') %>'
 
   #into easy_settings goes available setting as a symbol key, default value as a value
   settings easy_settings: {  }
@@ -12,10 +12,10 @@ end
 
 Dir[File.dirname(__FILE__) + '/lib/<%= plugin_name_underscored %>/redmine_patch/*/*.rb'].each {|file| require file }
 
-# this block is runed once just after easyproject is started
-# means after all plugins(easy) are initialized
+# this block is executed once just after Redmine is started
+# means after all plugins are initialized
 # it is place for plain requires, not require_dependency
-# it should contain hooks, permissions - base class in redmine is required thus is not reloaded
+# it should contain hooks, permissions - base class in Redmine is required thus is not reloaded
 ActiveSupport.on_load(:easyproject, yield: true) do
 
   require '<%= plugin_name_underscored %>/internals'
@@ -29,6 +29,6 @@ end
 # in this block should be used require_dependency, but only if necessary.
 # better is to place a class in file named by rails naming convency and let it be loaded automatically
 # Here goes query registering, custom fields registering and so on
-# ActionDispatch::Reloader.to_prepare do
-#
-# end
+ActionDispatch::Reloader.to_prepare do
+
+end
