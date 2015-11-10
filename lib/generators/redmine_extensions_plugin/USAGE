@@ -1,0 +1,11 @@
+Description:
+    The plugin generator creates stubs for a new Redmine plugin.
+    Plugin is prepared for use in Redmine and Easy Redmine as well.
+
+Example:
+    bundle exec rails generate redmine_extensions_plugin NameOfNewPlugin
+      create  plugins/name_of_new_plugin/app/controllers
+      ...
+
+Help:
+        bundle exec rails generate redmine_extensions_plugin --help
