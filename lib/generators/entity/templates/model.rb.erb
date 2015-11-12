@@ -7,6 +7,17 @@ class <%= model_name %> < ActiveRecord::Base
   scope :visible, lambda { |*args|
     where(<%= model_name %>.visible_condition(args.shift || User.current, *args)<%= '.joins(:project)' if project? %>)
   }
+  <% if name_column? %>
+  scope :sorted, lambda { order("#{table_name}.<%= name_column %> ASC") }
+  <% end %>
+
+  <% if acts_as_searchable? %>
+  acts_as_searchable :columns => [<%= string_columns.collect{|c| "\#{#{model_name}.table_name}.#{c}" }.join(', ') %>],
+                     :date_column => :created_at
+  <%- end -%>
+  <%- if acts_as_customizable? -%>
+  acts_as_customizable
+  <% end %>
 
   <%= 'validates :project_id, :presence => true' if project? %>
   <%= 'validates :author_id, :presence => true' if author? %>
@@ -15,6 +26,9 @@ class <%= model_name %> < ActiveRecord::Base
 
   <%- if safe_columns.any? -%>
   safe_attributes <%= safe_columns.collect{|column_name| "'#{column_name}'"}.join(', ') %>
+  <%- end -%>
+  <%- if acts_as_customizable? -%>
+  safe_attributes 'custom_field_values', 'custom_fields'
   <%- end -%>
 
   def self.visible_condition(user, options={})
@@ -38,5 +52,11 @@ class <%= model_name %> < ActiveRecord::Base
     user ||= User.current
     user.allowed_to?(:<%= edit_permission %>, <%= project? ? 'self.project' : 'nil' %>, global: true)
   end
+
+  <%- if name_column? -%>
+  def to_s
+    <%= name_column %>
+  end
+  <%- end -%>
 
 end

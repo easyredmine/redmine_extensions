@@ -1,0 +1,7 @@
+class <%= model_name %>CustomField < CustomField
+
+  def type_name
+    :label_<%= @model_name_pluralize_underscored %>
+  end
+
+end

@@ -18,12 +18,14 @@ class <%= controller_class %>Controller < ApplicationController
 
     respond_to do |format|
       format.html
+      format.api
     end
   end
 
   def show
     respond_to do |format|
       format.html
+      format.api
     end
   end
 
@@ -46,10 +48,12 @@ class <%= controller_class %>Controller < ApplicationController
           flash[:notice] = l(:notice_successful_create)
           redirect_back_or_default <%= model_name_pluralize_underscored %>_path(@<%= model_name_underscored %>)
         }
+        format.api { render :action => 'show', :status => :created, :location => <%= model_name_underscored %>_url(@<%= model_name_underscored %>) }
       end
     else
       respond_to do |format|
         format.html { render :action => 'new' }
+        format.api { render_validation_errors(@<%= model_name_underscored %>) }
       end
     end
   end
@@ -69,13 +73,13 @@ class <%= controller_class %>Controller < ApplicationController
       flash[:notice] = l(:notice_successful_update)
 
       respond_to do |format|
-        format.html {
-          redirect_back_or_default <%= model_name_pluralize_underscored %>_path(@<%= model_name_underscored %>)
-        }
+        format.html { redirect_back_or_default <%= model_name_pluralize_underscored %>_path(@<%= model_name_underscored %>) }
+        format.api { render_api_ok }
       end
     else
       respond_to do |format|
         format.html { render :action => 'edit' }
+        format.api { render_validation_errors(@<%= model_name_underscored %>) }
       end
     end
   end
@@ -85,7 +89,8 @@ class <%= controller_class %>Controller < ApplicationController
     flash[:notice] = l(:notice_successful_delete)
 
     respond_to do |format|
-      format.html {redirect_back_or_default <%= model_name_pluralize_underscored %>_path}
+      format.html { redirect_back_or_default <%= model_name_pluralize_underscored %>_path }
+      format.api { render_api_ok }
     end
   end
 

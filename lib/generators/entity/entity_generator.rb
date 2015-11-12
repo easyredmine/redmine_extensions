@@ -40,6 +40,7 @@ class EntityGenerator < Rails::Generators::Base
   def copy_templates
     template 'controller.rb.erb', "#{plugin_path}/app/controllers/#{model_name_pluralize_underscored}_controller.rb"
     template 'model.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}.rb"
+    template('custom_field.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_custom_field.rb") if acts_as_customizable?
     template 'index.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.html.erb"
     template 'show.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/show.html.erb"
     template 'new.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.html.erb"
@@ -57,7 +58,8 @@ class EntityGenerator < Rails::Generators::Base
     if File.exists?("#{plugin_path}/config/locales/en.yml")
       append_to_file "#{plugin_path}/config/locales/en.yml" do
         "\n  heading_#{model_name_pluralize_underscored}_new: New #{plugin_pretty_name}" +
-            "\n  heading_#{model_name_pluralize_underscored}_edit: Edit #{plugin_pretty_name}"
+            "\n  heading_#{model_name_pluralize_underscored}_edit: Edit #{plugin_pretty_name}" +
+            "\n  label_#{model_name_pluralize_underscored}: #{@model_name_pluralize_underscored.titleize}"
       end
     else
       template 'en.yml.erb', "#{plugin_path}/config/locales/en.yml"
@@ -76,6 +78,14 @@ class EntityGenerator < Rails::Generators::Base
     options[:author] == true
   end
 
+  def acts_as_customizable?
+    options[:acts_as_customizable] == true
+  end
+
+  def acts_as_searchable?
+    options[:acts_as_searchable] == true
+  end
+
   def prepare_columns
     @columns = {}
 
@@ -90,7 +100,7 @@ class EntityGenerator < Rails::Generators::Base
   end
 
   def safe_columns
-    @columns.select{|_, column_options| column_options[:safe]}.collect{|column_name, _| column_name}
+    @columns.select { |_, column_options| column_options[:safe] }.collect { |column_name, _| column_name }
   end
 
   def print_column_migration(column_name, column_attrs)
@@ -100,6 +110,18 @@ class EntityGenerator < Rails::Generators::Base
       else
         "t.#{column_attrs[:type]} :#{column_name}"
     end
+  end
+
+  def name_column?
+    safe_columns.include?('name')
+  end
+
+  def name_column
+    'name'
+  end
+
+  def string_columns
+    @columns.select { |_, column_options| column_options[:safe] && column_options[:type] == 'string' }.collect { |column_name, _| column_name }
   end
 
   def view_permission
