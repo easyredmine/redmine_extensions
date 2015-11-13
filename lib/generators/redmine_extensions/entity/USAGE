@@ -3,7 +3,7 @@ Description:
     Plugin is prepared for use in Redmine and Easy Redmine as well.
 
 Example:
-    rails g entity NameOfNewPlugin Post
+    rails g redmine_extensions:entity NameOfNewPlugin Post
       create  plugins/name_of_new_plugin/app/controllers
       ...
 

@@ -1,8 +1,8 @@
 class Create<%= model_name_pluralize_underscored.camelize %> < ActiveRecord::Migration
   def change
     create_table :<%= model_name_pluralize_underscored %> do |t|
-      <%- columns.each do |column_name, column_attrs| -%>
-        <%= print_column_migration(column_name, column_attrs) %>
+      <%- db_columns.each do |column_name, column_attrs| -%>
+        <%= print_column_migration(column_name, column_attrs) -%>
       <%- end -%>
     end
   end

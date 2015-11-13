@@ -2,8 +2,10 @@ class <%= controller_class %>Controller < ApplicationController
 
   menu_item :<%= plugin_name_underscored %>
 
-  before_filter :find_<%= model_name_underscored %>, :only => [:show, :edit, :update, :destroy]
-  before_filter :find_optional_project
+  before_filter :find_<%= model_name_underscored %>, :only => [:show, :edit, :update]
+  before_filter :find_<%= model_name_pluralize_underscored %>, :only => [:context_menu, :bulk_edit, :bulk_update, :destroy]
+  before_filter :find_project
+  before_filter :authorize_global
 
   helper :<%= model_name_pluralize_underscored %>
   helper :custom_fields
@@ -31,6 +33,9 @@ class <%= controller_class %>Controller < ApplicationController
 
   def new
     @<%= model_name_underscored %> = <%= model_name %>.new
+    <%- if project? -%>
+    @<%= model_name_underscored %>.project = @project
+    <%- end -%>
     @<%= model_name_underscored %>.safe_attributes = params[:<%= model_name_underscored %>]
 
     respond_to do |format|
@@ -40,6 +45,9 @@ class <%= controller_class %>Controller < ApplicationController
 
   def create
     @<%= model_name_underscored %> = <%= model_name %>.new
+    <%- if project? -%>
+    @<%= model_name_underscored %>.project = @project
+    <%- end -%>
     @<%= model_name_underscored %>.safe_attributes = params[:<%= model_name_underscored %>]
 
     if @<%= model_name_underscored %>.save
@@ -85,7 +93,10 @@ class <%= controller_class %>Controller < ApplicationController
   end
 
   def destroy
-    @<%= model_name_underscored %>.destroy
+    @<%= model_name_pluralize_underscored %>.each do |<%= model_name_underscored %>|
+      <%= model_name_underscored %>.destroy
+    end
+
     flash[:notice] = l(:notice_successful_delete)
 
     respond_to do |format|
@@ -94,10 +105,49 @@ class <%= controller_class %>Controller < ApplicationController
     end
   end
 
+  def bulk_edit
+  end
+
+  def bulk_update
+  end
+
+  def context_menu
+    if (@<%= model_name_pluralize_underscored %>.size == 1)
+      @<%= model_name_underscored %> = @<%= model_name_pluralize_underscored %>.first
+    end
+    @<%= model_name_underscored %>_ids = @<%= model_name_pluralize_underscored %>.map(&:id).sort
+
+    can_edit = @<%= model_name_pluralize_underscored %>.detect{|c| !c.editable?}.nil?
+    can_delete = @<%= model_name_pluralize_underscored %>.detect{|c| !c.deletable?}.nil?
+    @can = {:edit => can_edit, :delete => can_delete}
+    @back = back_url
+
+    @safe_attributes = @<%= model_name_pluralize_underscored %>.map(&:safe_attribute_names).reduce(:&)
+
+    render :layout => false
+  end
+
   private
 
   def find_<%= model_name_underscored %>
     @<%= model_name_underscored %> = <%= model_name %>.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render_404
+  end
+
+  def find_<%= model_name_pluralize_underscored %>
+    @<%= model_name_pluralize_underscored %> = <%= model_name %>.visible.where(:id => (params[:id] || params[:ids])).to_a
+    raise ActiveRecord::RecordNotFound if @<%= model_name_pluralize_underscored %>.empty?
+    raise Unauthorized unless @<%= model_name_pluralize_underscored %>.all?(&:visible?)
+    @projects = @<%= model_name_pluralize_underscored %>.collect(&:project).compact.uniq
+    @project = @projects.first if @projects.size == 1
+  rescue ActiveRecord::RecordNotFound
+    render_404
+  end
+
+  def find_project
+    @project ||= @<%= model_name_underscored %>.project if !@<%= model_name_underscored %>.nil?
+    @project ||= Project.find(params[:project_id]) if !params[:project_id].blank?
   rescue ActiveRecord::RecordNotFound
     render_404
   end

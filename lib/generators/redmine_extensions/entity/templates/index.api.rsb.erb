@@ -1,0 +1,5 @@
+api.array :<%= model_name_pluralize_underscored %>, api_meta(total_count: @entity_count, offset: @offset, limit: @limit) do
+  @entities.each do |<%= model_name_underscored %>|
+    render_api_<%= model_name_underscored %>(api, <%= model_name_underscored %>)
+  end
+end
