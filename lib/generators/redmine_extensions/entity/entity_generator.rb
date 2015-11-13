@@ -134,7 +134,7 @@ module RedmineExtensions
       end
 
       @db_columns['project_id'] = {type: 'integer', idx: nil, safe: false} if project? && !@db_columns.key?('project_id')
-      @db_columns['author_id'] = {type: 'integer', idx: nil, safe: false} if author? && !@db_columns.key?('author_id')
+      @db_columns['author_id'] = {type: 'integer', idx: nil, safe: true} if author? && !@db_columns.key?('author_id')
       @db_columns['timestamps'] = {}
     end
 
@@ -153,6 +153,14 @@ module RedmineExtensions
       @all_columns
     end
 
+    def string_columns
+      @db_columns.select { |_, column_options| column_options[:safe] && column_options[:type] == 'string' }.collect { |column_name, _| column_name }
+    end
+
+    def form_columns
+      @db_columns.select{ |_, column_options| column_options[:safe] }
+    end
+
     def print_column_migration(column_name, column_attrs)
       case column_name
         when 'timestamps'
@@ -168,10 +176,6 @@ module RedmineExtensions
 
     def name_column
       'name' if name_column?
-    end
-
-    def string_columns
-      @db_columns.select { |_, column_options| column_options[:safe] && column_options[:type] == 'string' }.collect { |column_name, _| column_name }
     end
 
     def view_permission

@@ -1,4 +1,10 @@
 <%%= fields_for :<%= model_name_underscored %>, <%= model_name_underscored %> do |f| %>
+  <% form_columns.each do |column_name, column_options| %>
   <p>
+    <%%= f.label :<%= column_name %> %>
+    <% if column_options[:type] == 'string' || column_options[:type] == 'integer' %>
+    <%%= f.text_field :<%= column_name %> %>
+    <% end %>
   </p>
+  <% end %>
 <%% end %>
