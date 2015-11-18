@@ -1,0 +1,10 @@
+<%
+  query ||= @query
+  entities ||= @entities
+  formatter ||= @query.formatter
+%>
+
+<%= render 'easy_queries/settings', query: query %>
+<%= render 'easy_queries/entities', query: query, entities: entities, formatter: formatter %>
+
+<%= context_menu issues_context_menu_path %>

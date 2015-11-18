@@ -9,3 +9,4 @@ spec/{dummy,redmine}/tmp/
 spec/{dummy,redmine}/.sass-cache
 Gemfile.lock
 navod.txt
+/.tags
