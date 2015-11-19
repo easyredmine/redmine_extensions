@@ -1,0 +1,56 @@
+<%= form_tag({}) do %>
+  <%= hidden_field_tag 'back_url', url_for(params), id: nil %>
+
+  <div class="autoscroll">
+    <table class="list <%= sort_css_classes %>">
+      <thead>
+        <tr>
+          <th class="checkbox hide-when-print">
+            <%= link_to_function image_tag('toggle_check.png'), 'toggleIssuesSelection(this)' %>
+          </th>
+
+          <% query.inline_columns.each do |column| %>
+            <%= column_header(column) %>
+          <% end %>
+
+          <% if formatter.ending_buttons? %>
+            <th></th>
+          <% end %>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% entities.each do |entity| %>
+
+          <tr id="entity-<%= entity.id %>" class="hascontextmenu <%= cycle('odd', 'even') %>">
+            <td class="checkbox hide-when-print">
+              <%= check_box_tag('ids[]', entity.id, false, id: nil) %>
+            </td>
+
+            <% query.inline_columns.each do |column| %>
+              <td>
+                <%= formatter.content(column, entity) %>
+              </td>
+            <% end %>
+
+            <% if formatter.ending_buttons? %>
+              <td>
+                <%= formatter.ending_buttons(entity) %>
+              </td>
+            <% end %>
+          </tr>
+
+          <% query.block_columns.each do |column| %>
+            <% text = formatter.content(column, entity) %>
+            <% if text.present? %>
+              <tr class="<%= current_cycle %>">
+                <td colspan="<%= @query.inline_columns.size + (formatter.ending_buttons? ? 2 : 1) %>"><%= text %></td>
+              </tr>
+            <% end %>
+          <% end %>
+
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
