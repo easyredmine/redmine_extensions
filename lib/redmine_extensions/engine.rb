@@ -28,7 +28,7 @@ module RedmineExtensions
       RedmineExtensions::BasePresenter.register RedmineExtensions::EasyBaseQueryPresenter, 'EasyBaseQuery'
       # ApplicationController.send :include, RedmineExtensions::RailsPatches::ControllerQueryHelpers
       ::ApplicationController.send :include, RedmineExtensions::RenderingHelper
-      ::ApplicationController.send :include, RedmineExtensions::ApplicationController
+      ::ApplicationController.send :include, RedmineExtensions::RedminePatches::Controllers::ApplicationControllerPatch
     end
 
     initializer 'redmine_extensions.initialize' do |app|
