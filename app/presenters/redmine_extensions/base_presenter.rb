@@ -6,7 +6,8 @@ module RedmineExtensions
       @registered_presenters ||= {}
     end
 
-    def self.register(klass_name, *for_classes)
+    def self.register(klass, *for_classes)
+      klass_name = klass.name
       for_classes = [klass_name.sub(/Presenter$/, '')] unless for_classes.any?
       for_classes.each do |name|
         registered_presenters[name] = klass_name
@@ -40,8 +41,12 @@ module RedmineExtensions
       @model || self
     end
 
-    def h
+    def view
       @view
+    end
+
+    def h
+      view
     end
 
     protected

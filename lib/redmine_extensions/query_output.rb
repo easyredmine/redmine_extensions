@@ -4,8 +4,8 @@ module RedmineExtensions
     attr_accessor :query
     delegate :options, to: :query
 
-    def self.register_output(name, klass, options={})
-      registered_outputs[name] = klass
+    def self.register(klass, options={})
+      registered_outputs[klass.key] = klass
     end
 
     def self.registered_outputs
@@ -44,12 +44,16 @@ module RedmineExtensions
       raise NotImplemented
     end
 
+    def self.key
+      self.name.split('::').last.sub(/Output$/, '').underscore
+    end
+
     def key
-      self.class.name.split('::').last.sub(/Output$/, '').underscore
+      self.class.key
     end
 
     def label
-      h.l('label_easy_query_output.'+key)
+      view.l('label_easy_query_output.'+key)
     end
 
     def enabled?
@@ -62,8 +66,13 @@ module RedmineExtensions
 
     def header
       content = options["#{key}_header".to_sym]
-      h.content_tag(:h3, content.html_safe) unless content.blank?
+      view.content_tag(:h3, content.html_safe) unless content.blank?
     end
+
+    def render_data
+      view.render partial: "easy_queries/outputs/#{key}", locals: variables
+    end
+
 
     def render_edit_box(style=:check_box, options={})
       raise 'Style of edit box is not allowed' unless [:check_box, :radio_button].include?(style)
@@ -72,15 +81,15 @@ module RedmineExtensions
 
       options[:class] ||= "#{options[:modul_uniq_id]}content_switch"
       r = ''
-      r << h.send("#{style}_tag" , "#{options[:block_name]}[output]", key, enabled?, id: box_id, class: options[:class])
-      r << h.label_tag(box_id, h.l('label_easy_query_output.' + key), :class => 'inline')
+      r << view.send("#{style}_tag" , "#{options[:block_name]}[output]", key, enabled?, id: box_id, class: options[:class])
+      r << view.label_tag(box_id, view.l('label_easy_query_output.' + key), :class => 'inline')
       r
     end
 
     def render_edit
-      h.content_tag(:fieldset, class: "easy-query-filters-field #{key}_settings", style: ('display: none;' unless enabled? )) do
-        h.content_tag(:legend, label) +
-        h.render(self.edit_form, query: query, modul_uniq_id: query.modul_uniq_id, action: 'edit')
+      view.content_tag(:fieldset, class: "easy-query-filters-field #{key}_settings", style: ('display: none;' unless enabled? )) do
+        view.content_tag(:legend, label) +
+        view.render(self.edit_form, query: query, modul_uniq_id: query.modul_uniq_id, action: 'edit')
       end
     end
 
@@ -88,11 +97,56 @@ module RedmineExtensions
       'easy_queries/form_'+key+'_settings'
     end
 
-    def h
-      @query.h
+    def view
+      @query.view
     end
 
   end
+
+  # ----- OUTPUTS HELPER CLASS ----
+  class Outputs
+    include Enumerable
+
+    def initialize(presenter)
+      @presenter = presenter
+      @query = presenter.model
+      @query.outputs = ['table'] unless @query.outputs.any?
+      @outputs = @query.outputs.map{|o| RedmineExtensions::QueryOutput.output_klass_for(o).new(presenter) }
+    end
+
+    def each(&block)
+      @outputs.each{|o| yield(o) }
+    end
+
+    def available_outputs
+      RedmineExtensions::QueryOutput.available_outputs_for( @query )
+    end
+
+    def available_output_instances
+      @available_outputs ||= RedmineExtensions::QueryOutput.available_output_klasses_for( @query ).map{|klass| klass.new(@presenter) }
+    end
+
+    def output_enabled?(output)
+      @query.outputs.include?(output.to_s)
+    end
+
+    def render_edit_selects(style=:check_box, options={})
+      available_output_instances.map{|o| o.render_edit_box(style, options) }.join('').html_safe
+    end
+
+    def render_edit
+      @outputs.map{ |output| output.render_edit }.join('').html_safe
+    end
+
+    def method_missing(name, *args)
+      if name.to_s.ends_with?('?')
+        output_enabled?(name.to_s[0..-2])
+      else
+        super
+      end
+    end
+  end
+
 end
 # alias for convinience
 EasyQueryOutput = RedmineExtensions::QueryOutput

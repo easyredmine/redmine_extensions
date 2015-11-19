@@ -24,8 +24,8 @@ module RedmineExtensions
 
     #config.to_prepare goes after Reloader.to_prepare
     ActionDispatch::Reloader.to_prepare do
-      RedmineExtensions::QueryOutput.register_output :table, RedmineExtensions::QueryOutputs::TableOutput
-      RedmineExtensions::BasePresenter.register 'RedmineExtensions::EasyQueryPresenter', 'EasyQuery'
+      RedmineExtensions::QueryOutput.register RedmineExtensions::QueryOutputs::TableOutput
+      RedmineExtensions::BasePresenter.register RedmineExtensions::EasyQueryPresenter, 'EasyQuery'
       # ApplicationController.send :include, RedmineExtensions::RailsPatches::ControllerQueryHelpers
       ApplicationController.send :include, RedmineExtensions::RenderingHelper
     end
