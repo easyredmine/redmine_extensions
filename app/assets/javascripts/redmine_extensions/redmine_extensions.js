@@ -203,8 +203,8 @@ REDMINE_EXTENSIONS = {
     };
 
     Group.prototype.createNextButton = function() {
-        this.next_link = $('<a>', {href: this.load_url}).text(this.loader.texts['next']).append($("<i>", {"class": "icon-arrow"}));
-        this.next_button = $('<tr/>', {'class': 'easy-next-button'}).html($('<td>', {colspan: this.loader.options.next_button_cols, "class": "infinite-scroll-load-next-page-trigger-container"}).html(this.next_link));
+        this.next_link = $('<a>', {href: this.load_url, 'class': 'button'}).text(this.loader.texts['next']).append($("<i>", {"class": "icon-arrow"}));
+        this.next_button = $('<tr/>', {'class': 'easy-next-button'}).html($('<td>', {colspan: this.loader.options.next_button_cols, "class": "text-center"}).html(this.next_link));
 
         var self = this;
 
