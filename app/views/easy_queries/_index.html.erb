@@ -4,7 +4,12 @@
   formatter ||= @query.formatter
 %>
 
-<%= render 'easy_queries/settings', query: query %>
-<%= render 'easy_queries/entities', query: query, entities: entities, formatter: formatter %>
+<% present(query, formatter: formatter) do |presenter| %>
+  <%= render 'easy_queries/settings', query: query %>
+
+  <% presenter.outputs.each do |output| %>
+    <%= output.render_data %>
+  <% end %>
+<% end %>
 
 <%= context_menu issues_context_menu_path %>

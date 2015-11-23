@@ -14,6 +14,7 @@ module RedmineExtensions
         module InstanceMethods
 
           def index_for_easy_query(query_klass, *)
+            self.class.send(:include, SortHelper) unless self.class.included_modules.include?(SortHelper)
             # if easy_extensions?
             #   return super
             # end

@@ -47,6 +47,10 @@ class EasyBaseQuery < Query
     @formatter ||= EasyQueryFormatter.new
   end
 
+  def outputs
+    ['table']
+  end
+
   def entity_scope
     if @entity_scope.present?
       @entity_scope

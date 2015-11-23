@@ -5,7 +5,7 @@ module RedmineExtensions
     delegate :options, to: :query
 
     def self.register(klass, options={})
-      registered_outputs[klass.key] = klass
+      registered_outputs[klass.key.to_sym] = klass
     end
 
     def self.registered_outputs
@@ -61,7 +61,7 @@ module RedmineExtensions
     end
 
     def variables
-      options.merge(easy_query: @query, output: self)
+      options.merge(query: @query, output: self, entities: @query.entities)
     end
 
     def header
@@ -101,50 +101,50 @@ module RedmineExtensions
       @query.view
     end
 
-  end
+    # ----- OUTPUTS HELPER CLASS ----
+    class Outputs
+      include Enumerable
 
-  # ----- OUTPUTS HELPER CLASS ----
-  class Outputs
-    include Enumerable
+      def initialize(presenter)
+        @presenter = presenter
+        @query = presenter.model
+        @query.outputs = ['table'] unless @query.outputs.any?
+        @outputs = @query.outputs.map{|o| RedmineExtensions::QueryOutput.output_klass_for(o).new(presenter) }
+      end
 
-    def initialize(presenter)
-      @presenter = presenter
-      @query = presenter.model
-      @query.outputs = ['table'] unless @query.outputs.any?
-      @outputs = @query.outputs.map{|o| RedmineExtensions::QueryOutput.output_klass_for(o).new(presenter) }
-    end
+      def each(&block)
+        @outputs.each{|o| yield(o) }
+      end
 
-    def each(&block)
-      @outputs.each{|o| yield(o) }
-    end
+      def available_outputs
+        RedmineExtensions::QueryOutput.available_outputs_for( @query )
+      end
 
-    def available_outputs
-      RedmineExtensions::QueryOutput.available_outputs_for( @query )
-    end
+      def available_output_instances
+        @available_outputs ||= RedmineExtensions::QueryOutput.available_output_klasses_for( @query ).map{|klass| klass.new(@presenter) }
+      end
 
-    def available_output_instances
-      @available_outputs ||= RedmineExtensions::QueryOutput.available_output_klasses_for( @query ).map{|klass| klass.new(@presenter) }
-    end
+      def output_enabled?(output)
+        @query.outputs.include?(output.to_s)
+      end
 
-    def output_enabled?(output)
-      @query.outputs.include?(output.to_s)
-    end
+      def render_edit_selects(style=:check_box, options={})
+        available_output_instances.map{|o| o.render_edit_box(style, options) }.join('').html_safe
+      end
 
-    def render_edit_selects(style=:check_box, options={})
-      available_output_instances.map{|o| o.render_edit_box(style, options) }.join('').html_safe
-    end
+      def render_edit
+        @outputs.map{ |output| output.render_edit }.join('').html_safe
+      end
 
-    def render_edit
-      @outputs.map{ |output| output.render_edit }.join('').html_safe
-    end
-
-    def method_missing(name, *args)
-      if name.to_s.ends_with?('?')
-        output_enabled?(name.to_s[0..-2])
-      else
-        super
+      def method_missing(name, *args)
+        if name.to_s.ends_with?('?')
+          output_enabled?(name.to_s[0..-2])
+        else
+          super
+        end
       end
     end
+
   end
 
 end
