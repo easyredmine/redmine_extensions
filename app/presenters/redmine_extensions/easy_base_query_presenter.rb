@@ -9,5 +9,18 @@ module RedmineExtensions
       @outputs ||= RedmineExtensions::QueryOutput::Outputs.new(self)
     end
 
+    # --- formating ----
+
+    def format_value(column, entity)
+      column.value(entity).to_s
+    end
+
+
+    # --- helpers -----
+
+    def ending_buttons?
+      false
+    end
+
   end
 end

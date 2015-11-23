@@ -13,7 +13,7 @@
             <%= column_header(column) %>
           <% end %>
 
-          <% if formatter.ending_buttons? %>
+          <% if query.ending_buttons? %>
             <th></th>
           <% end %>
         </tr>
@@ -29,22 +29,22 @@
 
             <% query.inline_columns.each do |column| %>
               <td>
-                <%= formatter.content(column, entity) %>
+                <%= query.format_value(column, entity) %>
               </td>
             <% end %>
 
-            <% if formatter.ending_buttons? %>
+            <% if query.ending_buttons? %>
               <td>
-                <%= formatter.ending_buttons(entity) %>
+                <%= query.ending_buttons(entity) %>
               </td>
             <% end %>
           </tr>
 
           <% query.block_columns.each do |column| %>
-            <% text = formatter.content(column, entity) %>
+            <% text = query.content(column, entity) %>
             <% if text.present? %>
               <tr class="<%= current_cycle %>">
-                <td colspan="<%= @query.inline_columns.size + (formatter.ending_buttons? ? 2 : 1) %>"><%= text %></td>
+                <td colspan="<%= @query.inline_columns.size + (query.ending_buttons? ? 2 : 1) %>"><%= text %></td>
               </tr>
             <% end %>
           <% end %>
