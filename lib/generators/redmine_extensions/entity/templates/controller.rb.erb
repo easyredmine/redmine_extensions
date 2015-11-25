@@ -1,0 +1,155 @@
+class <%= controller_class %>Controller < ApplicationController
+
+  menu_item :<%= plugin_name_underscored %>
+
+  before_filter :find_<%= model_name_underscored %>, :only => [:show, :edit, :update]
+  before_filter :find_<%= model_name_pluralize_underscored %>, :only => [:context_menu, :bulk_edit, :bulk_update, :destroy]
+  before_filter :find_project
+  before_filter :authorize_global
+
+  helper :<%= model_name_pluralize_underscored %>
+  helper :custom_fields
+  helper :attachments
+  helper :sort
+  include SortHelper
+
+  accept_api_auth :index, :show, :create, :update, :destroy
+
+  def index
+    @<%= model_name_pluralize_underscored %> = <%= model_name %>.all
+
+    respond_to do |format|
+      format.html
+      format.api
+    end
+  end
+
+  def show
+    respond_to do |format|
+      format.html
+      format.api
+    end
+  end
+
+  def new
+    @<%= model_name_underscored %> = <%= model_name %>.new
+    <%- if project? -%>
+    @<%= model_name_underscored %>.project = @project
+    <%- end -%>
+    @<%= model_name_underscored %>.safe_attributes = params[:<%= model_name_underscored %>]
+
+    respond_to do |format|
+      format.html
+    end
+  end
+
+  def create
+    @<%= model_name_underscored %> = <%= model_name %>.new
+    <%- if project? -%>
+    @<%= model_name_underscored %>.project = @project
+    <%- end -%>
+    @<%= model_name_underscored %>.safe_attributes = params[:<%= model_name_underscored %>]
+
+    if @<%= model_name_underscored %>.save
+      respond_to do |format|
+        format.html {
+          flash[:notice] = l(:notice_successful_create)
+          redirect_back_or_default <%= model_name_pluralize_underscored %>_path(@<%= model_name_underscored %>)
+        }
+        format.api { render :action => 'show', :status => :created, :location => <%= model_name_underscored %>_url(@<%= model_name_underscored %>) }
+      end
+    else
+      respond_to do |format|
+        format.html { render :action => 'new' }
+        format.api { render_validation_errors(@<%= model_name_underscored %>) }
+      end
+    end
+  end
+
+  def edit
+    @<%= model_name_underscored %>.safe_attributes = params[:<%= model_name_underscored %>]
+
+    respond_to do |format|
+      format.html
+    end
+  end
+
+  def update
+    @<%= model_name_underscored %>.safe_attributes = params[:<%= model_name_underscored %>]
+
+    if @<%= model_name_underscored %>.save
+      flash[:notice] = l(:notice_successful_update)
+
+      respond_to do |format|
+        format.html { redirect_back_or_default <%= model_name_pluralize_underscored %>_path(@<%= model_name_underscored %>) }
+        format.api { render_api_ok }
+      end
+    else
+      respond_to do |format|
+        format.html { render :action => 'edit' }
+        format.api { render_validation_errors(@<%= model_name_underscored %>) }
+      end
+    end
+  end
+
+  def destroy
+    @<%= model_name_pluralize_underscored %>.each do |<%= model_name_underscored %>|
+      <%= model_name_underscored %>.destroy
+    end
+
+    flash[:notice] = l(:notice_successful_delete)
+
+    respond_to do |format|
+      format.html { redirect_back_or_default <%= model_name_pluralize_underscored %>_path }
+      format.api { render_api_ok }
+    end
+  end
+
+  def bulk_edit
+  end
+
+  def bulk_update
+  end
+
+  def context_menu
+    if (@<%= model_name_pluralize_underscored %>.size == 1)
+      @<%= model_name_underscored %> = @<%= model_name_pluralize_underscored %>.first
+    end
+    @<%= model_name_underscored %>_ids = @<%= model_name_pluralize_underscored %>.map(&:id).sort
+
+    can_edit = @<%= model_name_pluralize_underscored %>.detect{|c| !c.editable?}.nil?
+    can_delete = @<%= model_name_pluralize_underscored %>.detect{|c| !c.deletable?}.nil?
+    @can = {:edit => can_edit, :delete => can_delete}
+    @back = back_url
+
+    @safe_attributes = @<%= model_name_pluralize_underscored %>.map(&:safe_attribute_names).reduce(:&)
+
+    render :layout => false
+  end
+
+  private
+
+  def find_<%= model_name_underscored %>
+    @<%= model_name_underscored %> = <%= model_name %>.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render_404
+  end
+
+  def find_<%= model_name_pluralize_underscored %>
+    @<%= model_name_pluralize_underscored %> = <%= model_name %>.visible.where(:id => (params[:id] || params[:ids])).to_a
+    raise ActiveRecord::RecordNotFound if @<%= model_name_pluralize_underscored %>.empty?
+    raise Unauthorized unless @<%= model_name_pluralize_underscored %>.all?(&:visible?)
+    @projects = @<%= model_name_pluralize_underscored %>.collect(&:project).compact.uniq
+    @project = @projects.first if @projects.size == 1
+  rescue ActiveRecord::RecordNotFound
+    render_404
+  end
+
+  def find_project
+    @project ||= @<%= model_name_underscored %>.project if !@<%= model_name_underscored %>.nil?
+    @project ||= Project.find(params[:project_id]) if !params[:project_id].blank?
+  rescue ActiveRecord::RecordNotFound
+    render_404
+  end
+
+end

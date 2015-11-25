@@ -107,7 +107,7 @@ class EasySetting < ActiveRecord::Base
     today = date || Date.today
     fy = get_beginning_of_fiscal_for_year(today.year)
 
-    if fy < today
+    if fy <= today
       fy
     else
       fy - 1.year

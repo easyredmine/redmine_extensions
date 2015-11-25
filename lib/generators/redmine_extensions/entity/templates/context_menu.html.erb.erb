@@ -1,0 +1,8 @@
+<ul>
+<%% if @<%= model_name_underscored %> -%>
+  <li><%%= context_menu_link l(:button_edit), edit_<%= model_name_underscored %>_path(@<%= model_name_underscored %>), class: 'icon icon-edit', disabled: !@can[:edit] %></li>
+<%% end %>
+  <li><%%= context_menu_link l(:button_delete), <%= model_name_pluralize_underscored %>_path(ids: @<%= model_name_underscored %>_ids, back_url: @back), method: :delete, data: {confirm: l(:text_are_you_sure)}, class: 'icon icon-del', disabled: !@can[:delete] %></li>
+
+  <%%= call_hook(:view_<%= model_name_pluralize_underscored %>_context_menu_end, {<%= model_name_underscored %>: @<%= model_name_underscored %>, <%= model_name_pluralize_underscored %>: @<%= model_name_pluralize_underscored %>, can: @can, back: @back, project: @project}) %>
+</ul>

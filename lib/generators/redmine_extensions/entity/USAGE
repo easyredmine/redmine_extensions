@@ -3,9 +3,9 @@ Description:
     Plugin is prepared for use in Redmine and Easy Redmine as well.
 
 Example:
-    bundle exec rails generate redmine_extensions_rest NameOfNewPlugin EasyContact
+    rails g redmine_extensions:entity NameOfNewPlugin Post
       create  plugins/name_of_new_plugin/app/controllers
       ...
 
 Help:
-        bundle exec rails generate redmine_extensions_rest --help
+        rails g entity --help
