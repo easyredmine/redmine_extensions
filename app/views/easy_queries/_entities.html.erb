@@ -1,3 +1,7 @@
+<%
+  formatter = query.init_formatter(self)
+%>
+
 <%= form_tag({}) do %>
   <%= hidden_field_tag 'back_url', url_for(params), id: nil %>
 
@@ -29,7 +33,7 @@
 
             <% query.inline_columns.each do |column| %>
               <td>
-                <%= formatter.content(column, entity) %>
+                <%= formatter.format(column, entity) %>
               </td>
             <% end %>
 
@@ -41,7 +45,7 @@
           </tr>
 
           <% query.block_columns.each do |column| %>
-            <% text = formatter.content(column, entity) %>
+            <% text = formatter.format(column, entity) %>
             <% if text.present? %>
               <tr class="<%= current_cycle %>">
                 <td colspan="<%= @query.inline_columns.size + (formatter.ending_buttons? ? 2 : 1) %>"><%= text %></td>

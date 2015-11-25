@@ -1,5 +1,5 @@
 module RedmineExtensions
-  module ApplicationController
+  module ApplicationControllerPatch
 
     def self.included(base)
       base.extend(ClassMethods)
@@ -12,10 +12,6 @@ module RedmineExtensions
     module InstanceMethods
 
       def index_for_easy_query(query_klass, *)
-        # if easy_extensions?
-        #   return super
-        # end
-
         @query = query_klass.new(name: '_')
         @query.project = @project
         @query.build_from_params(params)
@@ -55,3 +51,5 @@ module RedmineExtensions
 
   end
 end
+
+RedmineExtensions::PatchManager.register_controller_patch 'ApplicationController', 'RedmineExtensions::ApplicationControllerPatch'
