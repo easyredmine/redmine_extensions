@@ -1,7 +1,6 @@
 <%
   query ||= @query
   entities ||= @entities
-  formatter ||= @query.formatter
 %>
 
 <% present(query, formatter: formatter) do |presenter| %>

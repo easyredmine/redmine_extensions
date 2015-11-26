@@ -69,7 +69,8 @@ module RedmineExtensions
         ActiveSupport.run_load_hooks(:easyproject, self)
       end
 
-      EasyBaseQuery
+      require 'redmine_extensions/easy_query_adapter'
+      require 'redmine_extensions/easy_entity_formatters/easy_entity_formatter'
     end
 
     # initializer :add_html_formatting do |app|

@@ -41,7 +41,7 @@
           </tr>
 
           <% query.block_columns.each do |column| %>
-            <% text = query.content(column, entity) %>
+            <% text = formatter.format(column, entity) %>
             <% if text.present? %>
               <tr class="<%= current_cycle %>">
                 <td colspan="<%= @query.inline_columns.size + (query.ending_buttons? ? 2 : 1) %>"><%= text %></td>
