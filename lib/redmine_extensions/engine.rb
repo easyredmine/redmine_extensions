@@ -25,7 +25,7 @@ module RedmineExtensions
     #config.to_prepare goes after Reloader.to_prepare
     ActionDispatch::Reloader.to_prepare do
       RedmineExtensions::QueryOutput.register_output :table, RedmineExtensions::QueryOutputs::TableOutput
-      RedmineExtensions::BasePresenter.register 'RedmineExtensions::EasyQueryPresenter', 'EasyQuery'
+      # RedmineExtensions::BasePresenter.register 'RedmineExtensions::EasyQueryPresenter', 'EasyQuery'
       # ApplicationController.send :include, RedmineExtensions::RailsPatches::ControllerQueryHelpers
       ApplicationController.send :include, RedmineExtensions::RenderingHelper
     end
@@ -67,6 +67,9 @@ module RedmineExtensions
       unless Redmine::Plugin.installed?(:easy_extensions)
         ActiveSupport.run_load_hooks(:easyproject, self)
       end
+
+      require 'redmine_extensions/easy_query_adapter'
+      require 'redmine_extensions/easy_entity_formatters/easy_entity_formatter'
     end
 
     # initializer :add_html_formatting do |app|
