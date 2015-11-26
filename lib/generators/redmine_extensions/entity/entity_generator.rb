@@ -38,6 +38,7 @@ module RedmineExtensions
 
     def copy_templates
       template '_form.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/_form.html.erb"
+      template '_view_custom_fields_form_custom_field.html.erb.erb', "#{plugin_path}/app/views/custom_fields/_view_custom_fields_form_#{model_name_underscored}_custom_field.html.erb"
       template 'context_menu.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/context_menu.html.erb"
       template 'controller.rb.erb', "#{plugin_path}/app/controllers/#{model_name_pluralize_underscored}_controller.rb"
       template('custom_field.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_custom_field.rb") if acts_as_customizable?
@@ -59,6 +60,7 @@ module RedmineExtensions
       end
 
       template 'helper.rb.erb', "#{plugin_path}/app/helpers/#{model_name_pluralize_underscored}_helper.rb"
+      template 'hooks.rb.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/#{model_name_underscored}_hooks.rb"
       template 'index.api.rsb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.api.rsb"
       template 'index.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.html.erb"
       template 'migration.rb.erb', "#{plugin_path}/db/migrate/#{Time.now.strftime('%Y%m%d%H%M%S')}_create_#{@model_name_pluralize_underscored}.rb"
@@ -89,7 +91,8 @@ module RedmineExtensions
 
       if File.exists?("#{plugin_path}/init.rb")
         append_to_file "#{plugin_path}/init.rb" do
-          "\nRedmine::AccessControl.map do |map|" +
+          "\nrequire '#{plugin_name_underscored}/#{model_name_underscored}_hooks'" +
+            "\nRedmine::AccessControl.map do |map|" +
             "\n  map.project_module :#{model_name_pluralize_underscored} do |pmap|" +
             "\n    pmap.permission :view_#{model_name_pluralize_underscored}, { :#{model_name_pluralize_underscored} => [:index, :show] }, read: true" +
             "\n    pmap.permission :manage_#{model_name_pluralize_underscored}, { :#{model_name_pluralize_underscored} => [:new, :create, :edit, :update, :destroy, :bulk_edit, :bulk_update, :context_menu] }" +
@@ -100,7 +103,12 @@ module RedmineExtensions
             "\nend\n" +
             "\nRedmine::MenuManager.map :project_menu do |menu|" +
             "\n  menu.push :#{model_name_pluralize_underscored}, { :controller => '#{model_name_pluralize_underscored}', :action => 'index' }, param: :project_id, caption: :label_#{model_name_pluralize_underscored}" +
-            "\nend"
+            "\nend\n"
+        end
+        if acts_as_customizable?
+          append_to_file "#{plugin_path}/init.rb" do
+            "\nCustomFieldsHelper::CUSTOM_FIELDS_TABS << {:name => '#{model_name}CustomField', :partial => 'custom_fields/index', :label => :label_#{model_name_pluralize_underscored}}"
+          end
         end
       end
 
