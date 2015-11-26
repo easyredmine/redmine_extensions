@@ -29,7 +29,7 @@
 
             <% query.inline_columns.each do |column| %>
               <td>
-                <%= query.format_value(column, entity) %>
+                <%= query.formatter.format(column, entity) %>
               </td>
             <% end %>
 
@@ -41,7 +41,7 @@
           </tr>
 
           <% query.block_columns.each do |column| %>
-            <% text = formatter.format(column, entity) %>
+            <% text = query.formatter.format(column, entity) %>
             <% if text.present? %>
               <tr class="<%= current_cycle %>">
                 <td colspan="<%= @query.inline_columns.size + (query.ending_buttons? ? 2 : 1) %>"><%= text %></td>

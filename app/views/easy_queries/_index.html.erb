@@ -3,7 +3,7 @@
   entities ||= @entities
 %>
 
-<% present(query, formatter: formatter) do |presenter| %>
+<% present(query) do |presenter| %>
   <%= render 'easy_queries/settings', query: query %>
 
   <% presenter.outputs.each do |output| %>

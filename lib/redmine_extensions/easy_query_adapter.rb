@@ -43,22 +43,8 @@ class EasyQueryAdapter < Query
     [].freeze
   end
 
-  def formatter
-    @formatter
-  end
-
-  def init_formatter(object)
-    return @formatter if @formatter
-
-    if entity
-      begin
-        formatter_klass = "#{entity}Formatter".constantize
-      rescue NameError
-      end
-    end
-
-    formatter_klass ||= EasyEntityFormatter
-    @formatter = formatter_klass.new(object)
+  def outputs
+    ['table']
   end
 
   def entity_scope

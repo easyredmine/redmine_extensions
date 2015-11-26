@@ -1,5 +1,5 @@
 module RedmineExtensions
-  class EasyBaseQueryPresenter < BasePresenter
+  class EasyQueryAdapterPresenter < BasePresenter
 
     def entities
       view.instance_variable_get(:@entities)
@@ -11,8 +11,12 @@ module RedmineExtensions
 
     # --- formating ----
 
+    def formatter
+      @formatter ||= ("#{self.model.entity}Formatter".constantize rescue RedmineExtensions::EasyEntityFormatters::EasyEntityFormatter).new(view)
+    end
+
     def format_value(column, entity)
-      column.value(entity).to_s
+      formatter.format(column, entity)
     end
 
 

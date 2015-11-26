@@ -1,5 +1,4 @@
 require 'redmine_extensions/patch_manager'
-require 'redmine_extensions/redmine_patches/patches'
 
 module RedmineExtensions
   class Engine < ::Rails::Engine
@@ -25,10 +24,9 @@ module RedmineExtensions
     #config.to_prepare goes after Reloader.to_prepare
     ActionDispatch::Reloader.to_prepare do
       RedmineExtensions::QueryOutput.register RedmineExtensions::QueryOutputs::TableOutput
-      RedmineExtensions::BasePresenter.register RedmineExtensions::EasyBaseQueryPresenter, 'EasyBaseQuery'
+      RedmineExtensions::BasePresenter.register RedmineExtensions::EasyQueryAdapterPresenter, 'EasyQueryAdapter'
       # ApplicationController.send :include, RedmineExtensions::RailsPatches::ControllerQueryHelpers
       ::ApplicationController.send :include, RedmineExtensions::RenderingHelper
-      ::ApplicationController.send :include, RedmineExtensions::RedminePatches::Controllers::ApplicationControllerPatch
     end
 
     initializer 'redmine_extensions.initialize' do |app|
@@ -59,6 +57,7 @@ module RedmineExtensions
       ActiveSupport.on_load(:active_record) do
         include RedmineExtensions::RailsPatches::ActiveRecord
       end
+      require 'redmine_extensions/redmine_patches/patches'
     end
 
     initializer 'redmine_extensions.initialize_easy_plugins', after: :load_config_initializers do
@@ -70,7 +69,6 @@ module RedmineExtensions
       end
 
       require 'redmine_extensions/easy_query_adapter'
-      require 'redmine_extensions/easy_entity_formatters/easy_entity_formatter'
     end
 
     # initializer :add_html_formatting do |app|
