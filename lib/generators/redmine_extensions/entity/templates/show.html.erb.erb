@@ -1,1 +1,18 @@
-<%%= title(@<%= model_name_underscored %>.caption %>
+<%%= title @<%= model_name_underscored %>.caption %>
+<table class="attributes">
+  <%%= issue_fields_rows do |rows| %>
+  <%- form_columns.each_with_index do |column, idx| -%>
+    <%- if idx % 2 == 0 -%>
+    <%% rows.left <%= model_name %>.human_attribute_name(:<%= column[0] %>), format_object(@<%= model_name_underscored %>.<%= column[0] %>) %>
+    <%- else -%>
+    <%% rows.right <%= model_name %>.human_attribute_name(:<%= column[0] %>), format_object(@<%= model_name_underscored %>.<%= column[0] %>) %>
+    <%- end -%>
+  <%- end -%>
+  <%% end %>
+  <%%= render_custom_fields_rows(@<%= model_name_underscored %>) %>
+  <%%= call_hook(:view_<%= model_name_pluralize_underscored %>_show_details_bottom, :<%= model_name_underscored %> => @<%= model_name_underscored %>) %>
+</table>
+<%% ### PAGE CUSTOMS ########################################################## %>
+<%% content_for :sidebar do %>
+    <%%= link_to l(:button_edit), edit_polymorphic_path([@project, :<%= model_name_underscored %>]), title: l(:button_edit) %>
+<%% end %>

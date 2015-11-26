@@ -8,4 +8,4 @@ Example:
       ...
 
 Help:
-        rails g entity --help
+    rails g redmine_extensions:entity --help

@@ -5,7 +5,7 @@ class <%= model_name %> < ActiveRecord::Base
   <%= 'belongs_to :author, class_name: \'User\', foreign_key: \'author_id\'' if author? %>
 
   scope :visible, lambda { |*args|
-    where(<%= model_name %>.visible_condition(args.shift || User.current, *args)<%= '.joins(:project)' if project? %>)
+    where(<%= model_name %>.visible_condition(args.shift || User.current, *args))<%= '.joins(:project)' if project? %>
   }
   <% if name_column? %>
   scope :sorted, lambda { order("#{table_name}.<%= name_column %> ASC") }
@@ -43,6 +43,9 @@ class <%= model_name %> < ActiveRecord::Base
   <%- end -%>
   <%- if acts_as_customizable? -%>
   safe_attributes 'custom_field_values', 'custom_fields'
+  <%- end -%>
+  <%- if project? -%>
+  safe_attributes 'project_id', :if => lambda {|<%= model_name_underscored %>, user| <%= model_name_underscored %>.new_record? }
   <%- end -%>
 
   def self.visible_condition(user, options={})
@@ -93,6 +96,10 @@ class <%= model_name %> < ActiveRecord::Base
   <%- if name_column? -%>
   def to_s
     <%= name_column %>.to_s
+  end
+  <%- elsif string_columns.size > 0 -%>
+  def to_s
+    <%= string_columns.first %>.to_s
   end
   <%- end -%>
 

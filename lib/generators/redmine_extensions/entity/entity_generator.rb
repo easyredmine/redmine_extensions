@@ -46,9 +46,13 @@ module RedmineExtensions
       if File.exists?("#{plugin_path}/config/locales/en.yml")
         append_to_file "#{plugin_path}/config/locales/en.yml" do
           "\n  heading_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
-              "\n  heading_#{model_name_underscored}_edit: Edit #{model_name_underscored.titleize}" +
-              "\n  label_#{model_name_pluralize_underscored}: #{@model_name_pluralize_underscored.titleize}" +
-              "\n  label_#{model_name_underscored}: #{model_name_underscored.titleize}"
+            "\n  heading_#{model_name_underscored}_edit: Edit #{model_name_underscored.titleize}" +
+            "\n  button_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
+            "\n  label_#{model_name_pluralize_underscored}: #{@model_name_pluralize_underscored.titleize}" +
+            "\n  label_#{model_name_underscored}: #{model_name_underscored.titleize}" +
+            "\n  permission_view_#{model_name_pluralize_underscored}: View #{model_name_pluralize_underscored.titleize}" +
+            "\n  permission_manage_#{model_name_pluralize_underscored}: Manage #{model_name_pluralize_underscored.titleize}" +
+            "\n  title_#{model_name_underscored}_new: Click to create new #{model_name_underscored.titleize}"
         end
       else
         template 'en.yml.erb', "#{plugin_path}/config/locales/en.yml"
@@ -60,20 +64,46 @@ module RedmineExtensions
       template 'migration.rb.erb', "#{plugin_path}/db/migrate/#{Time.now.strftime('%Y%m%d%H%M%S')}_create_#{@model_name_pluralize_underscored}.rb"
       template 'model.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}.rb"
       template 'new.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.html.erb"
+      template 'query.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_query.rb"
 
       if File.exists?("#{plugin_path}/config/routes.rb")
+        if project?
+          append_to_file "#{plugin_path}/config/routes.rb" do
+            "\nresources :projects do " +
+              "\n  resources :#{model_name_pluralize_underscored}" +
+              "\nend\n"
+          end
+        end
         append_to_file "#{plugin_path}/config/routes.rb" do
-          "\nresources :#{model_name_pluralize_underscored} do " +
-              "\n  collection do " +
-              "\n    get 'bulk_edit'" +
-              "\n    post 'bulk_update'" +
-              "\n    get 'context_menu'" +
-              "\n  end " +
-              "\nend"
+          "\nresources :#{model_name_pluralize_underscored} do" +
+            "\n  collection do " +
+            "\n    get 'bulk_edit'" +
+            "\n    post 'bulk_update'" +
+            "\n    get 'context_menu'" +
+            "\n  end" +
+            "\nend"
         end
       else
         template 'routes.rb.erb', "#{plugin_path}/config/routes.rb"
       end
+
+      if File.exists?("#{plugin_path}/init.rb")
+        append_to_file "#{plugin_path}/init.rb" do
+          "\nRedmine::AccessControl.map do |map|" +
+            "\n  map.project_module :#{model_name_pluralize_underscored} do |pmap|" +
+            "\n    pmap.permission :view_#{model_name_pluralize_underscored}, { :#{model_name_pluralize_underscored} => [:index, :show] }, read: true" +
+            "\n    pmap.permission :manage_#{model_name_pluralize_underscored}, { :#{model_name_pluralize_underscored} => [:new, :create, :edit, :update, :destroy, :bulk_edit, :bulk_update, :context_menu] }" +
+            "\n  end " +
+            "\nend\n" +
+            "\nRedmine::MenuManager.map :top_menu do |menu|" +
+            "\n  menu.push :#{model_name_pluralize_underscored}, { :controller => '#{model_name_pluralize_underscored}', :action => 'index' }, caption: :label_#{model_name_pluralize_underscored}" +
+            "\nend\n" +
+            "\nRedmine::MenuManager.map :project_menu do |menu|" +
+            "\n  menu.push :#{model_name_pluralize_underscored}, { :controller => '#{model_name_pluralize_underscored}', :action => 'index' }, param: :project_id, caption: :label_#{model_name_pluralize_underscored}" +
+            "\nend"
+        end
+      end
+
 
       template 'show.api.rsb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/show.api.rsb"
       template 'show.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/show.html.erb"
@@ -130,27 +160,17 @@ module RedmineExtensions
 
       attributes.each do |attr|
         attr_name, attr_type, attr_idx = attr.split(':')
-        @db_columns[attr_name] = {type: attr_type || 'string', idx: attr_idx, safe: true}
+        @db_columns[attr_name] = {type: attr_type || 'string', idx: attr_idx, null: true, safe: true, query_type: attr_type || 'string'}
       end
 
-      @db_columns['project_id'] = {type: 'integer', idx: nil, safe: false} if project? && !@db_columns.key?('project_id')
-      @db_columns['author_id'] = {type: 'integer', idx: nil, safe: true} if author? && !@db_columns.key?('author_id')
-      @db_columns['timestamps'] = {}
+      @db_columns['project_id'] = {type: 'integer', idx: nil, null: false, safe: false, class: 'Project', list_class_name: 'name', query_type: 'list_optional', query_column_name: 'project'} if project? && !@db_columns.key?('project_id')
+      @db_columns['author_id'] = {type: 'integer', idx: nil, null: false, safe: true, class: 'User', list_class_name: 'name', query_type: 'list', query_column_name: 'author'} if author? && !@db_columns.key?('author_id')
+      @db_columns['created_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date'}
+      @db_columns['updated_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date'}
     end
 
     def safe_columns
       @db_columns.select { |_, column_options| column_options[:safe] }.collect { |column_name, _| column_name }
-    end
-
-    def all_columns
-      @all_columns = @db_columns.keys
-
-      if @all_columns.delete('timestamps')
-        @all_columns << 'created_at'
-        @all_columns << 'updated_at'
-      end
-
-      @all_columns
     end
 
     def string_columns
@@ -158,16 +178,7 @@ module RedmineExtensions
     end
 
     def form_columns
-      @db_columns.select{ |_, column_options| column_options[:safe] }
-    end
-
-    def print_column_migration(column_name, column_attrs)
-      case column_name
-        when 'timestamps'
-          't.timestamps null: false'
-        else
-          "t.#{column_attrs[:type]} :#{column_name}"
-      end
+      @db_columns.select { |_, column_options| column_options[:safe] }
     end
 
     def name_column?

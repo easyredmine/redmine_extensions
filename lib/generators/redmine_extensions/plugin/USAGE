@@ -8,4 +8,4 @@ Example:
       ...
 
 Help:
-        bundle exec rails generate redmine_extensions_plugin --help
+     rails g redmine_extensions:plugin --help

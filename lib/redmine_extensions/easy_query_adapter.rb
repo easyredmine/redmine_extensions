@@ -1,3 +1,5 @@
+require 'query'
+
 module RedmineExtensions
   module QueryColumnAdapter
     def self.included(base)
@@ -114,6 +116,7 @@ class EasyQueryAdapter < Query
 
   def add_available_column(name, options={})
     @available_columns ||= []
+
     @available_columns << QueryColumn.new(name.to_sym, options)
   end
 

@@ -1,1 +1,1 @@
-gem 'redmine_extensions'
+gem 'redmine_extensions', '~> 0.0.12'

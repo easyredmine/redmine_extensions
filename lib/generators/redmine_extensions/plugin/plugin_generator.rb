@@ -40,7 +40,7 @@ module RedmineExtensions
       template '.gitkeep', "#{plugin_path}/assets/javascripts/.gitkeep"
       template '.gitkeep', "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/others/.gitkeep"
 
-      template 'Gemfile', "#{plugin_path}/Gemfile"
+      #template 'Gemfile', "#{plugin_path}/Gemfile"
       template 'init.rb.erb', "#{plugin_path}/init.rb"
       template 'en.yml', "#{plugin_path}/config/locales/en.yml"
       template 'routes.rb.erb', "#{plugin_path}/config/routes.rb"
@@ -50,6 +50,8 @@ module RedmineExtensions
       template 'issues_controller_patch.example.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/controllers/issues_controller_patch.example"
       template 'issues_helper_patch.example.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/helpers/issues_helper_patch.example"
     end
+
+    hook_for :entity, as: :entity, in: :redmine_extensions, type: :boolean
 
   end
 end

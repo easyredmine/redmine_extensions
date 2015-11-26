@@ -1,6 +1,6 @@
 class <%= controller_class %>Controller < ApplicationController
 
-  menu_item :<%= plugin_name_underscored %>
+  menu_item :<%= model_name_pluralize_underscored %>
 
   before_filter :find_<%= model_name_underscored %>, :only => [:show, :edit, :update]
   before_filter :find_<%= model_name_pluralize_underscored %>, :only => [:context_menu, :bulk_edit, :bulk_update, :destroy]
@@ -10,18 +10,13 @@ class <%= controller_class %>Controller < ApplicationController
   helper :<%= model_name_pluralize_underscored %>
   helper :custom_fields
   helper :attachments
-  helper :sort
-  include SortHelper
+  helper :issues
+  include_query_helpers
 
   accept_api_auth :index, :show, :create, :update, :destroy
 
   def index
-    @<%= model_name_pluralize_underscored %> = <%= model_name %>.all
-
-    respond_to do |format|
-      format.html
-      format.api
-    end
+    index_for_easy_query(<%= model_name %>Query)
   end
 
   def show
@@ -54,7 +49,7 @@ class <%= controller_class %>Controller < ApplicationController
       respond_to do |format|
         format.html {
           flash[:notice] = l(:notice_successful_create)
-          redirect_back_or_default <%= model_name_pluralize_underscored %>_path(@<%= model_name_underscored %>)
+          redirect_back_or_default <%= model_name_underscored %>_path(@<%= model_name_underscored %>)
         }
         format.api { render :action => 'show', :status => :created, :location => <%= model_name_underscored %>_url(@<%= model_name_underscored %>) }
       end
@@ -78,10 +73,11 @@ class <%= controller_class %>Controller < ApplicationController
     @<%= model_name_underscored %>.safe_attributes = params[:<%= model_name_underscored %>]
 
     if @<%= model_name_underscored %>.save
-      flash[:notice] = l(:notice_successful_update)
-
       respond_to do |format|
-        format.html { redirect_back_or_default <%= model_name_pluralize_underscored %>_path(@<%= model_name_underscored %>) }
+        format.html {
+          flash[:notice] = l(:notice_successful_update)
+          redirect_back_or_default <%= model_name_underscored %>_path(@<%= model_name_underscored %>)
+        }
         format.api { render_api_ok }
       end
     else
@@ -97,10 +93,11 @@ class <%= controller_class %>Controller < ApplicationController
       <%= model_name_underscored %>.destroy
     end
 
-    flash[:notice] = l(:notice_successful_delete)
-
     respond_to do |format|
-      format.html { redirect_back_or_default <%= model_name_pluralize_underscored %>_path }
+      format.html {
+        flash[:notice] = l(:notice_successful_delete)
+        redirect_back_or_default <%= model_name_pluralize_underscored %>_path
+      }
       format.api { render_api_ok }
     end
   end

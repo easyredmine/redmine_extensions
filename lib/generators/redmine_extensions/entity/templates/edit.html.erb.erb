@@ -1,6 +1,6 @@
 <%%= title l(:heading_<%= model_name_underscored %>_edit) %>
 
-<%%= form_for(@<%= model_name_underscored %>, html: {multipart: <%= acts_as_attachable? %>, id: '<%= model_name_underscored %>_form', class: 'tabular'}) do |f| %>
+<%%= form_for([@project, @<%= model_name_underscored %>], html: {multipart: <%= acts_as_attachable? %>, id: '<%= model_name_underscored %>_form', class: 'tabular'}) do |f| %>
   <%%= error_messages_for @<%= model_name_underscored %> %>
 
   <div class="box">

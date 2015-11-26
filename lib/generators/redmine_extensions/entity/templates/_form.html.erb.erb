@@ -1,9 +1,19 @@
 <%%= fields_for :<%= model_name_underscored %>, <%= model_name_underscored %> do |f| %>
+  <% if project? %>
+  <%% if <%= model_name_underscored %>.new_record? && !@project %>
+  <p>
+    <%%= f.label :project_id %>
+    <%%= f.select :project_id, Project.allowed_to(:manage_<%= model_name_pluralize_underscored %>).collect{|x| [x.name, x.id]}, include_blank: true %>
+  </p>
+  <%% end %>
+  <% end %>
   <% form_columns.each do |column_name, column_options| %>
   <p>
     <%%= f.label :<%= column_name %> %>
     <% if column_options[:type] == 'string' || column_options[:type] == 'integer' %>
     <%%= f.text_field :<%= column_name %> %>
+    <% elsif column_options[:type] == 'list' %>
+    <%%= f.select :<%= column_name %>, <%= column_options[:class] %>.all.collect{|x| [x.<%= column_options[:list_class_name] %>, x.id]}, include_blank: true %>
     <% end %>
   </p>
   <% end %>

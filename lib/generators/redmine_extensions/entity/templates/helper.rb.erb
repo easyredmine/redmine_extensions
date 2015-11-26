@@ -3,9 +3,9 @@ module <%= controller_class %>Helper
   def render_api_<%= model_name_underscored %>(api, <%= model_name_underscored %>)
     api.<%= model_name_underscored %> do
       api.id <%= model_name_underscored %>.id
-      <% all_columns.each do |column_name| %>
-        api.<%= column_name %> <%= model_name_underscored %>.<%= column_name %>
-      <% end %>
+      <%- db_columns.keys.each do |column_name| -%>
+      api.<%= column_name %> <%= model_name_underscored %>.<%= column_name %>
+      <%- end -%>
 
       call_hook(:helper_render_api_<%= model_name_underscored %>, {api: api, <%= model_name_underscored %>: <%= model_name_underscored %>})
     end
