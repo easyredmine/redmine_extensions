@@ -38,6 +38,7 @@ module RedmineExtensions
 
     def copy_templates
       template '_form.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/_form.html.erb"
+      template '_sidebar.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/_sidebar.html.erb"
       template '_view_custom_fields_form_custom_field.html.erb.erb', "#{plugin_path}/app/views/custom_fields/_view_custom_fields_form_#{model_name_underscored}_custom_field.html.erb"
       template 'context_menu.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/context_menu.html.erb"
       template 'controller.rb.erb', "#{plugin_path}/app/controllers/#{model_name_pluralize_underscored}_controller.rb"
@@ -56,7 +57,7 @@ module RedmineExtensions
             "\n  title_#{model_name_underscored}_new: Click to create new #{model_name_underscored.titleize}"
         end
         append_to_file "#{plugin_path}/config/locales/en.yml" do
-          db_columns.collect{|column_name, _| "\n  field_#{model_name_underscored}_#{column_name}: #{column_name.humanize}"  }.join
+          db_columns.collect { |column_name, column_options| "\n  #{column_options[:lang_key]}: #{column_name.humanize}" }.join
         end
       else
         template 'en.yml.erb', "#{plugin_path}/config/locales/en.yml"
@@ -93,26 +94,38 @@ module RedmineExtensions
       end
 
       if File.exists?("#{plugin_path}/init.rb")
-        append_to_file "#{plugin_path}/init.rb" do
-          "\nrequire '#{plugin_name_underscored}/#{model_name_underscored}_hooks'" +
-            "\nRedmine::AccessControl.map do |map|" +
-            "\n  map.project_module :#{model_name_pluralize_underscored} do |pmap|" +
-            "\n    pmap.permission :view_#{model_name_pluralize_underscored}, { :#{model_name_pluralize_underscored} => [:index, :show] }, read: true" +
-            "\n    pmap.permission :manage_#{model_name_pluralize_underscored}, { :#{model_name_pluralize_underscored} => [:new, :create, :edit, :update, :destroy, :bulk_edit, :bulk_update, :context_menu] }" +
-            "\n  end " +
-            "\nend\n" +
-            "\nRedmine::MenuManager.map :top_menu do |menu|" +
-            "\n  menu.push :#{model_name_pluralize_underscored}, { :controller => '#{model_name_pluralize_underscored}', :action => 'index' }, caption: :label_#{model_name_pluralize_underscored}" +
-            "\nend\n" +
-            "\nRedmine::MenuManager.map :project_menu do |menu|" +
-            "\n  menu.push :#{model_name_pluralize_underscored}, { :controller => '#{model_name_pluralize_underscored}', :action => 'index' }, param: :project_id, caption: :label_#{model_name_pluralize_underscored}" +
-            "\nend\n"
+        s = "\nActiveSupport.on_load(:active_record) do"
+        s << "\n  require '#{plugin_name_underscored}/#{model_name_underscored}_hooks'\n"
+        s << "\n  Redmine::AccessControl.map do |map|"
+        s << "\n    map.project_module :#{model_name_pluralize_underscored} do |pmap|"
+        s << "\n      pmap.permission :view_#{model_name_pluralize_underscored}, { #{model_name_pluralize_underscored}: [:index, :show] }, read: true"
+        s << "\n      pmap.permission :manage_#{model_name_pluralize_underscored}, { #{model_name_pluralize_underscored}: [:new, :create, :edit, :update, :destroy, :bulk_edit, :bulk_update, :context_menu] }"
+        s << "\n    end "
+        s << "\n  end\n"
+        s << "\n  Redmine::MenuManager.map :top_menu do |menu|"
+        s << "\n    menu.push :#{model_name_pluralize_underscored}, { controller: '#{model_name_pluralize_underscored}', action: 'index', project_id: nil }, caption: :label_#{model_name_pluralize_underscored}"
+        s << "\n  end\n"
+        if project?
+          s << "\n  Redmine::MenuManager.map :project_menu do |menu|"
+          s << "\n    menu.push :#{model_name_pluralize_underscored}, { controller: '#{model_name_pluralize_underscored}', action: 'index' }, param: :project_id, caption: :label_#{model_name_pluralize_underscored}"
+          s << "\n  end\n"
         end
         if acts_as_customizable?
-          append_to_file "#{plugin_path}/init.rb" do
-            "\nCustomFieldsHelper::CUSTOM_FIELDS_TABS << {:name => '#{model_name}CustomField', :partial => 'custom_fields/index', :label => :label_#{model_name_pluralize_underscored}}"
-          end
+          s << "\n  CustomFieldsHelper::CUSTOM_FIELDS_TABS << {name: '#{model_name}CustomField', partial: 'custom_fields/index', label: :label_#{model_name_pluralize_underscored}}\n"
         end
+        if acts_as_searchable?
+          s << "\n  Redmine::Search.map do |search|"
+          s << "\n    search.register :#{model_name_pluralize_underscored}"
+          s << "\n  end\n"
+        end
+        if acts_as_activity_provider?
+          s << "\n  Redmine::Activity.map do |activity|"
+          s << "\n    activity.register :#{model_name_pluralize_underscored}, {class_name: %w(#{model_name}), default: false}"
+          s << "\n  end\n"
+        end
+        s << "\nend"
+
+        append_to_file "#{plugin_path}/init.rb", s
       end
 
 
@@ -171,33 +184,49 @@ module RedmineExtensions
 
       attributes.each do |attr|
         attr_name, attr_type, attr_idx = attr.split(':')
-        @db_columns[attr_name] = {type: attr_type || 'string', idx: attr_idx, null: true, safe: true, query_type: attr_type || 'string'}
+        lang_key = "field_#{model_name_underscored}_#{attr_name.to_s.sub(/_id$/, '').sub(/^.+\./, '')}"
+
+        @db_columns[attr_name] = {type: attr_type || 'string', idx: attr_idx, null: true, safe: true, query_type: attr_type || 'string', lang_key: lang_key}
       end
 
-      @db_columns['project_id'] = {type: 'integer', idx: nil, null: false, safe: false, class: 'Project', list_class_name: 'name', query_type: 'list_optional', query_column_name: 'project'} if project? && !@db_columns.key?('project_id')
-      @db_columns['author_id'] = {type: 'integer', idx: nil, null: false, safe: true, class: 'User', list_class_name: 'name', query_type: 'list', query_column_name: 'author'} if author? && !@db_columns.key?('author_id')
-      @db_columns['created_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date'}
-      @db_columns['updated_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date'}
+      @db_columns['project_id'] = {type: 'integer', idx: nil, null: false, safe: false, class: 'Project', list_class_name: 'name', query_type: 'list_optional', query_column_name: 'project', lang_key: "field_#{model_name_underscored}_project"} if project? && !@db_columns.key?('project_id')
+      @db_columns['author_id'] = {type: 'integer', idx: nil, null: false, safe: true, class: 'User', list_class_name: 'name', query_type: 'list', query_column_name: 'author', lang_key: "field_#{model_name_underscored}_author"} if author? && !@db_columns.key?('author_id')
+      @db_columns['created_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date', lang_key: "field_#{model_name_underscored}_created_at"}
+      @db_columns['updated_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date', lang_key: "field_#{model_name_underscored}_updated_at"}
     end
 
     def safe_columns
-      @db_columns.select { |_, column_options| column_options[:safe] }.collect { |column_name, _| column_name }
+      @db_columns.select { |_, column_options| column_options[:safe] }
     end
 
     def string_columns
-      @db_columns.select { |_, column_options| column_options[:safe] && column_options[:type] == 'string' }.collect { |column_name, _| column_name }
+      @db_columns.select { |_, column_options| column_options[:safe] && column_options[:type] == 'string' }
+    end
+
+    def text_columns
+      @db_columns.select { |_, column_options| column_options[:safe] && column_options[:type] == 'text' }
     end
 
     def form_columns
       @db_columns.select { |_, column_options| column_options[:safe] }
     end
 
-    def name_column?
-      safe_columns.include?('name')
+    def name_column
+      'name' if string_columns.keys.include?('name')
+      string_columns.keys.first
     end
 
-    def name_column
-      'name' if name_column?
+    def name_column?
+      !name_column.blank?
+    end
+
+    def description_column
+      'description' if text_columns.keys.include?('description')
+      text_columns.keys.first
+    end
+
+    def description_column?
+      !description_column.blank?
     end
 
     def view_permission

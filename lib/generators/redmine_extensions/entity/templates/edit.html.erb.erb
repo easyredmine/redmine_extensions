@@ -11,3 +11,7 @@
     <%%= submit_tag l(:button_update), title: l(:button_update) %>
   </p>
 <%% end %>
+<%% ### PAGE CUSTOMS ########################################################## %>
+<%% content_for :sidebar do %>
+  <%%= render :partial => '<%= model_name_pluralize_underscored %>/sidebar' %>
+<%% end %>

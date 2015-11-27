@@ -1,5 +1,5 @@
 <%%= render @query %>
 <%% ### PAGE CUSTOMS ########################################################## %>
 <%% content_for :sidebar do %>
-    <%%= link_to l(:button_<%= model_name_underscored %>_new), new_polymorphic_path([@project, :<%= model_name_underscored %>]), title: l(:title_<%= model_name_underscored %>_new), class: 'icon icon-add' %>
+  <%%= render :partial => '<%= model_name_pluralize_underscored %>/sidebar' %>
 <%% end %>

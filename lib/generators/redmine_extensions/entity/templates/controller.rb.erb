@@ -4,7 +4,9 @@ class <%= controller_class %>Controller < ApplicationController
 
   before_filter :find_<%= model_name_underscored %>, :only => [:show, :edit, :update]
   before_filter :find_<%= model_name_pluralize_underscored %>, :only => [:context_menu, :bulk_edit, :bulk_update, :destroy]
+  <%- if project? -%>
   before_filter :find_project
+  <%- end -%>
   before_filter :authorize_global
 
   helper :<%= model_name_pluralize_underscored %>
@@ -44,6 +46,7 @@ class <%= controller_class %>Controller < ApplicationController
     @<%= model_name_underscored %>.project = @project
     <%- end -%>
     @<%= model_name_underscored %>.safe_attributes = params[:<%= model_name_underscored %>]
+    @<%= model_name_underscored %>.save_attachments(params[:attachments] || (params[:<%= model_name_underscored %>] && params[:<%= model_name_underscored %>][:uploads]))
 
     if @<%= model_name_underscored %>.save
       respond_to do |format|
@@ -71,6 +74,7 @@ class <%= controller_class %>Controller < ApplicationController
 
   def update
     @<%= model_name_underscored %>.safe_attributes = params[:<%= model_name_underscored %>]
+    @<%= model_name_underscored %>.save_attachments(params[:attachments] || (params[:<%= model_name_underscored %>] && params[:<%= model_name_underscored %>][:uploads]))
 
     if @<%= model_name_underscored %>.save
       respond_to do |format|
@@ -142,11 +146,13 @@ class <%= controller_class %>Controller < ApplicationController
     render_404
   end
 
+  <%- if project? -%>
   def find_project
     @project ||= @<%= model_name_underscored %>.project if !@<%= model_name_underscored %>.nil?
     @project ||= Project.find(params[:project_id]) if !params[:project_id].blank?
   rescue ActiveRecord::RecordNotFound
     render_404
   end
+  <%- end -%>
 
 end

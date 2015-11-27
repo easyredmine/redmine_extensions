@@ -6,6 +6,16 @@ module <%= controller_class %>Helper
       <%- db_columns.keys.each do |column_name| -%>
       api.<%= column_name %> <%= model_name_underscored %>.<%= column_name %>
       <%- end -%>
+      <%- if acts_as_customizable? -%>
+      render_api_custom_values <%= model_name_underscored %>.visible_custom_field_values, api
+      <%- end -%>
+      <%- if acts_as_attachable? -%>
+      api.array :attachments do
+        <%= model_name_underscored %>.attachments.each do |attachment|
+          render_api_attachment(attachment, api)
+        end
+      end if include_in_api_response?('attachments')
+      <%- end -%>
 
       call_hook(:helper_render_api_<%= model_name_underscored %>, {api: api, <%= model_name_underscored %>: <%= model_name_underscored %>})
     end
