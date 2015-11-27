@@ -55,6 +55,9 @@ module RedmineExtensions
             "\n  permission_manage_#{model_name_pluralize_underscored}: Manage #{model_name_pluralize_underscored.titleize}" +
             "\n  title_#{model_name_underscored}_new: Click to create new #{model_name_underscored.titleize}"
         end
+        append_to_file "#{plugin_path}/config/locales/en.yml" do
+          db_columns.collect{|column_name, _| "\n  field_#{model_name_underscored}_#{column_name}: #{column_name.humanize}"  }.join
+        end
       else
         template 'en.yml.erb', "#{plugin_path}/config/locales/en.yml"
       end

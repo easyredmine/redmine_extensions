@@ -7,3 +7,4 @@ en:
   permission_view_<%= model_name_pluralize_underscored %>: View <%= model_name_pluralize_underscored.titleize %>
   permission_manage_<%= model_name_pluralize_underscored %>: Manage <%= model_name_pluralize_underscored.titleize %>
   title_<%= model_name_underscored %>_new: Click to create new <%= model_name_underscored.titleize %>
+<%= db_columns.collect{|column_name, _| "\n  field_#{model_name_underscored}_#{column_name}: #{column_name.humanize}"  }.join %>
