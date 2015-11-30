@@ -82,7 +82,7 @@ module RedmineExtensions
       options[:class] ||= "#{options[:modul_uniq_id]}content_switch"
       r = ''
       r << view.send("#{style}_tag" , "#{options[:block_name]}[output]", key, enabled?, id: box_id, class: options[:class])
-      r << view.label_tag(box_id, view.l('label_easy_query_output.' + key), :class => 'inline')
+      r << view.label_tag(box_id, view.l('label_easy_query_output.' + key), class: 'inline')
       r
     end
 
