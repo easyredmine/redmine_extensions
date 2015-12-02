@@ -12,7 +12,7 @@ module RedmineExtensions
     # --- formating ----
 
     def formatter
-      @formatter ||= ("#{self.model.entity}Formatter".constantize rescue RedmineExtensions::EasyEntityFormatters::EasyEntityFormatter).new(view)
+      @formatter ||= formatter_klass.new(view)
     end
 
     def format_value(column, entity)
@@ -25,6 +25,14 @@ module RedmineExtensions
     def ending_buttons?
       false
     end
+
+
+    private
+      def formatter_klass
+        formatter_klass = "#{self.model.entity}Formatter".constantize
+      rescue
+        formatter_klass = RedmineExtensions::EasyEntityFormatters::EasyEntityFormatter
+      end
 
   end
 end
