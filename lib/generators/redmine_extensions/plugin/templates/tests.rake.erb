@@ -1,0 +1,24 @@
+unless Rails.env.production?
+
+require 'rspec/core'
+require 'rspec/core/rake_task'
+
+namespace :<%= plugin_name_underscored %> do
+
+  desc 'Runs rspec tests.'
+  RSpec::Core::RakeTask.new(:spec, :tag, :format) do |t, task_args|
+    format = task_args[:format] #|| 'documentation'
+    unless task_args[:tag] == 'all'
+      tag = task_args[:tag] == 'default' ? '~slow' : task_args[:tag]
+      tag ||= '~slow'
+    end
+    t.verbose = false
+    t.pattern = "./plugins/<%= plugin_name_underscored %>/{,test/}spec{,/*/**}/#{ENV['FN'] || '*'}_spec.rb"
+    t.rspec_opts = ''
+    t.rspec_opts << "--format #{format} " if format
+    t.rspec_opts << "--tag #{tag} " if tag
+  end
+
+end
+
+end

@@ -24,6 +24,7 @@ module RedmineExtensions
       empty_directory "#{plugin_path}/assets/javascripts"
       empty_directory "#{plugin_path}/assets/stylesheets"
       empty_directory "#{plugin_path}/config/locales"
+      empty_directory "#{plugin_path}/lib/tasks"
       empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}"
 
       empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/controllers"
@@ -49,6 +50,8 @@ module RedmineExtensions
       template 'issue_patch.example.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/models/issue_patch.example"
       template 'issues_controller_patch.example.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/controllers/issues_controller_patch.example"
       template 'issues_helper_patch.example.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/helpers/issues_helper_patch.example"
+
+      template 'tests.rake.erb', "#{plugin_path}/lib/tasks/tests.rake"
     end
 
     hook_for :entity, as: :entity, in: :redmine_extensions, type: :boolean

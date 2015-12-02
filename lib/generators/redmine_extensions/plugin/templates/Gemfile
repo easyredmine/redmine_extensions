@@ -1,1 +1,7 @@
 gem 'redmine_extensions', '~> 0.0.12'
+
+group :development, :test do
+  gem 'rspec-rails'
+  gem 'poltergeist'
+  gem 'database_cleaner'
+end
