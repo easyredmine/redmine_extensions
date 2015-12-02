@@ -1,1 +1,5 @@
+<%%= render @query %>
 <%% ### PAGE CUSTOMS ########################################################## %>
+<%% content_for :sidebar do %>
+  <%%= render :partial => '<%= model_name_pluralize_underscored %>/sidebar' %>
+<%% end %>

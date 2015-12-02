@@ -5,15 +5,15 @@ class <%= model_name %> < ActiveRecord::Base
   <%= 'belongs_to :author, class_name: \'User\', foreign_key: \'author_id\'' if author? %>
 
   scope :visible, lambda { |*args|
-    where(<%= model_name %>.visible_condition(args.shift || User.current, *args)<%= '.joins(:project)' if project? %>)
+    where(<%= model_name %>.visible_condition(args.shift || User.current, *args))<%= '.joins(:project)' if project? %>
   }
   <% if name_column? %>
   scope :sorted, lambda { order("#{table_name}.<%= name_column %> ASC") }
   <% end %>
 
   <% if acts_as_searchable? %>
-  acts_as_searchable :columns => [<%= string_columns.collect{|c| "\"\#{#{model_name}.table_name}.#{c}\"" }.join(', ') %>],
-                     :date_column => :created_at
+  acts_as_searchable columns: [<%= string_columns.collect{|c, _| "\"\#{#{model_name}.table_name}.#{c}\"" }.join(', ') %>],
+                     date_column: :created_at
   <%- end -%>
   <%- if acts_as_customizable? -%>
   acts_as_customizable
@@ -22,12 +22,12 @@ class <%= model_name %> < ActiveRecord::Base
   acts_as_attachable
   <%- end -%>
   <%- if acts_as_event? -%>
-  acts_as_event :title => Proc.new {|o| "#{l(:label_<%= model_name_underscored %>)} - #{o.caption}"},
-    :url => Proc.new {|o| {:controller => '<%= model_name_pluralize_underscored %>', :action => 'show', :id => o, :project_id => o.project}},
-    :datetime => :created_at
+  acts_as_event title: ->(o){"#{l(:label_<%= model_name_underscored %>)} - #{o.to_s}"},
+    url: ->(o){{controller: '<%= model_name_pluralize_underscored %>', action: 'show', id: o, project_id: o.project}},
+    datetime: :created_at, description: :<%= description_column || name_column %>
   <%- end -%>
   <%- if acts_as_activity_provider? -%>
-  acts_as_activity_provider :permission => :view_<%= view_permission %>, :author_key => <%= author? ? ':author_id' : 'nil' %>, :timestamp => "#{<%= model_name %>.table_name}.created_at"<%= ', :scope => joins(:project)' if project? %>
+  acts_as_activity_provider permission: :view_<%= view_permission %>, author_key: <%= author? ? ':author_id' : 'nil' %>, timestamp: "#{<%= model_name %>.table_name}.created_at"<%= ', scope: joins(:project)' if project? %>
   <%- end -%>
   <%- if acts_as_watchable? -%>
   acts_as_watchable
@@ -39,10 +39,13 @@ class <%= model_name %> < ActiveRecord::Base
   attr_protected :id
 
   <%- if safe_columns.any? -%>
-  safe_attributes <%= safe_columns.collect{|column_name| "'#{column_name}'"}.join(', ') %>
+  safe_attributes <%= safe_columns.collect{|column_name, _| "'#{column_name}'"}.join(', ') %>
   <%- end -%>
   <%- if acts_as_customizable? -%>
   safe_attributes 'custom_field_values', 'custom_fields'
+  <%- end -%>
+  <%- if project? -%>
+  safe_attributes 'project_id', :if => lambda {|<%= model_name_underscored %>, user| <%= model_name_underscored %>.new_record? }
   <%- end -%>
 
   def self.visible_condition(user, options={})
@@ -95,9 +98,5 @@ class <%= model_name %> < ActiveRecord::Base
     <%= name_column %>.to_s
   end
   <%- end -%>
-
-  def caption
-    to_s
-  end
 
 end

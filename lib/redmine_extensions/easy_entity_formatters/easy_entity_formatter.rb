@@ -23,6 +23,9 @@ module RedmineExtensions
         format_object column.value(entity)
       end
 
+      def format_column(column, entity)
+        format_object column.value_object(entity)
+      end
     end
   end
 end
