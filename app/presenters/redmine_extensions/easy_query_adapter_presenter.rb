@@ -31,7 +31,7 @@ module RedmineExtensions
       def formatter_klass
         formatter_klass = "#{self.model.entity}Formatter".constantize
       rescue
-        formatter_klass = RedmineExtensions::EasyEntityFormatters::EasyEntityFormatter
+        formatter_klass = RedmineExtensions::EasyEntityFormatter
       end
 
   end
