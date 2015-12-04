@@ -27,7 +27,7 @@ class <%= model_name %> < ActiveRecord::Base
     datetime: :created_at, description: :<%= description_column || name_column %>
   <%- end -%>
   <%- if acts_as_activity_provider? -%>
-  acts_as_activity_provider permission: :view_<%= view_permission %>, author_key: <%= author? ? ':author_id' : 'nil' %>, timestamp: "#{<%= model_name %>.table_name}.created_at"<%= ', scope: joins(:project)' if project? %>
+  acts_as_activity_provider author_key: <%= author? ? ':author_id' : 'nil' %>, timestamp: "#{table_name}.created_at"
   <%- end -%>
   <%- if acts_as_watchable? -%>
   acts_as_watchable
@@ -48,6 +48,11 @@ class <%= model_name %> < ActiveRecord::Base
   safe_attributes 'project_id', :if => lambda {|<%= model_name_underscored %>, user| <%= model_name_underscored %>.new_record? }
   <%- end -%>
 
+  <%- if mail? -%>
+  after_create :send_create_notification
+  after_update :send_update_notification
+  <%- end -%>
+
   def self.visible_condition(user, options={})
   <%- if project? -%>
     Project.allowed_to_condition(user, :<%= view_permission %>, options)
@@ -60,11 +65,11 @@ class <%= model_name %> < ActiveRecord::Base
     'icon icon-user'
   end
 
-  <% if !project? %>
+  <%- if !project? -%>
   def project
     nil
   end
-  <% end %>
+  <%- end -%>
 
   def visible?(user = nil)
     user ||= User.current
@@ -96,6 +101,36 @@ class <%= model_name %> < ActiveRecord::Base
   <%- if name_column? -%>
   def to_s
     <%= name_column %>.to_s
+  end
+  <%- end -%>
+
+  def created_on
+    created_at
+  end
+
+  def updated_on
+    updated_at
+  end
+
+  <%- if mail? -%>
+  def notified_users
+    if project
+      project.notified_users.reject {|user| !visible?(user)}
+    else
+      [User.current]
+    end
+  end
+
+  def send_create_notification
+    # if Setting.notified_events.include?('<%= model_name_underscored %>_added')
+    <%= model_name %>Mailer.<%= model_name_underscored %>_added(self).deliver
+    # end
+  end
+
+  def send_update_notification
+    # if Setting.notified_events.include?('<%= model_name_underscored %>_updated')
+    <%= model_name %>Mailer.<%= model_name_underscored %>_updated(self).deliver
+    # end
   end
   <%- end -%>
 

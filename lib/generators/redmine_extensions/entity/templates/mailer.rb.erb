@@ -1,0 +1,41 @@
+class <%= model_name %>Mailer < Mailer
+
+  helper :<%= model_name_pluralize_underscored %>
+
+  def <%= model_name_underscored %>_added(<%= model_name_underscored %>)
+    <%- if project? -%>
+    redmine_headers 'Project' => <%= model_name_underscored %>.project.identifier
+
+    <%- end -%>
+    <%- if author? -%>
+    @author = <%= model_name_underscored %>.author
+    <%- end -%>
+    @<%= model_name_underscored %> = <%= model_name_underscored %>
+    @<%= model_name_underscored %>_url = url_for(controller: '<%= model_name_pluralize_underscored %>', action: 'show', id: <%= model_name_underscored %>)
+
+    message_id <%= model_name_underscored %>
+    references <%= model_name_underscored %>
+
+    mail to: <%= model_name_underscored %>.notified_users,
+      subject: "#{l(:label_<%= model_name_underscored %>)}: #{<%= model_name_underscored %>.to_s}"
+  end
+
+  def <%= model_name_underscored %>_updated(<%= model_name_underscored %>)
+    <%- if project? -%>
+    redmine_headers 'Project' => <%= model_name_underscored %>.project.identifier
+
+    <%- end -%>
+    <%- if author? -%>
+    @author = <%= model_name_underscored %>.author
+    <%- end -%>
+    @<%= model_name_underscored %> = <%= model_name_underscored %>
+    @<%= model_name_underscored %>_url = url_for(controller: '<%= model_name_pluralize_underscored %>', action: 'show', id: <%= model_name_underscored %>)
+
+    message_id <%= model_name_underscored %>
+    references <%= model_name_underscored %>
+
+    mail to: <%= model_name_underscored %>.notified_users,
+      subject: "#{l(:label_<%= model_name_underscored %>)}: #{<%= model_name_underscored %>.to_s}"
+  end
+
+end

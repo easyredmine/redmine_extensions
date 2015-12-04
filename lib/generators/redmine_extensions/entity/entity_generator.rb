@@ -8,6 +8,7 @@ module RedmineExtensions
 
     class_option :project, type: :boolean, default: true, banner: '', :desc => 'make model depends on project'
     class_option :author, type: :boolean, default: true, banner: '', :desc => 'make model depends on project'
+    class_option :mail, type: :boolean, default: true, banner: '', :desc => 'model have mail notifications'
     class_option :acts_as_activity_provider, type: :boolean, default: true, banner: '', :desc => 'changes in models are visible in user profile'
     class_option :acts_as_attachable, type: :boolean, default: true, banner: '', :desc => 'model have attachments'
     class_option :acts_as_customizable, type: :boolean, default: true, banner: '', :desc => 'model have custom fields'
@@ -67,6 +68,13 @@ module RedmineExtensions
       template 'hooks.rb.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/#{model_name_underscored}_hooks.rb"
       template 'index.api.rsb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.api.rsb"
       template 'index.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.html.erb"
+      if mail?
+        template 'mailer.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_mailer.rb"
+        template 'mail_added.html.erb.erb', "#{plugin_path}/app/views/#{model_name_underscored}_mailer/#{model_name_underscored}_added.html.erb"
+        template 'mail_added.text.erb.erb', "#{plugin_path}/app/views/#{model_name_underscored}_mailer/#{model_name_underscored}_added.text.erb"
+        template 'mail_updated.html.erb.erb', "#{plugin_path}/app/views/#{model_name_underscored}_mailer/#{model_name_underscored}_updated.html.erb"
+        template 'mail_updated.text.erb.erb', "#{plugin_path}/app/views/#{model_name_underscored}_mailer/#{model_name_underscored}_updated.text.erb"
+      end
       template 'migration.rb.erb', "#{plugin_path}/db/migrate/#{Time.now.strftime('%Y%m%d%H%M%S')}_create_#{@model_name_pluralize_underscored}.rb"
       template 'model.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}.rb"
       template 'new.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.html.erb"
@@ -177,6 +185,10 @@ module RedmineExtensions
 
     def acts_as_watchable?
       options[:acts_as_watchable] == true
+    end
+
+    def mail?
+      options[:mail] == true
     end
 
     def prepare_columns
