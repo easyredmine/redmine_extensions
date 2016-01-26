@@ -217,16 +217,16 @@ REDMINE_EXTENSIONS = {
 })(jQuery);
 
 window.cancelAnimFrame = ( function() {
-    return window.cancelAnimationFrame          ||
+    return window.cancelAnimationFrame              ||
         window.webkitCancelRequestAnimationFrame    ||
         window.mozCancelRequestAnimationFrame       ||
-        window.oCancelRequestAnimationFrame     ||
+        window.oCancelRequestAnimationFrame         ||
         window.msCancelRequestAnimationFrame        ||
         clearTimeout
 } )();
 
 window.requestAnimFrame = (function(){
-    return  window.requestAnimationFrame       ||
+    return  window.requestAnimationFrame   ||
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame    ||
         window.oRequestAnimationFrame      ||
@@ -238,24 +238,35 @@ window.requestAnimFrame = (function(){
 
 window.showFlashMessage = (function(type, message, delay){
     var $content = $("#content");
-    delay = typeof delay !== 'undefined' ?  b : 5000;
+    delay = typeof delay !== 'undefined' ?  delay : false;
     $content.find(".flash").remove();
-    var element = $("<div/>").attr({"class":"flash"})
-        .addClass(type)
-        .css({
-            position:'fixed',
-            zIndex: '10001',
-            right: '5px',
-            top: '5px'
-        })
-        .html($("<span/>").html(message))
-        .append($("<a/>").attr({"href":"javascript:void(0)", "class":"icon-close"}).click(function(event) {$(this).closest('.flash').fadeOut(500, function(){$(this).remove()})}))
-        .prependTo($content);
-    setTimeout(function(){
-        requestFrame(function(){
-            element.fadeOut(500);
-        });
-    }, delay);
-    return element;
+    var element = document.createElement("div");
+    element.className = 'fixed flash ' + type;
+    element.style.position = 'fixed';
+    element.style.zIndex = '10001';
+    element.style.right = '5px';
+    element.style.top = '5px';
+    var close = document.createElement("a");
+    close.className = 'icon-close';
+    close.setAttribute("href", "javascript:void(0)");
+    close.setAttribute("onclick", "closeFlashMessage($(this))");
+    var msg = document.createTextNode(message);
+    var span = document.createElement("span");
+    span.appendChild(msg);
+    element.appendChild(span);
+    element.appendChild(close);
+    $content.prepend(element);
+    var $element = $(element);
+    if(delay){
+        setTimeout(function(){
+            requestFrame(function(){
+                closeFlashMessage($element);
+            });
+        }, delay);
+    }
+    return $element;
 })();
 
+window.closeFlashMessage = (function($element){
+    $element.closest('.flash').fadeOut(500, function(){$element.remove()});
+})();
