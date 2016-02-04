@@ -215,3 +215,58 @@ REDMINE_EXTENSIONS = {
     }
 
 })(jQuery);
+
+window.cancelAnimFrame = ( function() {
+    return window.cancelAnimationFrame              ||
+        window.webkitCancelRequestAnimationFrame    ||
+        window.mozCancelRequestAnimationFrame       ||
+        window.oCancelRequestAnimationFrame         ||
+        window.msCancelRequestAnimationFrame        ||
+        clearTimeout
+} )();
+
+window.requestAnimFrame = (function(){
+    return  window.requestAnimationFrame   ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame    ||
+        window.oRequestAnimationFrame      ||
+        window.msRequestAnimationFrame     ||
+        function(callback){
+            return window.setTimeout(callback, 1000 / 60);
+        };
+})();
+
+window.showFlashMessage = (function(type, message, delay){
+    var $content = $("#content");
+    delay = typeof delay !== 'undefined' ?  delay : false;
+    $content.find(".flash").remove();
+    var element = document.createElement("div");
+    element.className = 'fixed flash ' + type;
+    element.style.position = 'fixed';
+    element.style.zIndex = '10001';
+    element.style.right = '5px';
+    element.style.top = '5px';
+    var close = document.createElement("a");
+    close.className = 'icon-close';
+    close.setAttribute("href", "javascript:void(0)");
+    close.setAttribute("onclick", "closeFlashMessage($(this))");
+    var msg = document.createTextNode(message);
+    var span = document.createElement("span");
+    span.appendChild(msg);
+    element.appendChild(span);
+    element.appendChild(close);
+    $content.prepend(element);
+    var $element = $(element);
+    if(delay){
+        setTimeout(function(){
+            requestFrame(function(){
+                closeFlashMessage($element);
+            });
+        }, delay);
+    }
+    return $element;
+})();
+
+window.closeFlashMessage = (function($element){
+    $element.closest('.flash').fadeOut(500, function(){$element.remove()});
+})();
