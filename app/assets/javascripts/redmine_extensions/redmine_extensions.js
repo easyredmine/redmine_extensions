@@ -265,8 +265,8 @@ window.showFlashMessage = (function(type, message, delay){
         }, delay);
     }
     return $element;
-})();
+});
 
 window.closeFlashMessage = (function($element){
-    $element.closest('.flash').fadeOut(500, function(){$element.remove()});
-})();
+    $element.closest('.flash').fadeOut(500, function(){$element.remove();});
+});
