@@ -246,10 +246,11 @@ window.showFlashMessage = (function(type, message, delay){
     element.style.zIndex = '10001';
     element.style.right = '5px';
     element.style.top = '5px';
+    element.setAttribute("onclick", "closeFlashMessage($(this))");
     var close = document.createElement("a");
     close.className = 'icon-close';
     close.setAttribute("href", "javascript:void(0)");
-    close.setAttribute("onclick", "closeFlashMessage($(this))");
+    // close.setAttribute("onclick", "closeFlashMessage($(this))");
     var span = document.createElement("span");
     span.innerHTML = message;
     element.appendChild(span);
