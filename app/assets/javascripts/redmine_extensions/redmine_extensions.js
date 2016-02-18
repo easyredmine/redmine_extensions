@@ -250,9 +250,8 @@ window.showFlashMessage = (function(type, message, delay){
     close.className = 'icon-close';
     close.setAttribute("href", "javascript:void(0)");
     close.setAttribute("onclick", "closeFlashMessage($(this))");
-    var msg = document.createTextNode(message);
     var span = document.createElement("span");
-    span.appendChild(msg);
+    span.innerHTML = message;
     element.appendChild(span);
     element.appendChild(close);
     $content.prepend(element);
