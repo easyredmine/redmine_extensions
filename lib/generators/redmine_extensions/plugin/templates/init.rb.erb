@@ -3,7 +3,7 @@ Redmine::Plugin.register :<%= plugin_name_underscored %> do
   author ''
   author_url ''
   description ''
-  version '<%= Date.today.strftime('%Y.01.01') %>'
+  version '<%= Date.today.strftime('%Y') %>'
 
   #into easy_settings goes available setting as a symbol key, default value as a value
   settings easy_settings: {  }
