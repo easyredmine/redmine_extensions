@@ -4,9 +4,12 @@ module RedmineExtensions
 
     attr_reader :plugin_path, :plugin_name_underscored, :plugin_pretty_name, :plugin_title
 
+    class_option :customer, type: :boolean, default: false, banner: '', :desc => 'plugin will act as customer modification. It is useful for changing few things and be uptodate with the core.'
+
     def initialize(*args)
       super
-      @plugin_name_underscored = file_name.underscore
+
+      @plugin_name_underscored = options[:customer] ? "modification_#{file_name.underscore}" : file_name.underscore
       @plugin_pretty_name = plugin_name_underscored.titleize
       @plugin_path = "plugins/#{plugin_name_underscored}"
       @plugin_title = @plugin_name_underscored.camelize
