@@ -48,7 +48,10 @@ module RedmineExtensions
 
       if File.exists?("#{plugin_path}/config/locales/en.yml")
         append_to_file "#{plugin_path}/config/locales/en.yml" do
-          "\n  heading_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
+          "\n  easy_query:" +
+            "\n    name:" +
+            "\n      #{model_name_underscored}_query: #{model_name_pluralize_underscored.titleize}" +
+            "\n  heading_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
             "\n  heading_#{model_name_underscored}_edit: Edit #{model_name_underscored.titleize}" +
             "\n  button_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
             "\n  label_#{model_name_pluralize_underscored}: #{@model_name_pluralize_underscored.titleize}" +
@@ -104,7 +107,7 @@ module RedmineExtensions
       end
 
       if File.exists?("#{plugin_path}/init.rb")
-        s = "\nActiveSupport.on_load(:active_record) do"
+        s = "\nActiveSupport.on_load(:easyproject, yield: true) do"
         s << "\n  require '#{plugin_name_underscored}/#{model_name_underscored}_hooks'\n"
         s << "\n  Redmine::AccessControl.map do |map|"
         s << "\n    map.project_module :#{model_name_pluralize_underscored} do |pmap|"

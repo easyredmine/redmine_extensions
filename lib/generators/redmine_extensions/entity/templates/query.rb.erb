@@ -2,10 +2,6 @@ class <%= model_name %>Query < EasyQuery
 
   self.queried_class = <%= model_name %>
 
-  def entity
-    <%= model_name %>
-  end
-
   def initialize_available_filters
     <%- db_columns.each do |column_name, column_options| -%>
     <%- if project? && column_name == 'project_id' -%>
