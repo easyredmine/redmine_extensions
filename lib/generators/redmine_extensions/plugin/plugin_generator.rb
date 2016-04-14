@@ -29,10 +29,10 @@ module RedmineExtensions
       empty_directory "#{plugin_path}/config/locales"
       empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}"
 
-      empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/controllers"
-      empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/helpers"
-      empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/models"
-      empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/others"
+      empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/easy_patch/redmine/controllers"
+      empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/easy_patch/redmine/helpers"
+      empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/easy_patch/redmine/models"
+      empty_directory "#{plugin_path}/lib/#{plugin_name_underscored}/easy_patch/redmine/others"
 
       template 'gitkeep.erb', "#{plugin_path}/app/controllers/.gitkeep"
       template 'gitkeep.erb', "#{plugin_path}/app/helpers/.gitkeep"
@@ -41,7 +41,7 @@ module RedmineExtensions
       template 'gitkeep.erb', "#{plugin_path}/db/migrate/.gitkeep"
       template 'gitkeep.erb', "#{plugin_path}/assets/images/.gitkeep"
       template 'gitkeep.erb', "#{plugin_path}/assets/javascripts/.gitkeep"
-      template 'gitkeep.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/others/.gitkeep"
+      template 'gitkeep.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/easy_patch/redmine/others/.gitkeep"
 
       template 'Gemfile.erb', "#{plugin_path}/Gemfile"
       template 'init.rb.erb', "#{plugin_path}/init.rb"
@@ -49,9 +49,9 @@ module RedmineExtensions
       template 'routes.rb.erb', "#{plugin_path}/config/routes.rb"
       template 'hooks.rb.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/hooks.rb"
       template 'internals.rb.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/internals.rb"
-      template 'issue_patch.example.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/models/issue_patch.example"
-      template 'issues_controller_patch.example.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/controllers/issues_controller_patch.example"
-      template 'issues_helper_patch.example.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/redmine_patch/helpers/issues_helper_patch.example"
+      template 'issue_patch.example.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/easy_patch/redmine/models/issue_patch.example"
+      template 'issues_controller_patch.example.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/easy_patch/redmine/controllers/issues_controller_patch.example"
+      template 'issues_helper_patch.example.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/easy_patch/redmine/helpers/issues_helper_patch.example"
     end
 
     hook_for :entity, as: :entity, in: :redmine_extensions, type: :boolean
