@@ -47,6 +47,7 @@ module RedmineExtensions
         Dir.glob( root.join('app', 'assets', 'javascripts', 'redmine_extensions', '*.js') ) do |js_file|
           begin
             FileUtils.cp(js_file, app.root.join('public', 'javascripts', 'redmine_extensions'))
+          rescue
           end
         end
       end
