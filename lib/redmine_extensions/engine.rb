@@ -9,6 +9,7 @@ module RedmineExtensions
       path ||= engine.to_s.underscore.split('/').first
       Rails.application.routes.draw do
         mount engine => path
+        resources :easy_settings, only: [:edit]
       end
     end
 
