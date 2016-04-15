@@ -6,6 +6,7 @@ module RedmineExtensions
       base.send(:include, InstanceMethods)
 
       base.class_eval do
+        helper_method :easy_extensions?
       end
     end
 
