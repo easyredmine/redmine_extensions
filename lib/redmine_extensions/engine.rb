@@ -44,7 +44,9 @@ module RedmineExtensions
         js_dir = app.root.join('public', 'javascripts', 'redmine_extensions')
         FileUtils.mkdir(js_dir) unless File.directory?(js_dir)
         Dir.glob( root.join('app', 'assets', 'javascripts', 'redmine_extensions', '*.js') ) do |js_file|
-          FileUtils.cp(js_file, app.root.join('public', 'javascripts', 'redmine_extensions'))
+          begin
+            FileUtils.cp(js_file, app.root.join('public', 'javascripts', 'redmine_extensions'))
+          end
         end
       end
     end
