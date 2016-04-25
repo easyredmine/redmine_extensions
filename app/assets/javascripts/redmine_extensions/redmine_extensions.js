@@ -31,9 +31,13 @@ REDMINE_EXTENSIONS = {
 
 };
 
+
+// TODO delete - it will be added to extensions
 (function($, undefined) {
 
     var plugin = 'easygrouploader';
+    if( $.fn[plugin] )
+        return;
     var defaults = {
         next_button_cols: 1,
         load_opened: false,
@@ -126,17 +130,22 @@ REDMINE_EXTENSIONS = {
     EasyGroupLoader.prototype.load_groups = function(groups_to_load) {
         var self = this;
         var group_names = groups_to_load.map(function(group) {
-            return group.group_name
+            return group.group_value;
         });
-        var url = EPExtensions.setAttrToUrl(this.loadUrl, 'group_to_load', group_names);
-        $.get(url, function(data, textStatus, request) {
-            var parsed = typeof data == 'object' ? data : $.parseJSON(data);
+        // var url = EPExtensions.setAttrToUrl(, 'group_to_load', group_names);
+        $.ajax(this.loadUrl, {
+            method: 'GET',
+            data: { group_to_load: group_names },
+            success: function(data, textStatus, request) {
+                var parsed = typeof data == 'object' ? data : $.parseJSON(data);
 
-            $.each(groups_to_load, function(idx, group) {
-                group.parseData(parsed[group.group_name]);
-                group.toggle();
-            });
-            self.initInlineEdit();
+                $.each(groups_to_load, function(idx, group) {
+                    key = group.group_name
+                    group.parseData(parsed[key]);
+                    group.toggle();
+                });
+                self.initInlineEdit();
+            }
         });
     };
 
@@ -146,7 +155,11 @@ REDMINE_EXTENSIONS = {
         this.header = header;
         this.header.data('group', this);
         this.group_name = this.header.data('group-name');
-        this.load_url = EPExtensions.setAttrToUrl(this.loader.loadUrl, 'group_to_load', this.group_name);
+        this.group_value = this.group_name;
+        if( $.isArray(this.group_name) ) {
+            // potencialne nebezpecne - TODO: vymyslet spravny oddelovac
+            this.group_name = '["' + this.group_name.join('", "') + '"]';
+        }
         this.count = parseInt(this.header.data('entity-count'));
         this.pages = this.header.data('pages') || 1;
         this.loaded = this.header.hasClass('preloaded');
@@ -162,9 +175,15 @@ REDMINE_EXTENSIONS = {
 
         if (!$hrow.hasClass('group-loaded')) {
             $hrow.addClass('group-loaded');
-            $.get(this.load_url, function(data, textStatus, request) {
-                self.parseData(data);
-                self.loader.initInlineEdit();
+            $.ajax(this.loader.loadUrl, {
+                method: 'GET',
+                data: {
+                    group_to_load: this.group_value
+                },
+                success: function(data, textStatus, request) {
+                    self.parseData(data);
+                    self.loader.initInlineEdit();
+                }
             });
         }
     };
