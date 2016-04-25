@@ -48,7 +48,10 @@ module RedmineExtensions
 
       if File.exists?("#{plugin_path}/config/locales/en.yml")
         append_to_file "#{plugin_path}/config/locales/en.yml" do
-          "\n  heading_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
+          "\n  easy_query:" +
+            "\n    name:" +
+            "\n      #{model_name_underscored}_query: #{model_name_pluralize_underscored.titleize}" +
+            "\n  heading_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
             "\n  heading_#{model_name_underscored}_edit: Edit #{model_name_underscored.titleize}" +
             "\n  button_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
             "\n  label_#{model_name_pluralize_underscored}: #{@model_name_pluralize_underscored.titleize}" +
@@ -68,6 +71,7 @@ module RedmineExtensions
       template 'hooks.rb.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/#{model_name_underscored}_hooks.rb"
       template 'index.api.rsb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.api.rsb"
       template 'index.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.html.erb"
+
       if mail?
         template 'mailer.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_mailer.rb"
         template 'mail_added.html.erb.erb', "#{plugin_path}/app/views/#{model_name_underscored}_mailer/#{model_name_underscored}_added.html.erb"
@@ -75,6 +79,7 @@ module RedmineExtensions
         template 'mail_updated.html.erb.erb', "#{plugin_path}/app/views/#{model_name_underscored}_mailer/#{model_name_underscored}_updated.html.erb"
         template 'mail_updated.text.erb.erb', "#{plugin_path}/app/views/#{model_name_underscored}_mailer/#{model_name_underscored}_updated.text.erb"
       end
+
       template 'migration.rb.erb', "#{plugin_path}/db/migrate/#{Time.now.strftime('%Y%m%d%H%M%S')}_create_#{@model_name_pluralize_underscored}.rb"
       template 'model.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}.rb"
       template 'new.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.html.erb"
@@ -102,7 +107,7 @@ module RedmineExtensions
       end
 
       if File.exists?("#{plugin_path}/init.rb")
-        s = "\nActiveSupport.on_load(:active_record) do"
+        s = "\nActiveSupport.on_load(:easyproject, yield: true) do"
         s << "\n  require '#{plugin_name_underscored}/#{model_name_underscored}_hooks'\n"
         s << "\n  Redmine::AccessControl.map do |map|"
         s << "\n    map.project_module :#{model_name_pluralize_underscored} do |pmap|"

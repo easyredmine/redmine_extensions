@@ -3,14 +3,14 @@ Redmine::Plugin.register :<%= plugin_name_underscored %> do
   author ''
   author_url ''
   description ''
-  version '<%= Date.today.strftime('%Y.01.01') %>'
+  version '<%= Date.today.strftime('%Y') %>'
 
   #into easy_settings goes available setting as a symbol key, default value as a value
   settings easy_settings: {  }
 end
 
 
-Dir[File.dirname(__FILE__) + '/lib/<%= plugin_name_underscored %>/redmine_patch/*/*.rb'].each {|file| require file }
+Dir[File.dirname(__FILE__) + '/lib/<%= plugin_name_underscored %>/easy_patch/**/*.rb'].each {|file| require_dependency file }
 
 # this block is executed once just after Redmine is started
 # means after all plugins are initialized

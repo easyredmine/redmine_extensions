@@ -87,7 +87,7 @@ module RedmineExtensions
         setting.save
         unsaved_settings << setting unless setting.persisted?
       end
-      unsaved_settings.any?
+      unsaved_settings.empty?
     end
 
     def format_value(name, value)

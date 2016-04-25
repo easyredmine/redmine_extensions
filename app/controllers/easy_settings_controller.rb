@@ -25,7 +25,7 @@ class EasySettingsController < ApplicationController
     Setting.send "plugin_#{@plugin.id}=", params[:settings] if params[:settings]
     if @easy_settings.save
       flash[:notice] = l(:notice_successful_update)
-      redirect_to redmine_extensions_engine.edit_easy_setting_path(@easy_settings)
+      redirect_back_or_default redmine_extensions_engine.edit_easy_setting_path(@easy_settings)
     else
       render :edit
     end

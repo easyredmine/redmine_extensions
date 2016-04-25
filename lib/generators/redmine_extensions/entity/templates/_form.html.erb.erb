@@ -14,7 +14,7 @@
     <%- if column_options[:query_type] == 'string' || column_options[:query_type] == 'integer' -%>
     <%%= f.text_field :<%= column_name %> %>
     <%- elsif column_options[:query_type] == 'list' || column_options[:query_type] == 'list_optional' -%>
-    <%%= f.select :<%= column_name %>, <%= column_options[:class] %>.all.collect{|x| [x.<%= column_options[:list_class_name] %>, x.id]}, include_blank: true %>
+    <%%= f.select :<%= column_name %>, <%= column_options[:class] %>.all.collect{|x| [x.<%= column_options[:list_class_name] %>, x.id]}.sort, include_blank: true %>
     <%- elsif column_options[:query_type] == 'text' -%>
     <%%= f.text_area :<%= column_name %>, :cols => 60, :rows => (<%= model_name_underscored %>.<%= column_name %>.blank? ? 10 : [[10, <%= model_name_underscored %>.<%= column_name %>.length / 50].max, 100].min), :accesskey => accesskey(:edit), :class => 'wiki-edit' %>
     <%%= wikitoolbar_for '<%= model_name_underscored %>_<%= column_name %>' %>
