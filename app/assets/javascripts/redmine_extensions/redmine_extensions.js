@@ -153,6 +153,7 @@ REDMINE_EXTENSIONS = {
         this.group_name = this.header.data('group-name');
         this.group_value = this.group_name;
         if( $.isArray(this.group_name) ) {
+            // potencialne nebezpecne - TODO: vymyslet spravny oddelovac
             this.group_name = '["' + this.group_name.join('", "') + '"]';
         }
         this.count = parseInt(this.header.data('entity-count'));
