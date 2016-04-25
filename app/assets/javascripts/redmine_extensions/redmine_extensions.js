@@ -36,6 +36,8 @@ REDMINE_EXTENSIONS = {
 (function($, undefined) {
 
     var plugin = 'easygrouploader';
+    if( $.fn[plugin] )
+        return;
     var defaults = {
         next_button_cols: 1,
         load_opened: false,
