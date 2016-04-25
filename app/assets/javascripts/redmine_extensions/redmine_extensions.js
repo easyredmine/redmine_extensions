@@ -31,6 +31,8 @@ REDMINE_EXTENSIONS = {
 
 };
 
+
+// TODO delete - it will be added to extensions
 (function($, undefined) {
 
     var plugin = 'easygrouploader';
