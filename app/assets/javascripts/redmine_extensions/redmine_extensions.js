@@ -137,11 +137,10 @@ REDMINE_EXTENSIONS = {
             method: 'GET',
             data: { group_to_load: group_names },
             success: function(data, textStatus, request) {
-                var parsed = typeof data == 'object' ? data : $.parseJSON(data);
+                var parsed = typeof(data === 'object') ? data : $.parseJSON(data);
 
                 $.each(groups_to_load, function(idx, group) {
-                    key = group.group_name
-                    group.parseData(parsed[key]);
+                    group.parseData(parsed[group.group_name]);
                     group.toggle();
                 });
                 self.initInlineEdit();
@@ -205,24 +204,32 @@ REDMINE_EXTENSIONS = {
     Group.prototype.loadNext = function() {
         var $hrow = this.header;
         var page = $hrow.data('group-page') + 1;
-        var url = EPExtensions.setAttrToUrl(this.load_url, 'page', page);
         var self = this;
 
         if (page <= this.pages) {
-            $.get(url, function(data, textStatus, request) {
-                self.next_button.before(data);
+            $.ajax(this.loader.loadUrl, {
+                method: 'GET',
+                data: {
+                    page: page,
+                    group_to_load: this.group_value
+                },
+                success: function(data, textStatus, request) {
+                    self.next_button.before(data);
 
-                self.loader.initInlineEdit();
-                $hrow.data('group-page', page);
-                if (self.pages == page) {
-                    self.next_button.remove();
+                    self.loader.initInlineEdit();
+                    $hrow.data('group-page', page);
+                    if (self.pages === page) {
+                        self.next_button.remove();
+                    }
                 }
             });
         }
     };
 
     Group.prototype.createNextButton = function() {
-        this.next_link = $('<a>', {href: this.load_url, 'class': 'button'}).text(this.loader.texts['next']).append($("<i>", {"class": "icon-arrow"}));
+        //var next_link_url = EPExtensions.setAttrToUrl(this.loader.loadUrl, 'group_to_load', this.group_value);
+        var next_link_url = this.loader.loadUrl + ( this.loader.loadUrl.indexOf('?') >= 0 ? '&' : '?' ) + $.param({group_to_load: this.group_value});
+        this.next_link = $('<a>', {href: next_link_url, 'class': 'button'}).text(this.loader.texts['next']).append($("<i>", {"class": "icon-arrow"}));
         this.next_button = $('<tr/>', {'class': 'easy-next-button'}).html($('<td>', {colspan: this.loader.options.next_button_cols, "class": "text-center"}).html(this.next_link));
 
         var self = this;
@@ -231,7 +238,7 @@ REDMINE_EXTENSIONS = {
             evt.preventDefault();
             self.loadNext();
         });
-    }
+    };
 
 })(jQuery);
 
@@ -241,7 +248,7 @@ window.cancelAnimFrame = ( function() {
         window.mozCancelRequestAnimationFrame       ||
         window.oCancelRequestAnimationFrame         ||
         window.msCancelRequestAnimationFrame        ||
-        clearTimeout
+        clearTimeout;
 } )();
 
 window.requestAnimFrame = (function(){
