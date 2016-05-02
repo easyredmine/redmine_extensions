@@ -137,7 +137,7 @@ REDMINE_EXTENSIONS = {
             method: 'GET',
             data: { group_to_load: group_names },
             success: function(data, textStatus, request) {
-                var parsed = typeof(data === 'object') ? data : $.parseJSON(data);
+                var parsed = (typeof data === 'object') ? data : $.parseJSON(data);
 
                 $.each(groups_to_load, function(idx, group) {
                     group.parseData(parsed[group.group_name]);
