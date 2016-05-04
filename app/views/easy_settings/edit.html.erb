@@ -1,4 +1,4 @@
-<%= form_for([redmine_extensions_engine, @easy_settings], html: { class: 'form-box' }) do |f| %>
+<%= form_for([redmine_extensions_engine, @easy_settings], html: { class: 'form-box easy-setting-plugin-form' }) do |f| %>
   <%= hidden_field_tag :back_url, params[:back_url] %>
 
   <%= render "easy_settings/#{@easy_settings.plugin.id}", easy_settings: @easy_settings, settings: @settings, form: f %>
