@@ -1,11 +1,13 @@
-<%= form_for([redmine_extensions_engine, @easy_settings]) do |f| %>
+<%= form_for([redmine_extensions_engine, @easy_settings], html: { class: 'form-box easy-setting-plugin-form' }) do |f| %>
   <%= hidden_field_tag :back_url, params[:back_url] %>
 
   <%= render "easy_settings/#{@easy_settings.plugin.id}", easy_settings: @easy_settings, settings: @settings, form: f %>
 
-  <% if params[:back_url].present? %>
-    <%= link_to l(:button_back), params[:back_url], class: 'button' %>
-  <% end %>
+  <div class="form-actions">
+    <%= f.submit l(:button_update_easy_settings), class: 'button-1' %>
 
-  <%= f.submit l(:button_update_easy_settings), class: 'button-2' %>
+    <% if params[:back_url].present? %>
+      <%= link_to l(:button_back), params[:back_url], class: 'button' %>
+    <% end %>
+  </div>
 <% end %>
