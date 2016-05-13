@@ -69,6 +69,7 @@ REDMINE_EXTENSIONS = {
         this.groupsContainer = $(elem);
         this.options = $.extend({}, defaults, options);
         this.loadUrl = options.loadUrl || elem.data('url');
+        this.callback = options.callback;
         this.texts = this.options.texts;
 
         this.init();
@@ -88,6 +89,8 @@ REDMINE_EXTENSIONS = {
                 }
             } else {
                 group.toggle();
+                if(self.callback !== null)
+                    self.callback();
             }
 
         });
@@ -182,6 +185,8 @@ REDMINE_EXTENSIONS = {
                 success: function(data, textStatus, request) {
                     self.parseData(data);
                     self.loader.initInlineEdit();
+                    if(self.loader.callback !== null)
+                        self.loader.callback();
                 }
             });
         }
