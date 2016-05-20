@@ -48,7 +48,11 @@ module RedmineExtensions
 
       if File.exists?("#{plugin_path}/config/locales/en.yml")
         append_to_file "#{plugin_path}/config/locales/en.yml" do
-          "\n  easy_query:" +
+          "\n  activerecord:" +
+            "\n  easy_query:" +
+            "\n    attributes:" +
+            "\n      #{model_name_underscored}:" +
+            db_columns.collect { |column_name, column_options| "\n        #{column_options[:lang_key]}: #{column_name.humanize}" }.join +
             "\n    name:" +
             "\n      #{model_name_underscored}_query: #{model_name_pluralize_underscored.titleize}" +
             "\n  heading_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
@@ -59,9 +63,6 @@ module RedmineExtensions
             "\n  permission_view_#{model_name_pluralize_underscored}: View #{model_name_pluralize_underscored.titleize}" +
             "\n  permission_manage_#{model_name_pluralize_underscored}: Manage #{model_name_pluralize_underscored.titleize}" +
             "\n  title_#{model_name_underscored}_new: Click to create new #{model_name_underscored.titleize}"
-        end
-        append_to_file "#{plugin_path}/config/locales/en.yml" do
-          db_columns.collect { |column_name, column_options| "\n  #{column_options[:lang_key]}: #{column_name.humanize}" }.join
         end
       else
         template 'en.yml.erb', "#{plugin_path}/config/locales/en.yml"
@@ -96,6 +97,7 @@ module RedmineExtensions
         append_to_file "#{plugin_path}/config/routes.rb" do
           "\nresources :#{model_name_pluralize_underscored} do" +
             "\n  collection do " +
+            "\n    get 'autocomplete'" +
             "\n    get 'bulk_edit'" +
             "\n    post 'bulk_update'" +
             "\n    get 'context_menu'" +
@@ -111,8 +113,8 @@ module RedmineExtensions
         s << "\n  require '#{plugin_name_underscored}/#{model_name_underscored}_hooks'\n"
         s << "\n  Redmine::AccessControl.map do |map|"
         s << "\n    map.project_module :#{model_name_pluralize_underscored} do |pmap|"
-        s << "\n      pmap.permission :view_#{model_name_pluralize_underscored}, { #{model_name_pluralize_underscored}: [:index, :show] }, read: true"
-        s << "\n      pmap.permission :manage_#{model_name_pluralize_underscored}, { #{model_name_pluralize_underscored}: [:new, :create, :edit, :update, :destroy, :bulk_edit, :bulk_update, :context_menu] }"
+        s << "\n      pmap.permission :view_#{model_name_pluralize_underscored}, { #{model_name_pluralize_underscored}: [:index, :show, :autocomplete, :context_menu] }, read: true"
+        s << "\n      pmap.permission :manage_#{model_name_pluralize_underscored}, { #{model_name_pluralize_underscored}: [:new, :create, :edit, :update, :destroy, :bulk_edit, :bulk_update] }"
         s << "\n    end "
         s << "\n  end\n"
         s << "\n  Redmine::MenuManager.map :top_menu do |menu|"
@@ -201,7 +203,8 @@ module RedmineExtensions
 
       attributes.each do |attr|
         attr_name, attr_type, attr_idx = attr.split(':')
-        lang_key = "field_#{model_name_underscored}_#{attr_name.to_s.sub(/_id$/, '').sub(/^.+\./, '')}"
+        #lang_key = "field_#{model_name_underscored}_#{attr_name.to_s.sub(/_id$/, '').sub(/^.+\./, '')}"
+        lang_key = "#{attr_name.to_s.sub(/_id$/, '').sub(/^.+\./, '')}"
 
         @db_columns[attr_name] = {type: attr_type || 'string', idx: attr_idx, null: true, safe: true, query_type: attr_type || 'string', lang_key: lang_key}
       end

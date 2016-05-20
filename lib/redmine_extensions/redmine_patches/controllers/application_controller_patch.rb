@@ -52,5 +52,4 @@ module RedmineExtensions
 
   end
 end
-
 RedmineExtensions::PatchManager.register_controller_patch 'ApplicationController', 'RedmineExtensions::ApplicationControllerPatch'

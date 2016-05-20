@@ -63,14 +63,28 @@ class EasyQueryAdapter < Query
     @formatter = formatter_klass.new(object)
   end
 
+  def entity
+    self.class.queried_class
+  end
+
   def entity_scope
-    if @entity_scope.present?
+    if !@entity_scope.nil?
       @entity_scope
     elsif entity.respond_to?(:visible)
       entity.visible
     else
       entity
     end
+  end
+
+  def set_entity_scope(entity, reference_collection = nil)
+    return nil if entity.nil? || reference_collection.nil?
+
+    @entity_scope = entity.send(reference_collection.to_sym)
+
+    self.filters = {}
+
+    @entity_scope
   end
 
   def create_entity_scope(options={})
@@ -111,7 +125,7 @@ class EasyQueryAdapter < Query
   end
 
   def entities(options={})
-    create_entity_scope(options).order(options[:order])
+    create_entity_scope(options).order(options[:order]).to_a
   end
 
   def add_available_column(name, options={})

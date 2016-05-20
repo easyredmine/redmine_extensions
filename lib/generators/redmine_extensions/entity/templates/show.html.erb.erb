@@ -5,9 +5,9 @@
 <%- safe_columns.each_with_index do |column, idx| -%>
 <%- next if description_column? && column[0] == description_column -%>
 <%- if idx % 2 == 0 -%>
-      <%% rows.left <%= model_name %>.human_attribute_name(:<%= column[0] %>), format_object(@<%= model_name_underscored %>.<%= column[0] %>) %>
+      <%% rows.left ::<%= model_name %>.human_attribute_name(:<%= column[0] %>), format_object(@<%= model_name_underscored %>.<%= column[0] %>) %>
 <%- else -%>
-      <%% rows.right <%= model_name %>.human_attribute_name(:<%= column[0] %>), format_object(@<%= model_name_underscored %>.<%= column[0] %>) %>
+      <%% rows.right ::<%= model_name %>.human_attribute_name(:<%= column[0] %>), format_object(@<%= model_name_underscored %>.<%= column[0] %>) %>
 <%- end -%>
 <%- end -%>
     <%% end %>
@@ -18,7 +18,7 @@
   <%% if !@<%= model_name_underscored %>.<%= description_column %>.blank? %>
     <hr />
     <div class="description">
-      <p><strong><%%= <%= model_name %>.human_attribute_name(:<%= description_column %>) %></strong></p>
+      <p><strong><%%= ::<%= model_name %>.human_attribute_name(:<%= description_column %>) %></strong></p>
       <div class="wiki">
         <%%= textilizable @<%= model_name_underscored %>, :<%= description_column %>, attachments: @<%= model_name_underscored %>.attachments %>
       </div>

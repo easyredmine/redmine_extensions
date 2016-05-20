@@ -53,6 +53,10 @@ class <%= model_name %> < ActiveRecord::Base
   after_update :send_update_notification
   <%- end -%>
 
+  def self.human_attribute_name(attribute, *args)
+    l(attribute.to_s.gsub(/\_id$/, ''), :scope => [:activerecord, :attributes, :<%= model_name_underscored %>])
+  end
+
   def self.visible_condition(user, options={})
   <%- if project? -%>
     Project.allowed_to_condition(user, :<%= view_permission %>, options)
