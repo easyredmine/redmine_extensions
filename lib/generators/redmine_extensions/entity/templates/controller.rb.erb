@@ -128,6 +128,9 @@ class <%= controller_class %>Controller < ApplicationController
     render :layout => false
   end
 
+  def autocomplete
+  end
+
   private
 
   def find_<%= model_name_underscored %>

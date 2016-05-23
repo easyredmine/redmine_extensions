@@ -3,7 +3,7 @@
   <li><%%= link_to l(:button_edit), edit_polymorphic_path([@project, @<%= model_name_underscored %>]), title: l(:button_edit), class: 'icon icon-edit' %></li>
 <%% end %>
 <%% if @<%= model_name_underscored %>.nil? %>
-  <li><%%= link_to l(:button_<%= model_name_underscored %>_new), new_polymorphic_path([@project, :<%= model_name_underscored %>]), title: l(:title_<%= model_name_underscored %>_new), class: 'icon icon-add' %></li>
+  <li><%%= link_to l(:button_<%= model_name_underscored %>_new), new_polymorphic_path([@project, :<%= model_name_underscored %>]), title: l(:title_<%= model_name_underscored %>_new), class: 'icon icon-add button button-positive' %></li>
 <%% end %>
-  <li><%%= link_to l(:label_<%= model_name_pluralize_underscored %>), polymorphic_path([@project, <%= model_name %>], set_filter: '1'), title: l(:label_<%= model_name_pluralize_underscored %>), class: 'icon icon-folder' %></li>
+  <li><%%= link_to l(:label_<%= model_name_pluralize_underscored %>), polymorphic_path([@project, :<%= model_name_pluralize_underscored %>], set_filter: '1'), title: l(:label_<%= model_name_pluralize_underscored %>), class: 'icon icon-folder button' %></li>
 </ul>

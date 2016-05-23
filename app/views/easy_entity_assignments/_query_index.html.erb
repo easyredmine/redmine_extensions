@@ -1,0 +1,11 @@
+<% if display_style == :list %>
+  <%= render :partial => 'easy_queries/easy_query_entities_list', :locals => {:query => query, :entities => referenced_entities, :options => {:hascontextmenu => true, :disable_sort => true} } -%>
+<% elsif display_style == :tile %>
+  <div class="easy-entity-cards-container">
+    <div class="splitcontent">
+      <% entities.each do |referenced_entity| %>
+        <%# render_easy_entity_card(referenced_entity, entity, options.merge(:referenced_entities => referenced_entities)) %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

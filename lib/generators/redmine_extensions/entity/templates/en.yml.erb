@@ -1,4 +1,8 @@
 en:
+  activerecord:
+    attributes:
+      <%= model_name_underscored %>:
+<%= db_columns.collect{|column_name, column_options| "\n        #{column_options[:lang_key]}: #{column_name.humanize}"  }.join %>
   easy_query:
     name:
       <%= model_name_underscored %>_query: <%= model_name_pluralize_underscored.titleize %>
@@ -10,4 +14,3 @@ en:
   permission_view_<%= model_name_pluralize_underscored %>: View <%= model_name_pluralize_underscored.titleize %>
   permission_manage_<%= model_name_pluralize_underscored %>: Manage <%= model_name_pluralize_underscored.titleize %>
   title_<%= model_name_underscored %>_new: Click to create new <%= model_name_underscored.titleize %>
-<%= db_columns.collect{|column_name, column_options| "\n  #{column_options[:lang_key]}: #{column_name.humanize}"  }.join %>

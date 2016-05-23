@@ -2,7 +2,7 @@
   <%- if project? -%>
   <%% if <%= model_name_underscored %>.safe_attribute?('project_id') && !@project %>
   <p>
-    <%%= f.label :project_id, <%= model_name %>.human_attribute_name(:project_id) %>
+    <%%= f.label :project_id, ::<%= model_name %>.human_attribute_name(:project_id) %>
     <%%= f.select :project_id, Project.allowed_to(:manage_<%= model_name_pluralize_underscored %>).collect{|x| [x.name, x.id]}, include_blank: true %>
   </p>
   <%% end %>
@@ -10,7 +10,7 @@
   <%- safe_columns.each do |column_name, column_options| -%>
   <%% if <%= model_name_underscored %>.safe_attribute?('<%= column_name %>') %>
   <p>
-    <%%= f.label :<%= column_name %>, <%= model_name %>.human_attribute_name(:<%= column_name %>) %>
+    <%%= f.label :<%= column_name %>, ::<%= model_name %>.human_attribute_name(:<%= column_name %>) %>
     <%- if column_options[:query_type] == 'string' || column_options[:query_type] == 'integer' -%>
     <%%= f.text_field :<%= column_name %> %>
     <%- elsif column_options[:query_type] == 'list' || column_options[:query_type] == 'list_optional' -%>

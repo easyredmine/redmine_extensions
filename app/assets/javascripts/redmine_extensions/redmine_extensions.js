@@ -302,3 +302,290 @@ window.showFlashMessage = (function(type, message, delay){
 window.closeFlashMessage = (function($element){
     $element.closest('.flash').fadeOut(500, function(){$element.remove();});
 });
+
+
+(function($, undefined) {
+
+    $.widget('easy.easymultiselect', {
+        options: {
+            source: null,
+            selected: null,
+            multiple: true, // multiple values can be selected
+            preload: true, // load all possible values
+            position: {collision: 'flip'},
+            autofocus: false,
+            inputName: null, // defaults to element prop name
+            render_item: function(ul, item) {
+                return $("<li>")
+                    .data("item.autocomplete", item)
+                    .append(item.label)
+                    .appendTo(ul);
+            },
+            activate_on_input_click: true,
+            load_immediately: false,
+            show_toggle_button: true,
+            select_first_value: true,
+            autocomplete_options: {}
+        },
+
+        _create: function() {
+            this.selectedValues = this.options.selected;
+            this._createUI();
+            this.expanded = false;
+            this.valuesLoaded = false;
+            this.afterLoaded = [];
+            if ( Array.isArray(this.options.source) ) {
+                this.options.preload = true;
+                this._initData(this.options.source);
+            } else if ( this.options.preload && this.options.load_immediately) {
+                this.load();
+            }
+        },
+
+        _createUI: function() {
+            var that = this;
+            this.element.wrap('<span class="easy-autocomplete-tag"></span>');
+            this.tag = this.element.parent();
+            this.inputName = this.options.inputName || this.element.prop('name');
+
+            if( this.options.multiple ) { // multiple values
+                this.valueElement = $('<span></span>');
+                this.tag.after(this.valueElement);
+
+                if (this.options.show_toggle_button)
+                    this._createToggleButton();
+
+                this.valueElement.entityArray({
+                    inputNames: this.inputName,
+                    afterRemove: function (entity) {
+                        that.element.trigger('change');
+                    }
+                });
+            } else { //single value
+                this.valueElement = $('<input>', {type: 'hidden', name: this.inputName});
+                this.element.after(this.valueElement);
+            }
+
+            this._createAutocomplete();
+            if( !this.options.multiple ) {
+                this.element.css('margin-right', 0);
+            }
+        },
+
+        _createToggleButton: function() {
+            var that = this;
+            this.link_ac_toggle = $('<a>').attr('class', 'icon icon-add clear-link');
+            this.link_ac_toggle.click(function(evt) {
+                var $elem = $(this);
+                evt.preventDefault();
+                that.load(function(){
+                    select = $('<select>').prop('multiple', true).prop('size', 5).prop('name', that.inputName);
+                    $.each(that.possibleValues, function(i, v) {
+                        option = $('<option>').prop('value', v.id).text(v.value);
+                        option.prop('selected', that.getValue().indexOf(v.id) > -1);
+                        select.append(option);
+                    });
+                    $container = $elem.closest('.easy-multiselect-tag-container')
+                    $container.children().hide();
+                    $container.append(select);
+                    that.valueElement = select;
+                    that.expanded = true;
+                });
+            });
+            this.element.parent().addClass('input-append');
+            this.element.after(this.link_ac_toggle);
+        },
+
+        _createAutocomplete: function() {
+            var that = this;
+
+            that.element.autocomplete($.extend({
+                source: function(request, response) {
+                    if( that.options.preload ) {
+                        that.load(function(){
+                            var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
+                            response($.grep(that.possibleValues, function(val, i) {
+                                return ( !that.options.multiple || !request.term || matcher.test(val.value));
+                            }));
+                        }, function(){
+                            response();
+                        });
+                    } else { // asking server everytime
+                        $.getJSON(that.options.source, {
+                            term: request.term
+                        }, function(json) {
+                            response(that.options.rootElement ? json[that.options.rootElement] : json);
+                        });
+                    }
+                },
+                minLength: 0,
+                select: function(event, ui) {
+                    that.selectValue(ui.item)
+                    return false;
+                },
+                change: function(event, ui) {
+                    if (!ui.item) {
+                        $(this).val('');
+                        if( !that.options.multiple ) {
+                            that.valueElement.val('');
+                            that.valueElement.change();
+                        }
+                    }
+                },
+                position: this.options.position,
+                autoFocus: this.options.autofocus
+            }, this.options.autocomplete_options)).data("ui-autocomplete")._renderItem = this.options.render_item;
+
+            this.element.click(function() {
+                $(this).select();
+            });
+            if( this.options.activate_on_input_click ) {
+                this.element.on('click', function() {
+                    if(!that.options.preload)
+                        that.element.focus().val('');
+                    that.element.trigger('keydown');
+                    that.element.autocomplete("search", that.element.val());
+                });
+            }
+
+            $("<button type='button'>&nbsp;</button>")
+                .attr("tabIndex", -1)
+                .insertAfter(that.element)
+                .button({
+                    icons: {
+                        primary: "ui-icon-triangle-1-s"
+                    },
+                    text: false
+                })
+                .removeClass("ui-corner-all")
+                .addClass("ui-corner-right ui-button-icon")
+                .css('font-size', '10px')
+                .css('margin-left', -1)
+                .click(function() {
+                    if (that.element.autocomplete("widget").is(":visible")) {
+                        that.element.autocomplete("close");
+                        that.element.blur();
+                        return;
+                    }
+                    $(this).blur();
+                    if(!that.options.preload)
+                        that.element.focus().val('');
+                    that.element.trigger('keydown');
+                    that.element.autocomplete("search", that.element.val());
+                });
+        },
+
+        _formatData: function(data) {
+            return $.map(data, function(elem, i){
+                var id, value;
+                if( $.isArray(elem) ) {
+                    value = elem[0];
+                    id = elem[1];
+                } else {
+                    id = value = elem;
+                }
+                return {value: value, id: id};
+            });
+        },
+
+        _initData: function(data) {
+            this.possibleValues = this._formatData(data)
+            this.valuesLoaded = true;
+
+            this.selectedValues = this.selectedValues ? this.selectedValues : [];
+            if( this.selectedValues.length == 0 && this.options.preload && this.options.select_first_value && this.possibleValues.length > 0 ) {
+                this.selectedValues.push(this.possibleValues[0]['id'])
+            }
+
+            this.setValue(this.selectedValues);
+        },
+
+        load: function(success, fail) {
+            var that = this;
+            if( this.valuesLoaded ) {
+                if( typeof success === 'function' )
+                    success();
+                return;
+            }
+
+            if( typeof success === 'function' )
+                this.afterLoaded.push(success);
+
+            if( this.loading )
+                return;
+
+            this.loading = true;
+            $.ajax(this.options.source, {
+                dataType: 'json',
+                success: function(data, status, xhr) {
+                    that._initData(data);
+                    for (var i = that.afterLoaded.length - 1; i >= 0; i--) {
+                        that.afterLoaded[i].call();
+                    }
+                },
+                error: fail
+            }).always(function(){
+                that.loading = false;
+            });
+        },
+
+        selectValue: function(value) {
+            if( this.options.multiple ) {
+                this.valueElement.entityArray('add', {
+                    id: value.id,
+                    name: value.value
+                });
+                this.element.trigger('change');
+            } else {
+                this.element.val(value.value);
+                this.valueElement.val(value.id);
+                this.valueElement.change();
+            }
+        },
+
+        setValue: function(values) {
+            var that = this;
+            if( typeof values == 'undefined' || !values )
+                return false;
+
+            if( this.options.preload ) {
+                this.load(function(){
+                    if( that.options.multiple ) {
+                        that.valueElement.entityArray('clear');
+                    }
+                    that._setValues(values)
+                });
+            } else {
+                // TODO - where to get real text value?
+                this.element.val(values[0]);
+                this.valueElement.val(values[0]);
+            }
+        },
+
+        _setValues: function(values) {
+            var that = this;
+            $.each(that.possibleValues, function(i, val) {
+                if ( values.indexOf(val.id) > -1 || (values.indexOf(val.id.toString()) > -1)) {
+                    if(that.options.multiple) {
+                        that.valueElement.entityArray('add', { id: val.id, name: val.value });
+                    } else {
+                        that.element.val(val.value);
+                        that.valueElement.val(val.id);
+                    }
+                }
+            });
+        },
+
+        getValue: function() {
+            if( this.options.multiple && !this.expanded ) {
+                return this.valueElement.entityArray('getValue'); // entityArray
+            } else if ( this.options.multiple ) {
+                return this.valueElement.val(); //select multiple=true
+            } else {
+                return [this.valueElement.val()]; // hidden field
+            }
+        }
+
+    });
+
+})(jQuery);
