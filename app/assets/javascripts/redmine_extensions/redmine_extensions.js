@@ -89,7 +89,7 @@ REDMINE_EXTENSIONS = {
                 }
             } else {
                 group.toggle();
-                if(typeof(callback) === 'function')
+                if(typeof(self.callback) === 'function')
                     self.callback();
             }
 
@@ -185,7 +185,7 @@ REDMINE_EXTENSIONS = {
                 success: function(data, textStatus, request) {
                     self.parseData(data);
                     self.loader.initInlineEdit();
-                    if(self.loader.callback !== null)
+                    if(typeof(self.loader.callback) === 'function')
                         self.loader.callback();
                 }
             });
