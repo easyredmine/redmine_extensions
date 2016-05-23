@@ -89,7 +89,7 @@ REDMINE_EXTENSIONS = {
                 }
             } else {
                 group.toggle();
-                if(self.callback !== null)
+                if(typeof(callback) === 'function')
                     self.callback();
             }
 
