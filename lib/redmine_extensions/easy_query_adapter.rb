@@ -25,8 +25,14 @@ class EasyQueryAdapter < Query
 
   after_initialize :after_initialize
 
+  attr_accessor :outputs
+
   def after_initialize
     self.filters ||= {}
+  end
+
+  def output=(output_t)
+    self.outputs = Array.wrap(output_t)
   end
 
   def default_find_include

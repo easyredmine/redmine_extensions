@@ -15,7 +15,7 @@ module RedmineExtensions
 
     def self.presenter_for(model)
       klasses = model.hiearchy.map do |klass|
-        (registered_presenters[klass] || "#{klass}Presenter").constantize rescue nil
+        (registered_presenters[klass] || "#{klass}Presenter").constantize rescue ( "RedmineExtensions::#{klass}Presenter".constantize rescue nil )
       end.compact
       raise NameError, 'presenter for ' + model.class.name + ' is not registered' unless klasses.any?
       klasses.first

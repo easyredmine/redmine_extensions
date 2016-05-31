@@ -68,7 +68,6 @@ module RedmineExtensions
 
       entities_count = entities.size
       options[:entities_count] = entities_count
-
       options[:module_name] ||= "entity_#{entity.class.name.underscore}_#{entity.id}_#{collection_name}"
       options[:heading] ||= l("label_#{target_class.name.underscore}_plural", :default => 'Heading')
 
@@ -81,6 +80,8 @@ module RedmineExtensions
           m if respond_to?(m)
         end
       end
+
+      query.output = options[:display_style] || (entities_count > 3 ? 'list' : 'tile')
 
       render(:partial => 'easy_entity_assignments/assignments_container', :locals => {
         :entity => entity,

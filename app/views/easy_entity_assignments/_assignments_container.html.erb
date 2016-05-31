@@ -1,9 +1,8 @@
 <%
-   display_style = options[:display_style] || (entities_count > 3 ? :list : :tile)
-   heading = "#{options[:heading]} (#{entities_count})"
+  heading = "#{options[:heading]} (#{entities_count})"
 %>
 <% if entities_count > 0 %>
-  <div id="<%= options[:module_name] %>_container" class="entity_references_container easy-dropper-target easy-drop-issue <%= display_style.to_s %>" data-drop-action="<%= entity.class.name.underscore %>" data-entity-id="<%= entity.id %>" data-issue-show="1">
+  <div id="<%= options[:module_name] %>_container" class="entity_references_container easy-dropper-target easy-drop-issue" data-drop-action="<%= entity.class.name.underscore %>" data-entity-id="<%= entity.id %>" data-issue-show="1">
     <%= call_hook(:view_easy_entity_assignemnt_top, :entity => entity, :query => query, :entities => entities, :options => options, :target_class => target_class) %>
     <div class="box">
       <%# entity_cards_params = {:module_name => options[:module_name], :project_id => project, :source_entity_type => entity.class.name, :source_entity_id => entity, :referenced_entity_type => referenced_entity_type, :referenced_collection_name => options[:referenced_collection_name]}.merge!(query.to_params) %>
@@ -18,7 +17,7 @@
           <%= render(:partial => 'easy_entity_assignments/query_index', :locals => {
                                                                       :entity => entity,
                                                                       :query => query, :target_class => target_class,
-                                                                      :project => project, :options => options, :entities => entities, :display_style => display_style}) %>
+                                                                      :project => project, :options => options, :referenced_entities => entities}) %>
 
 
         <% if options[:context_menus_path] && respond_to?(options[:context_menus_path]) %>
