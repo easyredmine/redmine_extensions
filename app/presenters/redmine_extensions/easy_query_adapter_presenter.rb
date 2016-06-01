@@ -2,7 +2,7 @@ module RedmineExtensions
   class EasyQueryAdapterPresenter < BasePresenter
 
     # --- GETTERS ---
-    attr_accessor :loading_group, :page_module, :row_limit, :export_formats
+    attr_accessor :page_module, :row_limit
 
     # should be defined in parent in future
     def initialize(query, view_context=nil, options={})
