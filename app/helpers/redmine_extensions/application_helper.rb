@@ -81,7 +81,7 @@ module RedmineExtensions
         end
       end
 
-      query.output = options[:display_style] || (entities_count > 3 ? 'list' : 'tile')
+      # query.output = options[:display_style] || (entities_count > 3 ? 'list' : 'tile')
 
       render(:partial => 'easy_entity_assignments/assignments_container', :locals => {
         :entity => entity,

@@ -25,10 +25,14 @@ class EasyQueryAdapter < Query
 
   after_initialize :after_initialize
 
-  attr_accessor :outputs
+  attr_writer :outputs
 
   def after_initialize
     self.filters ||= {}
+  end
+
+  def outputs
+    @outputs ||= ['list']
   end
 
   def output=(output_t)

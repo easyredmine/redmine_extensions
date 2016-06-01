@@ -10,7 +10,7 @@ module RedmineExtensions
       end
 
       def outputs
-        @outputs ||= enabled_outputs.map{|o| RedmineExtensions::QueryOutput.output_klass_for(o).new(@presenter) }.sort{|a,b| a.order <=> b.order}
+        @outputs ||= enabled_outputs.map{|o| RedmineExtensions::QueryOutput.output_klass_for(o).new(@presenter) }.sort_by{|a| a.order}
       end
 
       def each(style = :enabled, &block)
