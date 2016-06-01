@@ -47,4 +47,6 @@ module RedmineExtensions
     def filters_active?
       model.filters.any?
     end
+
+  end
 end
