@@ -44,20 +44,21 @@ module RedmineExtensions
       end
     end
 
-    def render_entity_assignments(entity, target_class, options = {}, &block)
+    def query_for_entity(entity_class)
+      entity_class_name = entity_class.name
+      query_class = "Easy#{entity_class_name}Query".constantize rescue nil
+      return query_class if query_class && query_class < EasyQuery
+      query_class ||= "#{entity_class_name}Query".constantize rescue nil
+    end
+
+    def render_entity_assignments(entity, target_entity, options = {}, &block)
       options ||= {}
-      collection_name = options.delete(:collection_name) || target_class.name.pluralize.underscore
+      collection_name = options.delete(:collection_name) || target_entity.name.pluralize.underscore
+      query_class = query_for_entity(target_entity)
+
+      return '' if !query_class || !entity.respond_to?(collection_name)
 
       project = options.delete(:project)
-      query_class = options.delete(:query_class)
-
-      if query_class.nil?
-        query_class_name = target_class.name + 'Query'
-
-        query_class = query_class_name.constantize #if Object.const_defined?(query_class_name)
-      end
-
-      return '' if !query_class || !(query_class < EasyQuery) || !entity.respond_to?(collection_name)
 
       query = query_class.new(:name => 'c_query')
       query.project = project
@@ -70,7 +71,7 @@ module RedmineExtensions
       options[:entities_count] = entities_count
 
       options[:module_name] ||= "entity_#{entity.class.name.underscore}_#{entity.id}_#{collection_name}"
-      options[:heading] ||= l("label_#{target_class.name.underscore}_plural", :default => 'Heading')
+      options[:heading] ||= l("label_#{query.entity}_plural", :default => 'Heading')
 
       if options[:context_menus_path].nil?
         options[:context_menus_path] = [
@@ -84,7 +85,7 @@ module RedmineExtensions
 
       render(:partial => 'easy_entity_assignments/assignments_container', :locals => {
         :entity => entity,
-        :query => query, :target_class => target_class, :project => project,
+        :query => query, :project => project,
         :entities => entities, :entities_count => entities_count, :options => options})
     end
 
