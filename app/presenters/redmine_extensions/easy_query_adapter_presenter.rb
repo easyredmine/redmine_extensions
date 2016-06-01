@@ -47,31 +47,4 @@ module RedmineExtensions
     def filters_active?
       model.filters.any?
     end
-
-    #------ MIDDLE LAYER ------
-
-    # Returns count of entities on the list action
-    # returns groups_count if query is grouped and entity_count otherwise
-    def entity_count_for_list(options={})
-      if self.grouped?
-        model.groups_count(options)
-      else
-        model.entity_count(options)
-      end
-    end
-
-    def path(params={})
-      if self.new_record?
-        entity_easy_query_path(self.to_params.merge(params))
-      else
-        entity_easy_query_path({:query_id => model}.merge(params))
-      end
-    end
-
-    def entity_easy_query_path(options = {})
-      options = options.dup
-
-      h.polymorphic_path([(options.delete(:project) || self.project), self.entity], options)
-    end
-  end
 end
