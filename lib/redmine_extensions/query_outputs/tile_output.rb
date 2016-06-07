@@ -10,7 +10,7 @@ module RedmineExtensions
         options[:entity]
       end
 
-      def render_entity_card(referenced_entity)
+      def render_entity_tile(referenced_entity)
         referenced_entity.to_s
       end
 

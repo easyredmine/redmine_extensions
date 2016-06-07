@@ -26,7 +26,7 @@ module RedmineExtensions
       end
 
       def enabled_outputs
-        res = @query.outputs.map{|o| o == 'table' ? 'list' : o}
+        res = @query.outputs
         res << 'list' if res.empty? && available_outputs.empty?
         res
       end
