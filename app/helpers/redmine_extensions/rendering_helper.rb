@@ -20,5 +20,10 @@ module RedmineExtensions
       partial.prepend("#{prefixes.last}/")
       render(*attrs)
     end
+
+    def query_outputs(presenter_or_query, options={})
+      presenter = present(presenter_or_query, options) rescue RedmineExtensions::BasePresenter.new(presenter_or_query, self, options)
+      RedmineExtensions::EasyQueryHelpers::Outputs.new(presenter)
+    end
   end
 end

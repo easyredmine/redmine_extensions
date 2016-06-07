@@ -4,8 +4,8 @@ module RedmineExtensions
     attr_accessor :query
     delegate :options, to: :query
 
-    def self.register_output(name, klass, options={})
-      registered_outputs[name] = klass
+    def self.register_output(klass, options={})
+      registered_outputs[klass.key.to_sym] = klass
     end
 
     def self.registered_outputs
@@ -19,15 +19,17 @@ module RedmineExtensions
     end
 
     def self.available_output_klasses_for(query)
-      result = []
-      registered_outputs.each do |name, output|
-        result << output if output.available_for?(query)
-      end
-      result
+      registered_outputs.select do |name, output|
+        output.available_for?(query)
+      end.values
     end
 
     def self.output_klass_for(output)
       registered_outputs[output.to_sym]
+    end
+
+    def self.key
+      self.name.split('::').last.sub(/Output$/, '').underscore
     end
 
 
@@ -40,16 +42,24 @@ module RedmineExtensions
       @query = query_presenter
     end
 
-    def render_data;
-      raise NotImplemented
+    def data_partial
+      'easy_queries/easy_query_'+key
+    end
+
+    def order
+      10
+    end
+
+    def render_data
+      h.render partial: data_partial, locals: variables
     end
 
     def key
-      self.class.name.split('::').last.sub(/Output$/, '').underscore
+      self.class.key
     end
 
     def label
-      h.l('label_easy_query_output.'+key)
+      h.l('label_easy_query_output.'+key, default: key.humanize)
     end
 
     def enabled?
@@ -57,7 +67,7 @@ module RedmineExtensions
     end
 
     def variables
-      options.merge(easy_query: @query, output: self)
+      options.reverse_merge(query: @query, output: self)
     end
 
     def header
@@ -68,20 +78,25 @@ module RedmineExtensions
     def render_edit_box(style=:check_box, options={})
       raise 'Style of edit box is not allowed' unless [:check_box, :radio_button].include?(style)
 
-      box_id = "#{options[:modul_uniq_id]}_output_#{key}"
+      box_id = "#{query.modul_uniq_id}output_#{key}"
 
-      options[:class] ||= "#{options[:modul_uniq_id]}content_switch"
+
+      options[:class] = "#{options[:class]} #{query.modul_uniq_id}output_switch #{query.modul_uniq_id}content_switch"
+      options[:enabled] = enabled? unless options.key?(:enabled)
       r = ''
-      r << h.send("#{style}_tag" , "#{options[:block_name]}[output]", key, enabled?, id: box_id, class: options[:class])
-      r << h.label_tag(box_id, h.l('label_easy_query_output.' + key), :class => 'inline')
-      r
+      r << h.send("#{style}_tag" , query.block_name.blank? ? 'outputs[]' : "#{query.block_name}[outputs][]", key, options[:enabled], id: box_id, class: options[:class])
+      r << h.label_tag(box_id, h.l('label_my_page_issue_output.' + key), :class => 'inline')
+      r.html_safe
     end
 
-    def render_edit
+    def render_edit(action='edit')
       h.content_tag(:fieldset, class: "easy-query-filters-field #{key}_settings", style: ('display: none;' unless enabled? )) do
-        h.content_tag(:legend, label) +
-        h.render(self.edit_form, query: query, modul_uniq_id: query.modul_uniq_id, action: 'edit')
+        h.content_tag(:legend, label) + render_edit_form(action)
       end
+    end
+
+    def render_edit_form(action='edit')
+      h.render(self.edit_form, options.reverse_merge(query: query, modul_uniq_id: query.modul_uniq_id, block_name: query.block_name, action: action, page_module: query.page_module))
     end
 
     def edit_form
@@ -95,4 +110,4 @@ module RedmineExtensions
   end
 end
 # alias for convinience
-EasyQueryOutput = RedmineExtensions::QueryOutput
+# EasyQueryOutput = RedmineExtensions::QueryOutput

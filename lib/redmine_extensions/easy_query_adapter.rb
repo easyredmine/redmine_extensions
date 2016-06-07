@@ -28,6 +28,16 @@ module RedmineExtensions
     #   self.filters ||= {}
     # end
 
+    attr_writer :outputs
+
+    def outputs
+      @outputs ||= ['list']
+    end
+
+    def output=(output_t)
+      self.outputs = Array.wrap(output_t)
+    end
+
     def filters
       super || {}
     end

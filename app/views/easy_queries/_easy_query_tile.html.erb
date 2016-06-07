@@ -1,0 +1,7 @@
+<div class="easy-entity-cards-container">
+  <div class="splitcontent">
+    <% query.entities.each do |referenced_entity| %>
+      <%= output.render_entity_tile(referenced_entity) %>
+    <% end %>
+  </div>
+</div>

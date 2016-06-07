@@ -14,15 +14,11 @@
                                                     ]}) do %>
 
 
-        <%#= render(:partial => 'easy_entity_assignments/query_index', :locals => {
-                                                                    :entity => entity,
-                                                                    :query => query, :target_class => target_class,
-                                                                    :project => project, :options => options, :referenced_entities => entities}) %>
-        <% entities.each do |entity| %>
-          <div>
-            <%= entity.to_s %>
-          </div>
-        <% end %>
+          <%= render(:partial => 'easy_entity_assignments/query_index', :locals => {
+                                                                      :entity => entity,
+                                                                      :query => query,
+                                                                      :project => project, :options => options, :referenced_entities => entities}) %>
+
 
         <% if options[:context_menus_path] && respond_to?(options[:context_menus_path]) %>
           <%# context_menu(send(options[:context_menus_path], {:project_id => project, :back_url => url_for(params)}), "##{options[:module_name]}_container") -%>
