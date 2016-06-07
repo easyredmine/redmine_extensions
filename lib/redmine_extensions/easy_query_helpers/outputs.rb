@@ -4,13 +4,9 @@ module RedmineExtensions
     class Outputs
       include Enumerable
 
-      def initialize(query_or_presenter)
-        if query_or_presenter.is_a?(RedmineExtensions::BasePresenter)
-          @presenter = query_or_presenter
-          @query = @presenter.model
-        else
-          @presenter = @query = query_or_presenter
-        end
+      def initialize(presenter)
+        @presenter = presenter
+        @query = @presenter.model
       end
 
       def outputs

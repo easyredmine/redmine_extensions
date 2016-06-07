@@ -22,7 +22,7 @@ module RedmineExtensions
     end
 
     def query_outputs(presenter_or_query, options={})
-      presenter = present(presenter_or_query, options) rescue presenter_or_query
+      presenter = present(presenter_or_query, options) rescue RedmineExtensions::BasePresenter.new(presenter_or_query, self, options)
       RedmineExtensions::EasyQueryHelpers::Outputs.new(presenter)
     end
   end
