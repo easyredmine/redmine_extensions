@@ -67,7 +67,7 @@ module RedmineExtensions
     end
 
     def variables
-      options.reverse_merge(easy_query: @query, output: self)
+      options.reverse_merge(query: @query, output: self)
     end
 
     def header
