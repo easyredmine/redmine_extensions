@@ -4,20 +4,29 @@ module RedmineExtensions
     class Outputs
       include Enumerable
 
-      def initialize(presenter)
-        @presenter = presenter
-        @query = @presenter.model
+      def initialize(presenter, view_context = nil)
+        if presenter.is_a?(RedmineExtensions::BasePresenter)
+          @presenter = presenter
+          @query = @presenter.model
+        else
+          @presenter = @query = presenter
+        end
+        @view_context = view_context
+      end
+
+      def view_context
+        @view_context || @presenter.h
       end
 
       def outputs
-        @outputs ||= enabled_outputs.map{|o| RedmineExtensions::QueryOutput.output_klass_for(o).new(@presenter) }.sort_by{|a| a.order}
+        @outputs ||= enabled_outputs.map{|o| RedmineExtensions::QueryOutput.output_klass_for(o).new(@presenter, self) }.sort_by{|a| a.order}
       end
 
       def each(style = :enabled, &block)
         if style == :enabled
           outputs.each(&block)
         else
-          available_output_instances.each(&block)
+          available_outputs.each(&block)
         end
       end
 
@@ -32,7 +41,7 @@ module RedmineExtensions
       end
 
       def available_outputs
-        @available_outputs ||= RedmineExtensions::QueryOutput.available_output_klasses_for( @query ).map{|klass| klass.new(@presenter) }
+        @available_outputs ||= RedmineExtensions::QueryOutput.available_output_klasses_for( @query ).map{|klass| klass.new(@presenter, self) }
       end
 
       def output_enabled?(output)
