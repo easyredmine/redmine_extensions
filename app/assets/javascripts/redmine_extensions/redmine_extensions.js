@@ -309,6 +309,7 @@ window.closeFlashMessage = (function($element){
     $.widget('easy.easymultiselect', {
         options: {
             source: null,
+            rootElement: null, // rootElement in the response from source
             selected: null,
             multiple: true, // multiple values can be selected
             preload: true, // load all possible values
@@ -385,7 +386,8 @@ window.closeFlashMessage = (function($element){
                         option.prop('selected', that.getValue().indexOf(v.id) > -1);
                         select.append(option);
                     });
-                    $container = $elem.closest('.easy-multiselect-tag-container')
+                    $container = $elem.closest('.easy-multiselect-tag-container');
+                    $container.children(':input').prop('disabled', true);
                     $container.children().hide();
                     $container.append(select);
                     that.valueElement = select;
@@ -484,7 +486,10 @@ window.closeFlashMessage = (function($element){
                 } else {
                     id = value = elem;
                 }
-                return {value: value, id: id};
+                if ( elem !== null && typeof elem === 'object' )
+                    return elem;
+                else
+                    return {value: value, id: id};
             });
         },
 
@@ -517,7 +522,8 @@ window.closeFlashMessage = (function($element){
             this.loading = true;
             $.ajax(this.options.source, {
                 dataType: 'json',
-                success: function(data, status, xhr) {
+                success: function(json, status, xhr) {
+                    data = that.options.rootElement ? json[that.options.rootElement] : json
                     that._initData(data);
                     for (var i = that.afterLoaded.length - 1; i >= 0; i--) {
                         that.afterLoaded[i].call();
