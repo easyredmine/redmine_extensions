@@ -386,7 +386,7 @@ window.closeFlashMessage = (function($element){
                         select.append(option);
                     });
                     $container = $elem.closest('.easy-multiselect-tag-container')
-                    $container.children().hide();
+                    $container.children().remove();
                     $container.append(select);
                     that.valueElement = select;
                     that.expanded = true;

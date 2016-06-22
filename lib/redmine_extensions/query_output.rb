@@ -35,11 +35,12 @@ module RedmineExtensions
 
     # Take query and decide if it is possible to render it by this output
     def self.available_for?(query)
-      true
+      query.class > Query
     end
 
-    def initialize(query_presenter)
+    def initialize(query_presenter, outputs=nil)
       @query = query_presenter
+      @outputs = outputs || query_presenter.outputs
     end
 
     def data_partial
@@ -63,7 +64,7 @@ module RedmineExtensions
     end
 
     def enabled?
-      query.outputs.output_enabled?(key)
+      @outputs.output_enabled?(key)
     end
 
     def variables
@@ -104,7 +105,7 @@ module RedmineExtensions
     end
 
     def h
-      @query.h
+      @outputs.view_context
     end
 
   end
