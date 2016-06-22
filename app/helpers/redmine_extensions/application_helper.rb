@@ -108,62 +108,103 @@ module RedmineExtensions
       end
     end
 
-    # options:
-    # => options[:heading] = text beside of plus button
-    # => options[:container_html] = a hash of html attributes
-    # => options[:default_button_state] = (true => expanded -), (false => collapsed +)
-    # => options[:ajax_call] = make ajax call for saving state (true => ajax call, false => no call, no save)
-    # => options[:wrapping_heading_element] = html element outside heading => h3, h4
-    def render_toggler(container_uniq_id, user = nil, options={}, &block)
-      user ||= User.current
-      options[:heading] ||= ''
-      options[:heading_links] ||= []
-      options[:heading_links] = [options[:heading_links]] if options[:heading_links] && !options[:heading_links].is_a?(Array)
-      options[:container_html] ||= {}
-      options[:default_button_state] = false #if is_mobile_device?
-      options[:default_button_state] = true if options[:default_button_state].nil?
-      options[:ajax_call] = true if options[:ajax_call].nil?
 
-      s = ''
-      if !options.key?(:no_heading_button)
-        options[:heading] << content_tag(:div, options[:heading_links].join(' ').html_safe, :class => 'module-heading-links') unless options[:heading_links].blank?
-        s << render_toggler_header(user, options[:heading].html_safe, container_uniq_id, options)
-      end
+    # ==== Options
+    # * <tt>class: Hash or String</tt> - This option can be used to add custom CSS classes. It can be *String* or *Hash*.
+    #       class: {heading: 'heading-additional-css', container: 'container-additional-css'}
+    # * <tt>heading_tag: name of HTML element of module heading</tt> - By default its its *h3*
+    # ** Aliases for this options are: wrapping_heading_element, header_tag
+    # * <tt>toggle: false</tt> - This disable toggle function (collapsible and remember)
+    # ** Aliases for this options are: collapsible, no_expander
+    # * <tt>remember: false</tt> - This disable remember function of toggle conatiner
+    # ** Aliases for this options are: ajax_call
+    #
+    def render_module_easy_box(id, heading, options = {}, &block) # with fallback to old
+      options[:toggle] = true unless options.key?(:toggle)
+      options[:remember] = options.delete(:ajax_call) if options.key?(:ajax_call)
+      options[:collapsible] = !options.delete(:no_expander) if options.key?(:no_expander)
 
-      if options[:ajax_call] == false
-        expanded = options[:default_button_state]
-      else
-        expanded = true
-      end
+      renderer = EasyBoxRenderer.new(self, id, heading, options)
+      renderer.content = capture {yield renderer}
 
-      s << (content_tag(:div, {
-        :id => container_uniq_id,
-        :style => (expanded ? '' : 'display:none')
-      }.merge(options[:container_html]) { |k, o, n| "#{o}; #{n}" }, &block))
-      s.html_safe
+      renderer.render
     end
 
-    def render_toggler_header(user, content, modul_uniq_id, options={})
-      expander_options = options[:expander_options] || {}
-      wrapping_heading_element = options[:wrapping_heading_element] || 'h3'
-      wrapping_heading_element_classes = (options[:wrapping_heading_element_classes] || '') + ' module-heading'
-      wrapping_heading_element_styles = options[:wrapping_heading_element_styles]
-      ajax_call = options.delete(:ajax_call) ? 'true' : 'false'
+    EasyBoxRenderer = Struct.new(:view, :id, :heading, :options) do
 
-      html = ''
+      attr_writer :container_class, :heading_class, :content_class
+      attr_writer :heading_links, :footer, :icon
+      attr_accessor :content
 
-      if options[:no_expander]
-        html << content_tag(wrapping_heading_element, content, :class => wrapping_heading_element_classes, :style => wrapping_heading_element_styles)
-      else
-        html << '<div class="module-toggle-button">'
-        html << "<div class='group open' >"
-        html << content_tag(wrapping_heading_element, content, :class => wrapping_heading_element_classes, :style => wrapping_heading_element_styles, :onclick => "var event = arguments[0] || window.event; if( !$(event.target).hasClass('do_not_toggle') && !$(event.target).parent().hasClass('module-heading-links') ) toggleMyPageModule(this,'#{modul_uniq_id}','#{user.id}', #{ajax_call})")
-        html << "<span class='expander #{expander_options[:class]}' onclick=\"toggleMyPageModule($(this),'#{modul_uniq_id}','#{user.id}', #{ajax_call}); return false;\" id=\"expander_#{modul_uniq_id}\">&nbsp;</span>"
-        html << '</div></div>'
+      def container_class
+        s = (@container_class.presence || css_classes[:container]).to_s
+        s << ' collapsible' if collapsible?
+        s << ' collapsed' if collapsed?
+
+        s
       end
 
-      html.html_safe
+      def saving_state_enabled?
+        collapsible? && (options[:remember].nil? || !!options[:remember])
+      end
+
+      def heading_tag
+        (options[:wrapping_heading_element] || (options[:header_tag] || options[:heading_tag])).presence || 'h3'
+      end
+
+      def heading_class
+        (@heading_class || css_classes[:heading]).to_s
+      end
+
+      def icon
+        @icon ||= options[:icon] && " icon #{options[:icon]}"
+      end
+
+      def heading_links
+        if block_given?
+          @heading_links = view.capture { yield }
+        else
+          @heading_links.to_s.html_safe
+        end
+      end
+
+      def collapsible?
+        return @collapsible unless @collapsible.nil?
+        @collapsible ||= !!options[:toggle] && (options[:collapsible].nil? || !!options[:collapsible])
+      end
+
+      def collapsed?
+        !!options[:default] || !!options[:collapsed] || !!options[:default_button_state]
+      end
+
+      def footer
+        if block_given?
+          @footer = view.capture { yield }
+        else
+          @footer.to_s.html_safe
+        end
+      end
+
+      def render
+        view.render({partial: 'common/collapsible_module_layout', locals: {renderer: self, content: content}} )
+      end
+      private
+
+      def css_classes
+        return @css_classes if @css_classes
+        if (css_class = options.delete(:class)).is_a?(Hash)
+          @css_classes = css_class
+        else
+          @css_classes = {
+              container: css_class,
+              heading: css_class,
+              content: css_class
+          }
+        end
+      end
+
     end
+
 
     def autocomplete_field_tag(name, jsonpath_or_array, selected_values, options = {})
       options.reverse_merge!({select_first_value: false, show_toggle_button: false, load_immediately: false})
