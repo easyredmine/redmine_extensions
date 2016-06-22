@@ -133,11 +133,11 @@ module RedmineExtensions
     EasyBoxRenderer = Struct.new(:view, :id, :heading, :options) do
 
       attr_writer :container_class, :heading_class, :content_class
-      attr_writer :heading_links, :footer
+      attr_writer :heading_links, :footer, :icon
       attr_accessor :content
 
       def container_class
-        s = @container_class.to_s
+        s = (@container_class.presence || css_classes[:container]).to_s
         s << ' collapsible' if collapsible?
         s << ' collapsed' if collapsed?
 
@@ -154,6 +154,10 @@ module RedmineExtensions
 
       def heading_class
         (@heading_class || css_classes[:heading]).to_s
+      end
+
+      def icon
+        @icon ||= options[:icon] && " icon #{options[:icon]}"
       end
 
       def heading_links
