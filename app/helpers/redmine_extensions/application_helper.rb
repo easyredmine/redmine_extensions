@@ -177,7 +177,7 @@ module RedmineExtensions
 
       content_tag(:span, :class => 'easy-multiselect-tag-container') do
         text_field_tag('', '', (options[:html_options] || {}).merge(id: options[:id])) +
-          javascript_tag("$('##{options[:id]}').easymultiselect({multiple: true, inputName: '#{name}', preload: true, source: #{source}, selected: #{selected_values.to_json}, show_toggle_button: #{options[:show_toggle_button]}, select_first_value: #{options[:select_first_value]}, load_immediately: #{options[:load_immediately]}, autocomplete_options: #{(options[:jquery_auto_complete_options]||{}).to_json} });")
+          javascript_tag("$('##{options[:id]}').easymultiselect({multiple: true, rootElement: #{options[:rootElement]}, inputName: '#{name}', preload: true, source: #{source}, selected: #{selected_values.to_json}, show_toggle_button: #{options[:show_toggle_button]}, select_first_value: #{options[:select_first_value]}, load_immediately: #{options[:load_immediately]}, autocomplete_options: #{(options[:jquery_auto_complete_options]||{}).to_json} });")
       end
     end
 
