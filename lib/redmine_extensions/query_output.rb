@@ -9,7 +9,7 @@ module RedmineExtensions
     end
 
     def self.registered_outputs
-      @registered_outputs ||= {}
+      @@registered_outputs ||= {}
     end
 
     def self.available_outputs_for(query)
