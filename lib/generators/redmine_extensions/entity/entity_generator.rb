@@ -206,8 +206,8 @@ module RedmineExtensions
     end
 
     def prepare_columns
-      prepare_associations
       @db_columns = {}
+      prepare_associations
 
       attributes.each do |attr|
         attr_name, attr_type, attr_idx = attr.split(':')
@@ -248,13 +248,15 @@ module RedmineExtensions
           end
         when 'belongs_to'
           if File.exists?(assoc_model_path)
-            line = "class #{assoc_model_class} < ActiveRecord::Base"
-            gsub_file model_path, /(#{Regexp.escape(line)})/mi do |match|
-              "#{match}\n  has_many :#{model_name.underscore.pluralize}\n"
+            unless File.readlines(assoc_model_path).grep(/has_many\ :#{model_name.underscore.pluralize}/).any?
+              line = "class #{assoc_model_class} < ActiveRecord::Base"
+              gsub_file assoc_model_path, /(#{Regexp.escape(line)})/mi do |match|
+                "#{match}\n  has_many :#{model_name.underscore.pluralize}\n"
+              end
             end
           end
 
-          @db_columns["#{assoc_class.underscore.singularize}_id"] = {type: 'integer', idx: true, null: false}
+          @db_columns["#{assoc_model_class.underscore.singularize}_id"] = {type: 'integer', idx: true, null: false}
         end
       end
     end
