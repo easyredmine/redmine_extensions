@@ -230,6 +230,8 @@ module RedmineExtensions
 
       assocs.each do |assoc|
         assoc_type, assoc_name, assoc_class = assoc.split(':')
+        next if assoc_type.blank? || assoc_name.blank?
+
         @associations[assoc_name] = {type: assoc_type, class: assoc_class}
 
         assoc_model_class = assoc_class.presence || assoc_name.singularize.camelize
