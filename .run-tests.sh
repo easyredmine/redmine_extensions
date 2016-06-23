@@ -42,7 +42,11 @@ bundle update
 bundle exec rake db:drop
 bundle exec rake db:create
 bundle exec rake db:migrate
-bundle exec rake app:redmine:plugins:migrate
-bundle exec rake app:easyproject:tests:spec
+if [ $EASY == 'yes' ]; then
+  bundle exec rake app:redmine:plugins:migrate
+  bundle exec rake app:easyproject:tests:spec
+else
+  bundle exect rake redmine_test
+fi
 bundle exec rake spec
 bundle exec rake db:drop
