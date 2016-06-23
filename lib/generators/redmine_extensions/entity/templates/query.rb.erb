@@ -12,6 +12,7 @@ class <%= model_name %>Query < EasyQuery
     add_available_filter '<%= column_name %>', name: ::<%= model_name %>.human_attribute_name(:<%= column_name %>), type: :<%= column_options[:query_type] -%>
     <%- end -%>
     <%- end -%>
+
     <%- if acts_as_customizable? -%>
     add_custom_fields_filters(<%= model_name %>CustomField)
     <%- end -%>
