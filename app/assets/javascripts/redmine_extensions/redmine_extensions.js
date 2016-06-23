@@ -480,16 +480,16 @@ window.closeFlashMessage = (function($element){
         _formatData: function(data) {
             return $.map(data, function(elem, i){
                 var id, value;
-                if( $.isArray(elem) ) {
-                    value = elem[0];
-                    id = elem[1];
+                if (elem instanceof Array) {
+                  value = elem[0];
+                  id = elem[1];
+                } else if (elem instanceof Object) {
+                  value = elem.value;
+                  id = elem.id;
                 } else {
-                    id = value = elem;
-                }
-                if ( elem !== null && typeof elem === 'object' )
-                    return elem;
-                else
-                    return {value: value, id: id};
+                  id = value = elem;
+              }
+              return {value: value, id: id};
             });
         },
 
