@@ -21,6 +21,8 @@ echo $CI_BUILD_TRIGGERED
 echo $CI_PROJECT_ID
 echo $CI_PROJECT_DIR
 
+bundle --version
+
 # Init database
 ruby -ryaml -rsecurerandom -e "
   database = 'redmine_'+SecureRandom.hex(8).to_s
