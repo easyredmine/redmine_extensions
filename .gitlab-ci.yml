@@ -10,16 +10,7 @@ before_script:
 
 Pure Redmine / MySQL:
   script:
-  - cp config/database.yml.mysql spec/redmine/config/database.yml
-  - sed "s/redmine/redmine_test_$((RANDOM))/" -i spec/redmine/config/database.yml
-  - ''
-  - bundle install
-  - bundle exec rake db:drop
-  - bundle exec rake db:create
-  - bundle exec rake db:migrate
-  - bundle exec rake redmine_test
-  - bundle exec rake spec
-  - bundle exec rake db:drop
+  - $SHELL ./.run-tests.sh
   tags:
   except:
   - master
@@ -31,17 +22,7 @@ EasyRedmine / MySQL:
   - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
   - 'sed ''s/pattern = "\.\/plugins/pattern = "#{Rails.root}\/plugins/'' -i spec/redmine/plugins/easyproject/easy_plugins/easy_extensions/lib/tasks/tests.rake'
   - ''
-  - cp config/database.yml.mysql spec/redmine/config/database.yml
-  - sed "s/redmine/redmine_test_$((RANDOM))/" -i spec/redmine/config/database.yml
-  - ''
-  - bundle install
-  - bundle exec rake db:drop
-  - bundle exec rake db:create
-  - bundle exec rake db:migrate
-  - bundle exec rake app:redmine:plugins:migrate
-  - bundle exec rake app:easyproject:tests:spec
-  - bundle exec rake spec
-  - bundle exec rake db:drop
+  - $SHELL ./.run-tests.sh
 
 #  - bundle exec rake test:prepare RAILS_ENV=test
 #  - bundle exec rake easyproject:tests:spec RAILS_ENV=test
