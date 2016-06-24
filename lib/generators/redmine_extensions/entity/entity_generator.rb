@@ -40,7 +40,6 @@ module RedmineExtensions
     def copy_templates
       template '_form.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/_form.html.erb"
       template '_sidebar.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/_sidebar.html.erb"
-      template '_view_custom_fields_form_custom_field.html.erb.erb', "#{plugin_path}/app/views/custom_fields/_view_custom_fields_form_#{model_name_underscored}_custom_field.html.erb"
       template 'context_menu.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/context_menu.html.erb"
       template 'controller.rb.erb', "#{plugin_path}/app/controllers/#{model_name_pluralize_underscored}_controller.rb"
       template('custom_field.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_custom_field.rb") if acts_as_customizable?
