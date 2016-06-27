@@ -26,7 +26,7 @@ class EasyQueryAdapterPresenter < RedmineExtensions::BasePresenter
   end
 
   def available_outputs
-    outputs.available_outputs
+    outputs.available_output_names
   end
 
   def outputs
