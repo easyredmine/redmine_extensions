@@ -22,10 +22,14 @@ module RedmineExtensions
 
   module QueryAdapter
 
-    # after_initialize :after_initialize
+    after_initialize :after_initialize
 
-    # def after_initialize
-    #   self.filters ||= {}
+    def after_initialize
+      self.filters ||= {}
+    end
+
+    # def filters
+    #   super || {}
     # end
 
     attr_writer :outputs
@@ -36,10 +40,6 @@ module RedmineExtensions
 
     def output=(output_t)
       self.outputs = Array.wrap(output_t)
-    end
-
-    def filters
-      super || {}
     end
 
     def default_find_include
