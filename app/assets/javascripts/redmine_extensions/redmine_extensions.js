@@ -582,14 +582,19 @@ window.closeFlashMessage = (function($element){
             });
         },
 
-        getValue: function() {
-            if( this.options.multiple && !this.expanded ) {
-                return this.valueElement.entityArray('getValue'); // entityArray
-            } else if ( this.options.multiple ) {
-                return this.valueElement.val(); //select multiple=true
+        getValue: function(with_label) {
+            var result;
+            if( this.options.multiple ) {
+              result = this.valueElement.entityArray('getValue');
             } else {
-                return [this.valueElement.val()]; // hidden field
+              result = [this.valueElement.val()];
             }
+            if( with_label ) {
+              result = this.possibleValues.filter(function(el) {
+                return result.indexOf( el.id ) >= 0;
+              });
+            }
+            return result;
         }
 
     });
