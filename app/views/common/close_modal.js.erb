@@ -1,0 +1,5 @@
+$("#ajax-modal").html("<%= j render(:partial => 'common/closing_modal', :formats => [:html]) %>");
+$("#ajax-modal").dialog('option', {
+  buttons: []
+});
+window.location = "<%= j params[:back_url] %>";
