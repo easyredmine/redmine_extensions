@@ -37,6 +37,7 @@ class <%= controller_class %>Controller < ApplicationController
 
     respond_to do |format|
       format.html
+      format.js
     end
   end
 
@@ -57,11 +58,13 @@ class <%= controller_class %>Controller < ApplicationController
           redirect_back_or_default <%= model_name_underscored %>_path(@<%= model_name_underscored %>)
         }
         format.api { render :action => 'show', :status => :created, :location => <%= model_name_underscored %>_url(@<%= model_name_underscored %>) }
+        format.js { render :template => 'common/close_modal' }
       end
     else
       respond_to do |format|
         format.html { render :action => 'new' }
         format.api { render_validation_errors(@<%= model_name_underscored %>) }
+        format.js { render :action => 'new' }
       end
     end
   end
@@ -71,6 +74,7 @@ class <%= controller_class %>Controller < ApplicationController
 
     respond_to do |format|
       format.html
+      format.js
     end
   end
 
@@ -87,11 +91,13 @@ class <%= controller_class %>Controller < ApplicationController
           redirect_back_or_default <%= model_name_underscored %>_path(@<%= model_name_underscored %>)
         }
         format.api { render_api_ok }
+        format.js { render :template => 'common/close_modal' }
       end
     else
       respond_to do |format|
         format.html { render :action => 'edit' }
         format.api { render_validation_errors(@<%= model_name_underscored %>) }
+        format.js { render :action => 'edit' }
       end
     end
   end
