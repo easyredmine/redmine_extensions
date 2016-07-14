@@ -5,7 +5,8 @@ module RedmineExtensions
     delegate :options, to: :query
 
     def self.register_output(klass, options={})
-      registered_outputs[klass.key.to_sym] = klass
+      register_as = (options[:as] || klass.key).to_sym
+      registered_outputs[register_as] = klass
     end
 
     def self.registered_outputs
