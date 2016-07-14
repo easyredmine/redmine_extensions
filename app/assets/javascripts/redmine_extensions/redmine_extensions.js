@@ -599,13 +599,19 @@ window.closeFlashMessage = (function($element){
             }
         },
 
-        getValue: function() {
-            if( this.options.multiple && !this.expanded ) {
-                return this.valueElement.entityArray('getValue'); // entityArray
+        getValue: function(with_label) {
+            var result;
+            if ( this.options.multiple && !this.expanded ) {
+              result = this.valueElement.entityArray('getValue'); // entityArray
             } else if ( this.options.multiple ) {
-                return this.valueElement.val(); //select multiple=true
+                return this.valueElement.val(); // select multiple=true
             } else {
-                return [this.valueElement.val()]; // hidden field
+              result = [this.valueElement.val()]; // hidden field
+            }
+            if( with_label ) {
+              result = this.possibleValues.filter(function(el) {
+                return result.indexOf( el.id ) >= 0;
+              });
             }
         }
 
