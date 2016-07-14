@@ -584,10 +584,12 @@ window.closeFlashMessage = (function($element){
 
         getValue: function(with_label) {
             var result;
-            if( this.options.multiple ) {
-              result = this.valueElement.entityArray('getValue');
+            if ( this.options.multiple && !this.expanded ) {
+              result = this.valueElement.entityArray('getValue'); // entityArray
+            } else if ( this.options.multiple ) {
+                return this.valueElement.val(); // select multiple=true
             } else {
-              result = [this.valueElement.val()];
+              result = [this.valueElement.val()]; // hidden field
             }
             if( with_label ) {
               result = this.possibleValues.filter(function(el) {
