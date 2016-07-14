@@ -494,7 +494,7 @@ window.closeFlashMessage = (function($element){
         },
 
         _initData: function(data) {
-            this.possibleValues = this._formatData(data)
+            this.possibleValues = this._formatData(data);
             this.valuesLoaded = true;
 
             this.selectedValues = this.selectedValues ? this.selectedValues : [];
