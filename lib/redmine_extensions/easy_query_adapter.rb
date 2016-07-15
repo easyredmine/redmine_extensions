@@ -22,7 +22,12 @@ module RedmineExtensions
 
   module QueryAdapter
 
-    # after_initialize :after_initialize
+    def self.included(base)
+      base.class_eval do
+        after_initialize :after_initialize
+      end
+    end
+
 
     def after_initialize
       self.filters ||= {}
