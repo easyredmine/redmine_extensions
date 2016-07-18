@@ -17,13 +17,10 @@ var EasyToggler = new function() {
   var toggle = function(el) {
     var parent = el.parentNode;
 
-    if (parent.classList.contains("collapsed")) {
-      parent.classList.remove("collapsed");
-    } else {
-      parent.classList.add("collapsed");
-    }
+    parent.classList.toggle("collapsed");
+
     el.style.display = isHidden(el) ? 'block' : 'none';
-    !!parent.dataset.toggle && save();
+    el.id && !!parent.dataset.toggle && save();
     $( document ).trigger( "erui_interface_change_vertical" ); // <> !#@!
     return el;
   };
@@ -41,11 +38,8 @@ var EasyToggler = new function() {
       } else {
         storage[id] = isHidden(el) ? 0 : 1;
       }
-      toggle(el);
-    } else {
-      console.warn('Could not toggle this element', el);
     }
-
+    toggle(el);
   };
 
   this.ensureToggle = function() {
