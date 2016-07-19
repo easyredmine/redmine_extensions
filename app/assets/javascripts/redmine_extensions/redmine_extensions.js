@@ -564,31 +564,39 @@ window.closeFlashMessage = (function($element){
                     that._setValues(values)
                 });
             } else {
-                // TODO - where to get real text value?
-                var identifier, label;
-                if( typeof values[0] === "object" && !Array.isArray(values[0]) && values[0] !== null ) {
-                    identifier = values[0].id;
-                    label = values[0].value;
-                } else {
-                    identifier = label = values[0];
+                vals = [];
+                for (var i = values.length - 1; i >= 0; i--) {
+                    var identifier, label;
+                    if( values[i] instanceof Object && !Array.isArray(values[i]) && values[i] !== null ) {
+                        vals.push( values[i] );
+                    } else {
+                        vals.push( {id: values[i], value: values[i]} );
+                    }
                 }
-                this.element.val(label);
-                this.valueElement.val(identifier);
+                that._setValues(values);
             }
         },
 
         _setValues: function(values) {
-            var that = this;
-            $.each(that.possibleValues, function(i, val) {
-                if ( values.indexOf(val.id) > -1 || (values.indexOf(val.id.toString()) > -1)) {
-                    if(that.options.multiple) {
-                        that.valueElement.entityArray('add', { id: val.id, name: val.value });
-                    } else {
-                        that.element.val(val.value);
-                        that.valueElement.val(val.id);
+            var selected;
+            if( Array.isArray(this.possibleValues) ) {
+                selected = [];
+                for(var i = this.possibleValues.length - 1; i >= 0; i-- ) {
+                    if ( values.indexOf(this.possibleValues[i].id) > -1 || (values.indexOf(this.possibleValues[i].id.toString()) > -1)) {
+                        selected.unshift(this.possibleValues[i]);
                     }
                 }
-            });
+            } else {
+                selected = values;
+            }
+            for (var i = selected.length - 1; i >= 0; i--) {
+                if(this.options.multiple) {
+                    this.valueElement.entityArray('add', { id: selected[i].id, name: selected[i].value });
+                } else {
+                    this.element.val(selected[i].value);
+                    this.valueElement.val(selected[i].id);
+                }
+            }
         },
 
         getValue: function() {
