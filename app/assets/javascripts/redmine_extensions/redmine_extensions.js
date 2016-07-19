@@ -340,6 +340,8 @@ window.closeFlashMessage = (function($element){
                 this._initData(this.options.source);
             } else if ( this.options.preload && this.options.load_immediately) {
                 this.load();
+            } else if ( this.selectedValues ) {
+                this.setValue( this.selectedValues );
             }
         },
 
@@ -563,8 +565,15 @@ window.closeFlashMessage = (function($element){
                 });
             } else {
                 // TODO - where to get real text value?
-                this.element.val(values[0]);
-                this.valueElement.val(values[0]);
+                var identifier, label;
+                if( typeof values[0] === "object" && !Array.isArray(values[0]) && values[0] !== null ) {
+                    identifier = values[0].id;
+                    label = values[0].value;
+                } else {
+                    identifier = label = values[0];
+                }
+                this.element.val(label);
+                this.valueElement.val(identifier);
             }
         },
 
