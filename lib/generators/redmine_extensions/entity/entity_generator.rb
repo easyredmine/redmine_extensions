@@ -44,6 +44,7 @@ module RedmineExtensions
       template 'controller.rb.erb', "#{plugin_path}/app/controllers/#{model_name_pluralize_underscored}_controller.rb"
       template('custom_field.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_custom_field.rb") if acts_as_customizable?
       template 'edit.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/edit.html.erb"
+      template 'edit.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/edit.js.erb"
 
       if File.exists?("#{plugin_path}/config/locales/en.yml")
         append_to_file "#{plugin_path}/config/locales/en.yml" do
@@ -71,6 +72,7 @@ module RedmineExtensions
       template 'hooks.rb.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/#{model_name_underscored}_hooks.rb"
       template 'index.api.rsb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.api.rsb"
       template 'index.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.html.erb"
+      template 'index.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.js.erb"
 
       if mail?
         template 'mailer.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_mailer.rb"
@@ -83,6 +85,7 @@ module RedmineExtensions
       template 'migration.rb.erb', "#{plugin_path}/db/migrate/#{Time.now.strftime('%Y%m%d%H%M%S')}_create_#{@model_name_pluralize_underscored}.rb"
       template 'model.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}.rb"
       template 'new.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.html.erb"
+      template 'new.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.js.erb"
       template 'query.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_query.rb"
 
       if File.exists?("#{plugin_path}/config/routes.rb")
@@ -145,6 +148,7 @@ module RedmineExtensions
 
       template 'show.api.rsb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/show.api.rsb"
       template 'show.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/show.html.erb"
+      template 'show.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/show.js.erb"
     end
 
     private

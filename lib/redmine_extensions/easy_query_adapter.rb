@@ -22,12 +22,6 @@ module RedmineExtensions
 
   module QueryAdapter
 
-    # after_initialize :after_initialize
-
-    # def after_initialize
-    #   self.filters ||= {}
-    # end
-
     attr_writer :outputs
 
     def outputs
@@ -36,10 +30,6 @@ module RedmineExtensions
 
     def output=(output_t)
       self.outputs = Array.wrap(output_t)
-    end
-
-    def filters
-      super || {}
     end
 
     def default_find_include
@@ -161,6 +151,15 @@ module RedmineExtensions
 
   end
 
+  module QueryAdapterDefaults
+
+    def initialize(attributes=nil, *args)
+      super
+      self.filters ||= {}
+    end
+
+  end
+
 end
 
 class EasyQueryAdapter < Query
@@ -170,6 +169,7 @@ if Redmine::Plugin.installed?(:easy_extensions)
   # EasyQuery exist
 else
   QueryColumn.send(:include, RedmineExtensions::QueryColumnAdapter)
-  RedmineExtensions::PatchManager.register_model_patch('Query', "RedmineExtensions::QueryAdapter")
+  RedmineExtensions::PatchManager.register_model_patch('Query', 'RedmineExtensions::QueryAdapter')
   EasyQuery = EasyQueryAdapter
+  EasyQuery.prepend(RedmineExtensions::QueryAdapterDefaults)
 end

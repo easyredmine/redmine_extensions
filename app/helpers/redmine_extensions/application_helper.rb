@@ -116,7 +116,7 @@ module RedmineExtensions
     # ** Aliases for this options are: wrapping_heading_element, header_tag
     # * <tt>toggle: false</tt> - This disable toggle function (collapsible and remember)
     # ** Aliases for this options are: collapsible, no_expander
-    # * <tt>remember: false</tt> - This disable remember function of toggle conatiner
+    # * <tt>remember: false</tt> - This disable remember function of toggle container
     # ** Aliases for this options are: ajax_call
     #
     def render_module_easy_box(id, heading, options = {}, &block) # with fallback to old
@@ -220,7 +220,7 @@ module RedmineExtensions
 
       content_tag(:span, :class => 'easy-multiselect-tag-container') do
         text_field_tag('', '', (options[:html_options] || {}).merge(id: options[:id])) +
-          javascript_tag("$('##{options[:id]}').easymultiselect({multiple: true, rootElement: #{options[:rootElement]}, inputName: '#{name}', preload: #{options[:preload]}, source: #{source}, selected: #{selected_values.to_json}, show_toggle_button: #{options[:show_toggle_button]}, select_first_value: #{options[:select_first_value]}, load_immediately: #{options[:load_immediately]}, autocomplete_options: #{(options[:jquery_auto_complete_options]||{}).to_json} });")
+          javascript_tag("$('##{options[:id]}').easymultiselect({multiple: true, rootElement: #{options[:rootElement].to_json}, inputName: '#{name}', preload: #{options[:preload]}, source: #{source}, selected: #{selected_values.to_json}, show_toggle_button: #{options[:show_toggle_button]}, select_first_value: #{options[:select_first_value]}, load_immediately: #{options[:load_immediately]}, autocomplete_options: #{(options[:jquery_auto_complete_options]||{}).to_json} });")
       end
     end
 
