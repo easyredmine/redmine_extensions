@@ -10,7 +10,6 @@ module RedmineExtensions
       end
     end
 
-
     def self.get_date_range(period_type = '1', period = 'all', from = '', to = '')
       @free_period = false
       start_of_week = self.first_wday
@@ -22,88 +21,88 @@ module RedmineExtensions
           when 'all', 'is_null', 'is_not_null'
 
           when 'today'
-            ret[:from] = ret[:to] = Date.today
+            ret[:from] = ret[:to] = User.current.today
           when 'yesterday'
-            ret[:from] = ret[:to] = Date.today - 1
+            ret[:from] = ret[:to] = User.current.today - 1
           when 'current_week'
-            ret[:from] = Date.today - (Date.today.cwday - start_of_week)%7
+            ret[:from] = User.current.today - (User.current.today.cwday - start_of_week)%7
             ret[:to] = ret[:from] + 6
           when 'last_week'
-            ret[:from] = Date.today - 7 - (Date.today.cwday - start_of_week)%7
+            ret[:from] = User.current.today - 7 - (User.current.today.cwday - start_of_week)%7
             ret[:to] = ret[:from] + 6
           when 'last_2_weeks'
-            ret[:from] = Date.today - 14 - (Date.today.cwday - start_of_week)%7
+            ret[:from] = User.current.today - 14 - (User.current.today.cwday - start_of_week)%7
             ret[:to] = ret[:from] + 13
           when '7_days'
-            ret[:from] = Date.today - 7
-            ret[:to] = Date.today
+            ret[:from] = User.current.today - 7
+            ret[:to] = User.current.today
           when 'current_month'
-            ret[:from] = Date.civil(Date.today.year, Date.today.month, 1)
+            ret[:from] = Date.civil(User.current.today.year, User.current.today.month, 1)
             ret[:to] = (ret[:from] >> 1) - 1
           when 'last30_next90'
-            ret[:from] = Date.today - 30
-            ret[:to] = Date.today + 90
+            ret[:from] = User.current.today - 30
+            ret[:to] = User.current.today + 90
           when 'last_month'
-            ret[:from] = Date.civil(Date.today.year, Date.today.month, 1) << 1
+            ret[:from] = Date.civil(User.current.today.year, User.current.today.month, 1) << 1
             ret[:to] = (ret[:from] >> 1) - 1
           when '30_days'
-            ret[:from] = Date.today - 30
-            ret[:to] = Date.today
+            ret[:from] = User.current.today - 30
+            ret[:to] = User.current.today
           when '90_days'
-            ret[:from] = Date.today - 90
-            ret[:to] = Date.today
+            ret[:from] = User.current.today - 90
+            ret[:to] = User.current.today
           when 'current_year'
-            ret[:from] = Date.civil(Date.today.year, 1, 1)
-            ret[:to] = Date.civil(Date.today.year, 12, 31)
+            ret[:from] = Date.civil(User.current.today.year, 1, 1)
+            ret[:to] = Date.civil(User.current.today.year, 12, 31)
           when 'last_year'
-            ret[:from] = Date.civil(Date.today.year - 1, 1, 1)
-            ret[:to] = Date.civil(Date.today.year - 1, 12, 31)
+            ret[:from] = Date.civil(User.current.today.year - 1, 1, 1)
+            ret[:to] = Date.civil(User.current.today.year - 1, 12, 31)
           when 'older_than_14_days'
             ret[:from] = nil
-            ret[:to] = Date.today - 14
+            ret[:to] = User.current.today - 14
           when 'older_than_15_days'
             ret[:from] = nil
-            ret[:to] = Date.today - 15
+            ret[:to] = User.current.today - 15
           when 'older_than_31_days'
             ret[:from] = nil
-            ret[:to] = Date.today - 31
+            ret[:to] = User.current.today - 31
           ### FUTURE ###
           when 'tomorrow'
             ret[:from] = ret[:to] = Date.tomorrow
           when 'next_week'
-            ret[:from] = Date.today + 7 - (Date.today.cwday - start_of_week)%7
+            ret[:from] = User.current.today + 7 - (User.current.today.cwday - start_of_week)%7
             ret[:to] = ret[:from] + 6
           when 'next_5_days'
-            ret[:from] = Date.today
-            ret[:to] = Date.today + 5
+            ret[:from] = User.current.today
+            ret[:to] = User.current.today + 5
           when 'next_7_days'
-            ret[:from] = Date.today
-            ret[:to] = Date.today + 7
+            ret[:from] = User.current.today
+            ret[:to] = User.current.today + 7
           when 'next_10_days'
-            ret[:from] = Date.today
-            ret[:to] = Date.today + 10
+            ret[:from] = User.current.today
+            ret[:to] = User.current.today + 10
           when 'next_14_days'
-            ret[:from] = Date.today
-            ret[:to] = Date.today + 14
+            ret[:from] = User.current.today
+            ret[:to] = User.current.today + 14
           when 'next_15_days'
-            ret[:from] = Date.today
-            ret[:to] = Date.today + 15
+            ret[:from] = User.current.today
+            ret[:to] = User.current.today + 15
           when 'next_30_days'
-            ret[:from] = Date.today
-            ret[:to] = Date.today + 30
+            ret[:from] = User.current.today
+            ret[:to] = User.current.today + 30
           when 'next_90_days'
-            ret[:from] = Date.today
-            ret[:to] = Date.today + 90
+            ret[:from] = User.current.today
+            ret[:to] = User.current.today + 90
           when 'next_month'
-            ret[:from] = Date.civil(Date.today.year, Date.today.month, 1) >> 1
+            ret[:from] = Date.civil(User.current.today.year, User.current.today.month, 1) >> 1
             ret[:to] = (ret[:from] >> 1) - 1
           when 'next_year'
-            ret[:from] = Date.civil(Date.today.year + 1, 1, 1)
-            ret[:to] = Date.civil(Date.today.year + 1, 12, 31)
+            ret[:from] = Date.civil(User.current.today.year + 1, 1, 1)
+            ret[:to] = Date.civil(User.current.today.year + 1, 12, 31)
           ### EXTENDED ###
           when 'to_today'
             ret[:from] = nil
-            ret[:to] = Date.today
+            ret[:to] = User.current.today
           when 'from_tomorrow'
             ret[:from] = Date.tomorrow
             ret[:to] = nil
@@ -112,14 +111,14 @@ module RedmineExtensions
             ret[:to] = Date.yesterday
           ### FISCAL ###
           when 'last_fiscal_year'
-            ret[:from] = EasySetting.beginning_of_fiscal_year(Date.today - 1.year)
-            ret[:to] = EasySetting.end_of_fiscal_year(Date.today - 1.year)
+            ret[:from] = EasySetting.beginning_of_fiscal_year(User.current.today - 1.year)
+            ret[:to] = EasySetting.end_of_fiscal_year(User.current.today - 1.year)
           when 'current_fiscal_year'
             ret[:from] = EasySetting.beginning_of_fiscal_year
             ret[:to] = EasySetting.end_of_fiscal_year
           when 'next_fiscal_year'
-            ret[:from] = EasySetting.beginning_of_fiscal_year(Date.today + 1.year)
-            ret[:to] = EasySetting.end_of_fiscal_year(Date.today + 1.year)
+            ret[:from] = EasySetting.beginning_of_fiscal_year(User.current.today + 1.year)
+            ret[:to] = EasySetting.end_of_fiscal_year(User.current.today + 1.year)
           else
             if respond_to?("hook_#{period}")
               ret = send("hook_#{period}")
