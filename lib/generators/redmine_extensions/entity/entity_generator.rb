@@ -6,6 +6,8 @@ module RedmineExtensions
     argument :model_name, type: :string, required: true, banner: 'Post'
     argument :attributes, type: :array, required: true, banner: 'field[:type][:index] field[:type][:index]'
 
+    class_option :associations, type: :array, required: false, banner: '--associations association_type[:association_name][:association_class]'
+
     class_option :project, type: :boolean, default: true, banner: '', :desc => 'make model depends on project'
     class_option :author, type: :boolean, default: true, banner: '', :desc => 'make model depends on project'
     class_option :mail, type: :boolean, default: true, banner: '', :desc => 'model have mail notifications'
@@ -22,6 +24,7 @@ module RedmineExtensions
     attr_reader :plugin_path, :plugin_name_underscored, :plugin_pretty_name, :plugin_title
     attr_reader :controller_class, :model_name_underscored, :model_name_pluralize_underscored
     attr_reader :db_columns
+    attr_reader :associations
 
     def initialize(*args)
       super
@@ -153,6 +156,10 @@ module RedmineExtensions
 
     private
 
+    def assocs
+      options[:associations]
+    end
+
     def project?
       options[:project] == true
     end
@@ -203,6 +210,7 @@ module RedmineExtensions
 
     def prepare_columns
       @db_columns = {}
+      prepare_associations
 
       attributes.each do |attr|
         attr_name, attr_type, attr_idx = attr.split(':')
@@ -216,6 +224,44 @@ module RedmineExtensions
       @db_columns['author_id'] = {type: 'integer', idx: nil, null: false, safe: true, class: 'User', list_class_name: 'name', query_type: 'list', query_column_name: 'author', lang_key: "field_#{model_name_underscored}_author"} if author? && !@db_columns.key?('author_id')
       @db_columns['created_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date', lang_key: "field_#{model_name_underscored}_created_at"}
       @db_columns['updated_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date', lang_key: "field_#{model_name_underscored}_updated_at"}
+    end
+
+    def prepare_associations
+      @associations = {}
+
+      return true if assocs.nil?
+
+      assocs.each do |assoc|
+        assoc_type, assoc_name, assoc_class = assoc.split(':')
+        next if assoc_type.blank? || assoc_name.blank?
+
+        @associations[assoc_name] = {type: assoc_type, class: assoc_class}
+
+        assoc_model_class = assoc_class.presence || assoc_name.singularize.camelize
+        assoc_model_filename = assoc_model_class.underscore
+        assoc_model_path = "#{plugin_path}/app/models/#{assoc_model_filename}.rb"
+
+        case assoc_type
+        when 'has_many', 'has_one'
+          if File.exists?(assoc_model_path)
+            line = "class #{assoc_model_class} < ActiveRecord::Base"
+            gsub_file assoc_model_path, /(#{Regexp.escape(line)})/mi do |match|
+              "#{match}\n  belongs_to :#{model_name.underscore}\n"
+            end
+          end
+        when 'belongs_to'
+          if File.exists?(assoc_model_path)
+            unless File.readlines(assoc_model_path).grep(/has_many\ :#{model_name.underscore.pluralize}/).any?
+              line = "class #{assoc_model_class} < ActiveRecord::Base"
+              gsub_file assoc_model_path, /(#{Regexp.escape(line)})/mi do |match|
+                "#{match}\n  has_many :#{model_name.underscore.pluralize}\n"
+              end
+            end
+          end
+
+          @db_columns["#{assoc_model_class.underscore.singularize}_id"] = {type: 'integer', idx: true, null: false}
+        end
+      end
     end
 
     def safe_columns
