@@ -340,6 +340,8 @@ window.closeFlashMessage = (function($element){
                 this._initData(this.options.source);
             } else if ( this.options.preload && this.options.load_immediately) {
                 this.load();
+            } else if ( this.selectedValues ) {
+                this.setValue( this.selectedValues );
             }
         },
 
@@ -494,7 +496,7 @@ window.closeFlashMessage = (function($element){
         },
 
         _initData: function(data) {
-            this.possibleValues = this._formatData(data)
+            this.possibleValues = this._formatData(data);
             this.valuesLoaded = true;
 
             this.selectedValues = this.selectedValues ? this.selectedValues : [];
@@ -562,34 +564,56 @@ window.closeFlashMessage = (function($element){
                     that._setValues(values)
                 });
             } else {
-                // TODO - where to get real text value?
-                this.element.val(values[0]);
-                this.valueElement.val(values[0]);
+                vals = [];
+                for (var i = values.length - 1; i >= 0; i--) {
+                    var identifier, label;
+                    if( values[i] instanceof Object && !Array.isArray(values[i]) && values[i] !== null ) {
+                        vals.push( values[i] );
+                    } else {
+                        vals.push( {id: values[i], value: values[i]} );
+                    }
+                }
+                that._setValues(values);
             }
         },
 
         _setValues: function(values) {
-            var that = this;
-            $.each(that.possibleValues, function(i, val) {
-                if ( values.indexOf(val.id) > -1 || (values.indexOf(val.id.toString()) > -1)) {
-                    if(that.options.multiple) {
-                        that.valueElement.entityArray('add', { id: val.id, name: val.value });
-                    } else {
-                        that.element.val(val.value);
-                        that.valueElement.val(val.id);
+            var selected;
+            if( Array.isArray(this.possibleValues) ) {
+                selected = [];
+                for(var i = this.possibleValues.length - 1; i >= 0; i-- ) {
+                    if ( values.indexOf(this.possibleValues[i].id) > -1 || (values.indexOf(this.possibleValues[i].id.toString()) > -1)) {
+                        selected.unshift(this.possibleValues[i]);
                     }
                 }
-            });
+            } else {
+                selected = values;
+            }
+            for (var i = selected.length - 1; i >= 0; i--) {
+                if(this.options.multiple) {
+                    this.valueElement.entityArray('add', { id: selected[i].id, name: selected[i].value });
+                } else {
+                    this.element.val(selected[i].value);
+                    this.valueElement.val(selected[i].id);
+                }
+            }
         },
 
-        getValue: function() {
-            if( this.options.multiple && !this.expanded ) {
-                return this.valueElement.entityArray('getValue'); // entityArray
+        getValue: function(with_label) {
+            var result;
+            if ( this.options.multiple && !this.expanded ) {
+                result = this.valueElement.entityArray('getValue'); // entityArray
             } else if ( this.options.multiple ) {
-                return this.valueElement.val(); //select multiple=true
+                result = this.valueElement.val(); // select multiple=true
             } else {
-                return [this.valueElement.val()]; // hidden field
+                result = [this.valueElement.val()]; // hidden field
             }
+            if( with_label ) {
+                result = this.possibleValues.filter(function(el) {
+                    return result.indexOf( el.id ) >= 0;
+                });
+            }
+            return result;
         }
 
     });

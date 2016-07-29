@@ -56,6 +56,14 @@ module RedmineExtensions
         outputs.map{ |output| output.render_edit }.join('').html_safe
       end
 
+      def render_data
+        if outputs.any?
+          outputs.map{ |output| output.render_data }.join('').html_safe
+        else
+          view_context.l(:label_no_output)
+        end
+      end
+
       def method_missing(name, *args)
         if name.to_s.ends_with?('?')
           output_enabled?(name.to_s[0..-2])

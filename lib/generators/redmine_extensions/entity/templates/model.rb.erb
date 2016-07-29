@@ -38,6 +38,14 @@ class <%= model_name %> < ActiveRecord::Base
 
   attr_protected :id
 
+  <%- if associations.any? -%>
+  <%- associations.each do |assoc_name, values| -%>
+  <%- options = ''-%>
+  <%- options = ", class_name: '#{values[:class]}'" if values[:class].present? -%>
+  <%= values[:type] %> :<%= assoc_name %><%= options %>
+  <%- end -%>
+  <%- end -%>
+
   <%- if safe_columns.any? -%>
   safe_attributes <%= safe_columns.collect{|column_name, _| "'#{column_name}'"}.join(', ') %>
   <%- end -%>
