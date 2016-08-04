@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.homepage    = "https://www.easyredmine.com"
   spec.summary     = "Redmine Extensions is set of usefull features for Redmine. Main focus is on development helpers, but many users can find it helpfull"
   spec.description = "Redmine Extensions provide many extended functionalities for Redmine project."
-  spec.license     = 'GPL-2'
+  spec.license     = 'GPL-2.0'
 
   spec.test_files = Dir["spec/**/*"]
 
