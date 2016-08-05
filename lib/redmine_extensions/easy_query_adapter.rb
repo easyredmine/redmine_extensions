@@ -168,8 +168,8 @@ end
 if Redmine::Plugin.installed?(:easy_extensions)
   # EasyQuery exist
 else
-  QueryColumn.send(:include, RedmineExtensions::QueryColumnAdapter)
+  QueryColumn.__send__(:include, RedmineExtensions::QueryColumnAdapter)
   RedmineExtensions::PatchManager.register_model_patch('Query', 'RedmineExtensions::QueryAdapter')
   EasyQuery = EasyQueryAdapter
-  EasyQuery.prepend(RedmineExtensions::QueryAdapterDefaults)
+  EasyQuery.__send__(:prepend, RedmineExtensions::QueryAdapterDefaults)
 end
