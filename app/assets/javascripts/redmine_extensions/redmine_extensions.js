@@ -544,7 +544,7 @@ window.closeFlashMessage = (function($element){
                     name: value.value
                 });
                 this.element.trigger('change');
-                this.element.clear();
+                this.element.val('');
             } else {
                 this.element.val(value.value);
                 this.valueElement.val(value.id);
