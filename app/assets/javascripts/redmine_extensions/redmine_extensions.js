@@ -557,38 +557,39 @@ window.closeFlashMessage = (function($element){
             if( typeof values == 'undefined' || !values )
                 return false;
 
+            if( that.options.multiple ) {
+                that.valueElement.entityArray('clear');
+            }
             if( this.options.preload ) {
                 this.load(function(){
-                    if( that.options.multiple ) {
-                        that.valueElement.entityArray('clear');
-                    }
                     that._setValues(values)
                 });
             } else {
-                vals = [];
-                for (var i = values.length - 1; i >= 0; i--) {
-                    var identifier, label;
-                    if( values[i] instanceof Object && !Array.isArray(values[i]) && values[i] !== null ) {
-                        vals.push( values[i] );
-                    } else {
-                        vals.push( {id: values[i], value: values[i]} );
-                    }
-                }
                 that._setValues(values);
             }
         },
 
         _setValues: function(values) {
-            var selected;
-            if( Array.isArray(this.possibleValues) ) {
-                selected = [];
-                for(var i = this.possibleValues.length - 1; i >= 0; i-- ) {
-                    if ( values.indexOf(this.possibleValues[i].id) > -1 || (values.indexOf(this.possibleValues[i].id.toString()) > -1)) {
-                        selected.unshift(this.possibleValues[i]);
+            var selected = [];
+
+            if( values.length == 0 )
+                return false;
+
+            // allows the combination of only id values and values with label
+            for (var i = values.length - 1; i >= 0; i--) {
+                var identifier, label;
+                if( values[i] instanceof Object && !Array.isArray(values[i]) && values[i] !== null ) {
+                    selected.push( values[i] );
+                } else if( this.options.preload && Array.isArray(this.possibleValues) )  {
+                    for(var j = this.possibleValues.length - 1; j >= 0; j-- ) {
+                        if ( values[i] == this.possibleValues[j].id || values[i] == this.possibleValues[j].id.toString() ) {
+                            selected.push(this.possibleValues[j]);
+                            break;
+                        }
                     }
+                } else {
+                    selected.push( {id: values[i], value: values[i]} );
                 }
-            } else {
-                selected = values;
             }
             for (var i = selected.length - 1; i >= 0; i--) {
                 if(this.options.multiple) {
