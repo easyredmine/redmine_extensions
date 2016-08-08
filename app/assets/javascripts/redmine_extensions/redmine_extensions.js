@@ -555,32 +555,48 @@ window.closeFlashMessage = (function($element){
             if( typeof values == 'undefined' || !values )
                 return false;
 
+            if( that.options.multiple ) {
+                that.valueElement.entityArray('clear');
+            }
             if( this.options.preload ) {
                 this.load(function(){
-                    if( that.options.multiple ) {
-                        that.valueElement.entityArray('clear');
-                    }
                     that._setValues(values)
                 });
             } else {
-                // TODO - where to get real text value?
-                this.element.val(values[0]);
-                this.valueElement.val(values[0]);
+                that._setValues(values);
             }
         },
 
         _setValues: function(values) {
-            var that = this;
-            $.each(that.possibleValues, function(i, val) {
-                if ( values.indexOf(val.id) > -1 || (values.indexOf(val.id.toString()) > -1)) {
-                    if(that.options.multiple) {
-                        that.valueElement.entityArray('add', { id: val.id, name: val.value });
-                    } else {
-                        that.element.val(val.value);
-                        that.valueElement.val(val.id);
+            var selected = [];
+
+            if( values.length == 0 )
+                return false;
+
+            // allows the combination of only id values and values with label
+            for (var i = values.length - 1; i >= 0; i--) {
+                var identifier, label;
+                if( values[i] instanceof Object && !Array.isArray(values[i]) && values[i] !== null ) {
+                    selected.push( values[i] );
+                } else if( this.options.preload && Array.isArray(this.possibleValues) )  {
+                    for(var j = this.possibleValues.length - 1; j >= 0; j-- ) {
+                        if ( values[i] == this.possibleValues[j].id || values[i] == this.possibleValues[j].id.toString() ) {
+                            selected.push(this.possibleValues[j]);
+                            break;
+                        }
                     }
+                } else {
+                    selected.push( {id: values[i], value: values[i]} );
                 }
-            });
+            }
+            for (var i = selected.length - 1; i >= 0; i--) {
+                if(this.options.multiple) {
+                    this.valueElement.entityArray('add', { id: selected[i].id, name: selected[i].value });
+                } else {
+                    this.element.val(selected[i].value);
+                    this.valueElement.val(selected[i].id);
+                }
+            }
         },
 
         getValue: function() {
