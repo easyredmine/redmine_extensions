@@ -4,15 +4,6 @@ require 'redmine_extensions/redmine_patches/patches'
 module RedmineExtensions
   class Engine < ::Rails::Engine
 
-    def self.automount!(path = nil)
-      engine = self
-      path ||= engine.to_s.underscore.split('/').first
-      Rails.application.routes.draw do
-        mount engine => path
-        resources :easy_settings, only: [:edit]
-      end
-    end
-
     config.generators do |g|
       g.test_framework      :rspec,        :fixture => false
       g.fixture_replacement :factory_girl, :dir => 'spec/factories'
