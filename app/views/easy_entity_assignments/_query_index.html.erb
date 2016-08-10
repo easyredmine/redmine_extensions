@@ -1,5 +1,5 @@
 <% if display_style == :list %>
-  <%= render :partial => 'easy_queries/easy_query_entities_list', :locals => {:query => query, :entities => referenced_entities, :options => {:hascontextmenu => true, :disable_sort => true} } -%>
+  <%= render :partial => 'easy_queries/easy_query_entities_list', :locals => {:query => query, :entities => entities, :options => {:hascontextmenu => true, :disable_sort => true} } -%>
 <% elsif display_style == :tile %>
   <div class="easy-entity-cards-container">
     <div class="splitcontent">
