@@ -340,6 +340,8 @@ window.closeFlashMessage = (function($element){
                 this._initData(this.options.source);
             } else if ( this.options.preload && this.options.load_immediately) {
                 this.load();
+            } else if ( this.selectedValues ) {
+                this.setValue( this.selectedValues );
             }
         },
 
