@@ -340,6 +340,8 @@ window.closeFlashMessage = (function($element){
                 this._initData(this.options.source);
             } else if ( this.options.preload && this.options.load_immediately) {
                 this.load();
+            } else if ( this.selectedValues ) {
+                this.setValue( this.selectedValues );
             }
         },
 
@@ -542,6 +544,7 @@ window.closeFlashMessage = (function($element){
                     name: value.value
                 });
                 this.element.trigger('change');
+                this.element.val('');
             } else {
                 this.element.val(value.value);
                 this.valueElement.val(value.id);
@@ -554,41 +557,63 @@ window.closeFlashMessage = (function($element){
             if( typeof values == 'undefined' || !values )
                 return false;
 
+            if( that.options.multiple ) {
+                that.valueElement.entityArray('clear');
+            }
             if( this.options.preload ) {
                 this.load(function(){
-                    if( that.options.multiple ) {
-                        that.valueElement.entityArray('clear');
-                    }
                     that._setValues(values)
                 });
             } else {
-                // TODO - where to get real text value?
-                this.element.val(values[0]);
-                this.valueElement.val(values[0]);
+                that._setValues(values);
             }
         },
 
         _setValues: function(values) {
-            var that = this;
-            $.each(that.possibleValues, function(i, val) {
-                if ( values.indexOf(val.id) > -1 || (values.indexOf(val.id.toString()) > -1)) {
-                    if(that.options.multiple) {
-                        that.valueElement.entityArray('add', { id: val.id, name: val.value });
-                    } else {
-                        that.element.val(val.value);
-                        that.valueElement.val(val.id);
+            var selected = [];
+
+            if( values.length == 0 )
+                return false;
+
+            // allows the combination of only id values and values with label
+            for (var i = values.length - 1; i >= 0; i--) {
+                var identifier, label;
+                if( values[i] instanceof Object && !Array.isArray(values[i]) && values[i] !== null ) {
+                    selected.push( values[i] );
+                } else if( this.options.preload && Array.isArray(this.possibleValues) )  {
+                    for(var j = this.possibleValues.length - 1; j >= 0; j-- ) {
+                        if ( values[i] == this.possibleValues[j].id || values[i] == this.possibleValues[j].id.toString() ) {
+                            selected.push(this.possibleValues[j]);
+                            break;
+                        }
                     }
+                } else {
+                    selected.push( {id: values[i], value: values[i]} );
                 }
-            });
+            }
+            for (var i = selected.length - 1; i >= 0; i--) {
+                if(this.options.multiple) {
+                    this.valueElement.entityArray('add', { id: selected[i].id, name: selected[i].value });
+                } else {
+                    this.element.val(selected[i].value);
+                    this.valueElement.val(selected[i].id);
+                }
+            }
         },
 
-        getValue: function() {
-            if( this.options.multiple && !this.expanded ) {
-                return this.valueElement.entityArray('getValue'); // entityArray
+        getValue: function(with_label) {
+            var result;
+            if ( this.options.multiple && !this.expanded ) {
+              result = this.valueElement.entityArray('getValue'); // entityArray
             } else if ( this.options.multiple ) {
-                return this.valueElement.val(); //select multiple=true
+                return this.valueElement.val(); // select multiple=true
             } else {
-                return [this.valueElement.val()]; // hidden field
+              result = [this.valueElement.val()]; // hidden field
+            }
+            if( with_label ) {
+              result = this.possibleValues.filter(function(el) {
+                return result.indexOf( el.id ) >= 0;
+              });
             }
         }
 
