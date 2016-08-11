@@ -606,7 +606,7 @@ window.closeFlashMessage = (function($element){
             if ( this.options.multiple && !this.expanded ) {
               result = this.valueElement.entityArray('getValue'); // entityArray
             } else if ( this.options.multiple ) {
-                return this.valueElement.val(); // select multiple=true
+              result = this.valueElement.val(); // select multiple=true
             } else {
               result = [this.valueElement.val()]; // hidden field
             }
@@ -615,6 +615,7 @@ window.closeFlashMessage = (function($element){
                 return result.indexOf( el.id ) >= 0;
               });
             }
+            return result;
         }
 
     });
