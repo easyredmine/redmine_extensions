@@ -554,17 +554,20 @@ window.closeFlashMessage = (function($element){
 
         setValue: function(values) {
             var that = this;
-            if( typeof values == 'undefined' || !values )
+            if( typeof values === 'undefined' || !values )
                 return false;
 
-            if( that.options.multiple ) {
-                that.valueElement.entityArray('clear');
-            }
             if( this.options.preload ) {
                 this.load(function(){
-                    that._setValues(values)
+                    if( that.options.multiple ) {
+                        that.valueElement.entityArray('clear');
+                    }
+                    that._setValues(values);
                 });
             } else {
+                if( that.options.multiple ) {
+                    that.valueElement.entityArray('clear');
+                }
                 that._setValues(values);
             }
         },
