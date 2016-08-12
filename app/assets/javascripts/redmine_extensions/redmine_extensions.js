@@ -389,7 +389,7 @@ window.closeFlashMessage = (function($element){
                         select.append(option);
                     });
                     $container = $elem.closest('.easy-multiselect-tag-container');
-                    $container.children(':input').prop('disabled', true);
+                    $container.find(':input').prop('disabled', true);
                     $container.children().hide();
                     $container.append(select);
                     that.valueElement = select;
