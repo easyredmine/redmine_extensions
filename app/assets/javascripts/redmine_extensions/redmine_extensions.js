@@ -522,19 +522,24 @@ window.closeFlashMessage = (function($element){
                 return;
 
             this.loading = true;
-            $.ajax(this.options.source, {
-                dataType: 'json',
-                success: function(json, status, xhr) {
-                    data = that.options.rootElement ? json[that.options.rootElement] : json
-                    that._initData(data);
-                    for (var i = that.afterLoaded.length - 1; i >= 0; i--) {
-                        that.afterLoaded[i].call();
-                    }
-                },
-                error: fail
-            }).always(function(){
-                that.loading = false;
-            });
+            function successFce(json, status, xhr) {
+                data = that.options.rootElement ? json[that.options.rootElement] : json
+                that._initData(data);
+                for (var i = that.afterLoaded.length - 1; i >= 0; i--) {
+                    that.afterLoaded[i].call();
+                }
+            }
+            if( typeof this.options.source === 'function' ) {
+                this.options.source(successFce);
+            } else {
+                $.ajax(this.options.source, {
+                    dataType: 'json',
+                    success: successFce,
+                    error: fail
+                }).always(function(){
+                    that.loading = false;
+                });
+            }
         },
 
         selectValue: function(value) {
