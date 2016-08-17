@@ -415,11 +415,17 @@ window.closeFlashMessage = (function($element){
                             response();
                         });
                     } else { // asking server everytime
-                        $.getJSON(that.options.source, {
-                            term: request.term
-                        }, function(json) {
-                            response(that.options.rootElement ? json[that.options.rootElement] : json);
-                        });
+                        if( typeof that.options.source == 'function' ) {
+                            that.options.source(function(json){
+                                response(that.options.rootElement ? json[that.options.rootElement] : json);
+                            });
+                        } else {
+                            $.getJSON(that.options.source, {
+                                term: request.term
+                            }, function(json) {
+                                response(that.options.rootElement ? json[that.options.rootElement] : json);
+                            });
+                        }
                     }
                 },
                 minLength: 0,
