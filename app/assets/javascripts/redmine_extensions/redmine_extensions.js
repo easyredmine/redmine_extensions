@@ -532,8 +532,9 @@ window.closeFlashMessage = (function($element){
                 data = that.options.rootElement ? json[that.options.rootElement] : json
                 that._initData(data);
                 for (var i = that.afterLoaded.length - 1; i >= 0; i--) {
-                    that.afterLoaded[i].call();
+                    that.afterLoaded[i].call(that);
                 }
+                that.loading = false;
             }
             if( typeof this.options.source === 'function' ) {
                 this.options.source(successFce);
@@ -543,7 +544,7 @@ window.closeFlashMessage = (function($element){
                     success: successFce,
                     error: fail
                 }).always(function(){
-                    that.loading = false;
+                    that.loading = false; //even if ajax fails
                 });
             }
         },
