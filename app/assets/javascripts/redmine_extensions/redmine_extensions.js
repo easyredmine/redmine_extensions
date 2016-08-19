@@ -415,11 +415,17 @@ window.closeFlashMessage = (function($element){
                             response();
                         });
                     } else { // asking server everytime
-                        $.getJSON(that.options.source, {
-                            term: request.term
-                        }, function(json) {
-                            response(that.options.rootElement ? json[that.options.rootElement] : json);
-                        });
+                        if( typeof that.options.source == 'function' ) {
+                            that.options.source(function(json){
+                                response(that.options.rootElement ? json[that.options.rootElement] : json);
+                            });
+                        } else {
+                            $.getJSON(that.options.source, {
+                                term: request.term
+                            }, function(json) {
+                                response(that.options.rootElement ? json[that.options.rootElement] : json);
+                            });
+                        }
                     }
                 },
                 minLength: 0,
@@ -522,19 +528,25 @@ window.closeFlashMessage = (function($element){
                 return;
 
             this.loading = true;
-            $.ajax(this.options.source, {
-                dataType: 'json',
-                success: function(json, status, xhr) {
-                    data = that.options.rootElement ? json[that.options.rootElement] : json
-                    that._initData(data);
-                    for (var i = that.afterLoaded.length - 1; i >= 0; i--) {
-                        that.afterLoaded[i].call();
-                    }
-                },
-                error: fail
-            }).always(function(){
+            function successFce(json, status, xhr) {
+                data = that.options.rootElement ? json[that.options.rootElement] : json
+                that._initData(data);
+                for (var i = that.afterLoaded.length - 1; i >= 0; i--) {
+                    that.afterLoaded[i].call(that);
+                }
                 that.loading = false;
-            });
+            }
+            if( typeof this.options.source === 'function' ) {
+                this.options.source(successFce);
+            } else {
+                $.ajax(this.options.source, {
+                    dataType: 'json',
+                    success: successFce,
+                    error: fail
+                }).always(function(){
+                    that.loading = false; //even if ajax fails
+                });
+            }
         },
 
         selectValue: function(value) {
