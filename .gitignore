@@ -2,6 +2,7 @@
 .idea/
 log/*.log
 pkg/
+spec/redmine
 spec/{dummy,redmine}/db/*.sqlite3
 spec/{dummy,redmine}/db/*.sqlite3-journal
 spec/{dummy,redmine}/log/*.log

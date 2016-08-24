@@ -7,26 +7,47 @@ before_script:
   - ''
   - rvm use ruby 2.3.1 > /dev/null 2>&1
   - ruby -v
+  - export REDMINE_SUBDIR="spec/redmine"
 
 Pure Redmine / MySQL:
-  script:
-  - $SHELL ./.run-tests.sh
   tags:
+  - mysql
+  script:
+  - export ADAPTER="mysql2"
+  - export DB_USERNAME="root"
+  - export DB_PWD=$MYSQL_PASS
+  - git clone https://github.com/redmine/redmine.git spec/redmine
+  - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
+  - $SHELL ./.run-tests.sh
+  except:
+  - master
+
+Pure Redmine / Postgresql:
+  tags:
+  - postgresql
+  script:
+  - export ADAPTER="postgresql"
+  - export DB_USERNAME="postgres"
+  - export DB_PWD=""
+  - git clone https://github.com/redmine/redmine.git spec/redmine
+  - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
+  - $SHELL ./.run-tests.sh
   except:
   - master
 
 EasyRedmine / MySQL:
+  tags:
+  - mysql
   script:
-  - EASY='yes'
   - rm -rf spec/redmine
-  - git clone https://$GITLAB_FETCH_USER:$GITLAB_FETCH_PASSWORD@git.easy.cz/easyproject/stable-2014.git spec/redmine
+  - git clone https://$GITLAB_FETCH_USER:$GITLAB_FETCH_PASSWORD@git.easy.cz/easyproject/devel.git -b devel spec/redmine
   - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
   - 'sed ''s/pattern = "\.\/plugins/pattern = "#{Rails.root}\/plugins/'' -i spec/redmine/plugins/easyproject/easy_plugins/easy_extensions/lib/tasks/tests.rake'
+  - export EASY='true'
+  - export ADAPTER="mysql2"
+  - export DB_USERNAME="root"
+  - export DB_PWD=$MYSQL_PASS
   - ''
   - $SHELL ./.run-tests.sh
-
-#  - bundle exec rake test:prepare RAILS_ENV=test
-#  - bundle exec rake easyproject:tests:spec RAILS_ENV=test
-  tags:
   except:
   - master

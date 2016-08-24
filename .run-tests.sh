@@ -20,6 +20,7 @@ echo $CI_BUILD_REPO
 echo $CI_BUILD_TRIGGERED
 echo $CI_PROJECT_ID
 echo $CI_PROJECT_DIR
+echo $REDMINE_SUBDIR
 
 bundle --version
 
@@ -35,18 +36,18 @@ ruby -ryaml -rsecurerandom -e "
     'encoding' => 'utf8'
   }
   config = { 'test' => config.merge({'database' => 'test_'+database}), 'development' => config }.to_yaml
-  File.write('config/database.yml', config)
+  File.write(ENV['REDMINE_SUBDIR'] + '/config/database.yml', config)
 "
 
 bundle update
-bundle exec rake db:drop
-bundle exec rake db:create
-bundle exec rake db:migrate
-if [ $EASY == 'yes' ]; then
-  bundle exec rake app:redmine:plugins:migrate
-  bundle exec rake app:easyproject:tests:spec
+bundle exec rake db:drop db:create db:migrate RAILS_ENV=test
+cd $REDMINE_SUBDIR
+if [ "$EASY" = "true" ]; then
+  bundle exec rake easyproject:install
+  bundle exec rake easyproject:tests:spec
 else
-  bundle exect rake redmine_test
+  bundle exec rake test
 fi
+cd ../..
 bundle exec rake spec
 bundle exec rake db:drop

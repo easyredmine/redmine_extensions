@@ -17,6 +17,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir["{app,config,db,lib}/**/*", "LICENSE", "Rakefile", "README.rdoc"]
 
   spec.add_dependency "rails", "~> 4.2"
+  spec.add_dependency "actionpack", "~> 4.2"
 
   spec.required_ruby_version = '>= 2.1'
 
