@@ -38,6 +38,14 @@ class <%= model_name %> < ActiveRecord::Base
 
   attr_protected :id
 
+  <%- if associations.any? -%>
+  <%- associations.each do |assoc_name, values| -%>
+  <%- options = ''-%>
+  <%- options = ", class_name: '#{values[:class]}'" if values[:class].present? -%>
+  <%= values[:type] %> :<%= assoc_name %><%= options %>
+  <%- end -%>
+  <%- end -%>
+
   <%- if safe_columns.any? -%>
   safe_attributes <%= safe_columns.collect{|column_name, _| "'#{column_name}'"}.join(', ') %>
   <%- end -%>
@@ -52,10 +60,6 @@ class <%= model_name %> < ActiveRecord::Base
   after_create :send_create_notification
   after_update :send_update_notification
   <%- end -%>
-
-  def self.human_attribute_name(attribute, *args)
-    l(attribute.to_s.gsub(/\_id$/, ''), :scope => [:activerecord, :attributes, :<%= model_name_underscored %>])
-  end
 
   def self.visible_condition(user, options={})
   <%- if project? -%>

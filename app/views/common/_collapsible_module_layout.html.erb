@@ -1,0 +1,13 @@
+<div class="module box <%= renderer.container_class %>"<%=raw renderer.saving_state_enabled? && %Q{ data-toggle="#{renderer.id}"} || nil %>>
+  <%= content_tag(:div, class: 'module-heading ' + renderer.heading_class, onclick: (renderer.collapsible? && 'EasyToggler.toggle(this.nextElementSibling, event)' || nil)) do %>
+    <%= content_tag(:span, ' ', class: 'expander module-toggler') if renderer.collapsible? %>
+    <%= content_tag(renderer.heading_tag, renderer.heading, class: renderer.icon) %>
+    <%= content_tag(:span, renderer.heading_links, class: 'module-heading-links') if renderer.heading_links.presence %>
+  <% end if renderer.heading.present? %>
+  <div class="module-content" id="<%= renderer.id %>"<%=raw renderer.collapsed? && %q{ style="display:none"} || nil %>>
+    <%= content -%>
+    <%= content_tag(:div, class: 'module-content-footer') do %>
+      <%= renderer.footer %>
+    <% end if renderer.footer.present? %>
+  </div>
+</div>

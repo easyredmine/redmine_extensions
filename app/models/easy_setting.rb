@@ -94,7 +94,7 @@ class EasySetting < ActiveRecord::Base
   def self.get_beginning_of_fiscal_for_year(year = nil)
     f_y = year || Date.today.year
     f_m = (EasySetting.value('fiscal_month') || 1).to_i
-    f_d = (EasySetting.value('fiscal_day') || 1).to_i
+    f_d = 1
 
     begin
       Date.civil(f_y, f_m, f_d)

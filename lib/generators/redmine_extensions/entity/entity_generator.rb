@@ -6,6 +6,8 @@ module RedmineExtensions
     argument :model_name, type: :string, required: true, banner: 'Post'
     argument :attributes, type: :array, required: true, banner: 'field[:type][:index] field[:type][:index]'
 
+    class_option :associations, type: :array, required: false, banner: '--associations association_type[:association_name][:association_class]'
+
     class_option :project, type: :boolean, default: true, banner: '', :desc => 'make model depends on project'
     class_option :author, type: :boolean, default: true, banner: '', :desc => 'make model depends on project'
     class_option :mail, type: :boolean, default: true, banner: '', :desc => 'model have mail notifications'
@@ -22,6 +24,7 @@ module RedmineExtensions
     attr_reader :plugin_path, :plugin_name_underscored, :plugin_pretty_name, :plugin_title
     attr_reader :controller_class, :model_name_underscored, :model_name_pluralize_underscored
     attr_reader :db_columns
+    attr_reader :associations
 
     def initialize(*args)
       super
@@ -40,11 +43,11 @@ module RedmineExtensions
     def copy_templates
       template '_form.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/_form.html.erb"
       template '_sidebar.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/_sidebar.html.erb"
-      template '_view_custom_fields_form_custom_field.html.erb.erb', "#{plugin_path}/app/views/custom_fields/_view_custom_fields_form_#{model_name_underscored}_custom_field.html.erb"
       template 'context_menu.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/context_menu.html.erb"
       template 'controller.rb.erb', "#{plugin_path}/app/controllers/#{model_name_pluralize_underscored}_controller.rb"
       template('custom_field.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_custom_field.rb") if acts_as_customizable?
       template 'edit.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/edit.html.erb"
+      template 'edit.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/edit.js.erb"
 
       if File.exists?("#{plugin_path}/config/locales/en.yml")
         append_to_file "#{plugin_path}/config/locales/en.yml" do
@@ -72,6 +75,7 @@ module RedmineExtensions
       template 'hooks.rb.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/#{model_name_underscored}_hooks.rb"
       template 'index.api.rsb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.api.rsb"
       template 'index.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.html.erb"
+      template 'index.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.js.erb"
 
       if mail?
         template 'mailer.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_mailer.rb"
@@ -84,6 +88,7 @@ module RedmineExtensions
       template 'migration.rb.erb', "#{plugin_path}/db/migrate/#{Time.now.strftime('%Y%m%d%H%M%S')}_create_#{@model_name_pluralize_underscored}.rb"
       template 'model.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}.rb"
       template 'new.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.html.erb"
+      template 'new.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.js.erb"
       template 'query.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_query.rb"
 
       if File.exists?("#{plugin_path}/config/routes.rb")
@@ -146,9 +151,14 @@ module RedmineExtensions
 
       template 'show.api.rsb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/show.api.rsb"
       template 'show.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/show.html.erb"
+      template 'show.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/show.js.erb"
     end
 
     private
+
+    def assocs
+      options[:associations]
+    end
 
     def project?
       options[:project] == true
@@ -200,6 +210,7 @@ module RedmineExtensions
 
     def prepare_columns
       @db_columns = {}
+      prepare_associations
 
       attributes.each do |attr|
         attr_name, attr_type, attr_idx = attr.split(':')
@@ -213,6 +224,44 @@ module RedmineExtensions
       @db_columns['author_id'] = {type: 'integer', idx: nil, null: false, safe: true, class: 'User', list_class_name: 'name', query_type: 'list', query_column_name: 'author', lang_key: "field_#{model_name_underscored}_author"} if author? && !@db_columns.key?('author_id')
       @db_columns['created_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date', lang_key: "field_#{model_name_underscored}_created_at"}
       @db_columns['updated_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date', lang_key: "field_#{model_name_underscored}_updated_at"}
+    end
+
+    def prepare_associations
+      @associations = {}
+
+      return true if assocs.nil?
+
+      assocs.each do |assoc|
+        assoc_type, assoc_name, assoc_class = assoc.split(':')
+        next if assoc_type.blank? || assoc_name.blank?
+
+        @associations[assoc_name] = {type: assoc_type, class: assoc_class}
+
+        assoc_model_class = assoc_class.presence || assoc_name.singularize.camelize
+        assoc_model_filename = assoc_model_class.underscore
+        assoc_model_path = "#{plugin_path}/app/models/#{assoc_model_filename}.rb"
+
+        case assoc_type
+        when 'has_many', 'has_one'
+          if File.exists?(assoc_model_path)
+            line = "class #{assoc_model_class} < ActiveRecord::Base"
+            gsub_file assoc_model_path, /(#{Regexp.escape(line)})/mi do |match|
+              "#{match}\n  belongs_to :#{model_name.underscore}\n"
+            end
+          end
+        when 'belongs_to'
+          if File.exists?(assoc_model_path)
+            unless File.readlines(assoc_model_path).grep(/has_many\ :#{model_name.underscore.pluralize}/).any?
+              line = "class #{assoc_model_class} < ActiveRecord::Base"
+              gsub_file assoc_model_path, /(#{Regexp.escape(line)})/mi do |match|
+                "#{match}\n  has_many :#{model_name.underscore.pluralize}\n"
+              end
+            end
+          end
+
+          @db_columns["#{assoc_model_class.underscore.singularize}_id"] = {type: 'integer', idx: true, null: false}
+        end
+      end
     end
 
     def safe_columns

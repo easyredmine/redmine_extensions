@@ -1,3 +1,5 @@
 en:
   nothing: Nothing
   button_update_easy_settings: Update settings
+  label_no_output: No output has been selected
+  text_modal_is_closing: This modal dialog will be closed automatically, please wait.

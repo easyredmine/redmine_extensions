@@ -1,0 +1,11 @@
+$("#ajax-modal").html("<%%= j render(:template => '<%= model_name_pluralize_underscored %>/index', :formats => [:html]) %>");
+showModal('ajax-modal');
+var closeButton = {
+  text: "<%=j l(:button_close) -%>",
+  title: "<%=j l(:button_close) -%>",
+  click: function() {$(this).dialog('close');},
+  'class': 'button'
+}
+$("#ajax-modal").dialog('option', {
+  buttons: [closeButton, submitButton]
+});

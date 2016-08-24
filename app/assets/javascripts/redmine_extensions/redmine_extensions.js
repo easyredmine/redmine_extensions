@@ -418,11 +418,17 @@ window.escapeHTML = (function(html){
                             response();
                         });
                     } else { // asking server everytime
-                        $.getJSON(that.options.source, {
-                            term: request.term
-                        }, function(json) {
-                            response(that.options.rootElement ? json[that.options.rootElement] : json);
-                        });
+                        if( typeof that.options.source == 'function' ) {
+                            that.options.source(function(json){
+                                response(that.options.rootElement ? json[that.options.rootElement] : json);
+                            });
+                        } else {
+                            $.getJSON(that.options.source, {
+                                term: request.term
+                            }, function(json) {
+                                response(that.options.rootElement ? json[that.options.rootElement] : json);
+                            });
+                        }
                     }
                 },
                 minLength: 0,
@@ -499,7 +505,7 @@ window.escapeHTML = (function(html){
         },
 
         _initData: function(data) {
-            this.possibleValues = this._formatData(data)
+            this.possibleValues = this._formatData(data);
             this.valuesLoaded = true;
 
             this.selectedValues = this.selectedValues ? this.selectedValues : [];
@@ -525,19 +531,25 @@ window.escapeHTML = (function(html){
                 return;
 
             this.loading = true;
-            $.ajax(this.options.source, {
-                dataType: 'json',
-                success: function(json, status, xhr) {
-                    data = that.options.rootElement ? json[that.options.rootElement] : json
-                    that._initData(data);
-                    for (var i = that.afterLoaded.length - 1; i >= 0; i--) {
-                        that.afterLoaded[i].call();
-                    }
-                },
-                error: fail
-            }).always(function(){
+            function successFce(json, status, xhr) {
+                data = that.options.rootElement ? json[that.options.rootElement] : json
+                that._initData(data);
+                for (var i = that.afterLoaded.length - 1; i >= 0; i--) {
+                    that.afterLoaded[i].call(that);
+                }
                 that.loading = false;
-            });
+            }
+            if( typeof this.options.source === 'function' ) {
+                this.options.source(successFce);
+            } else {
+                $.ajax(this.options.source, {
+                    dataType: 'json',
+                    success: successFce,
+                    error: fail
+                }).always(function(){
+                    that.loading = false; //even if ajax fails
+                });
+            }
         },
 
         selectValue: function(value) {
@@ -610,16 +622,16 @@ window.escapeHTML = (function(html){
         getValue: function(with_label) {
             var result;
             if ( this.options.multiple && !this.expanded ) {
-              result = this.valueElement.entityArray('getValue'); // entityArray
+                result = this.valueElement.entityArray('getValue'); // entityArray
             } else if ( this.options.multiple ) {
-              result = this.valueElement.val(); // select multiple=true
+                result = this.valueElement.val(); // select multiple=true
             } else {
-              result = [this.valueElement.val()]; // hidden field
+                result = [this.valueElement.val()]; // hidden field
             }
             if( with_label ) {
-              result = this.possibleValues.filter(function(el) {
-                return result.indexOf( el.id ) >= 0;
-              });
+                result = this.possibleValues.filter(function(el) {
+                    return result.indexOf( el.id ) >= 0;
+                });
             }
             return result;
         }

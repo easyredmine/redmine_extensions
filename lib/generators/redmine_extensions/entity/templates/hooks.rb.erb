@@ -1,7 +1,5 @@
 module <%= plugin_title %>
   class <%= model_name %>Hooks < Redmine::Hook::ViewListener
 
-    render_on :view_custom_fields_form_<%= model_name_underscored %>_custom_field, partial: 'custom_fields/view_custom_fields_form_<%= model_name_underscored %>_custom_field'
-
   end
 end
