@@ -38,7 +38,7 @@
             }
 
             entity.element = $("<span/>")
-                .html(escapeHTML(entity.name))
+                .text(entity.name)
                 .addClass(entity.className || this.options.className)
                 .appendTo(this.element)
                 .after(" ");
