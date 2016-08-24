@@ -303,6 +303,9 @@ window.closeFlashMessage = (function($element){
     $element.closest('.flash').fadeOut(500, function(){$element.remove();});
 });
 
+window.escapeHTML = (function(html){
+    return document.createElement('div').appendChild(document.createTextNode(html)).parentNode.innerHTML;
+});
 
 (function($, undefined) {
 
@@ -319,7 +322,7 @@ window.closeFlashMessage = (function($element){
             render_item: function(ul, item) {
                 return $("<li>")
                     .data("item.autocomplete", item)
-                    .text(item.label)
+                    .append(escapeHTML(item.label))
                     .appendTo(ul);
             },
             activate_on_input_click: true,
