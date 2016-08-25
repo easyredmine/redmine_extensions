@@ -409,7 +409,7 @@ window.closeFlashMessage = (function($element){
                         that.load(function(){
                             var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
                             response($.grep(that.possibleValues, function(val, i) {
-                                return ( !that.options.multiple || !request.term || matcher.test(val.value));
+                                return ( !request.term || matcher.test(val.value) );
                             }));
                         }, function(){
                             response();
