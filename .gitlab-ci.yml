@@ -21,6 +21,8 @@ Pure Redmine / MySQL:
   - $SHELL ./.run-tests.sh
   except:
   - master
+  - devel
+  - stable
 
 Pure Redmine / Postgresql:
   tags:
@@ -34,20 +36,22 @@ Pure Redmine / Postgresql:
   - $SHELL ./.run-tests.sh
   except:
   - master
+  - devel
+  - stable
 
-EasyRedmine / MySQL:
-  tags:
-  - mysql
-  script:
-  - rm -rf spec/redmine
-  - git clone https://$GITLAB_FETCH_USER:$GITLAB_FETCH_PASSWORD@git.easy.cz/easyproject/devel.git -b devel spec/redmine
-  - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
-  - 'sed ''s/pattern = "\.\/plugins/pattern = "#{Rails.root}\/plugins/'' -i spec/redmine/plugins/easyproject/easy_plugins/easy_extensions/lib/tasks/tests.rake'
-  - export EASY='true'
-  - export ADAPTER="mysql2"
-  - export DB_USERNAME="root"
-  - export DB_PWD=$MYSQL_PASS
-  - ''
-  - $SHELL ./.run-tests.sh
-  except:
-  - master
+# EasyRedmine / MySQL:
+#   tags:
+#   - mysql
+#   script:
+#   - rm -rf spec/redmine
+#   - git clone https://$GITLAB_FETCH_USER:$GITLAB_FETCH_PASSWORD@git.easy.cz/easyproject/devel.git -b devel spec/redmine
+#   - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
+#   - 'sed ''s/pattern = "\.\/plugins/pattern = "#{Rails.root}\/plugins/'' -i spec/redmine/plugins/easyproject/easy_plugins/easy_extensions/lib/tasks/tests.rake'
+#   - export EASY='true'
+#   - export ADAPTER="mysql2"
+#   - export DB_USERNAME="root"
+#   - export DB_PWD=$MYSQL_PASS
+#   - ''
+#   - $SHELL ./.run-tests.sh
+#   except:
+#   - master
