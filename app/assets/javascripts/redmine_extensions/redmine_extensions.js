@@ -319,7 +319,7 @@ window.closeFlashMessage = (function($element){
             render_item: function(ul, item) {
                 return $("<li>")
                     .data("item.autocomplete", item)
-                    .append(item.label)
+                    .text(item.label)
                     .appendTo(ul);
             },
             activate_on_input_click: true,
