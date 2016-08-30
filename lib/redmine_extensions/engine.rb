@@ -1,3 +1,4 @@
+require 'active_support/dependencies'
 require 'redmine_extensions/patch_manager'
 require 'redmine_extensions/redmine_patches/patches'
 

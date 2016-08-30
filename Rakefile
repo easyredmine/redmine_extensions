@@ -38,12 +38,6 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
   spec.exclude_pattern = 'spec/redmine/**/*_spec.rb'
 end
 
-Rake::TestTask.new('redmine_test') do |t|
-  t.libs = ['spec/redmine/test']
-  t.pattern = 'spec/redmine/test/**/*_test.rb'
-  t.verbose = true
-end
-
 # task :redmine_test do |rake|
 #   Rake::Task['app:test'].invoke
 # end
