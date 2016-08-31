@@ -10,9 +10,6 @@ require 'database_cleaner'
 
   Rails.backtrace_cleaner.remove_silencers!
 
-require "#{RedmineExtensions::Engine.root}/spec/support/plugin_generator"
-PluginGenerator.generate_test_plugin!
-
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
 # run as spec files by default. This means that files in spec/support that end
@@ -57,7 +54,7 @@ require 'capybara/poltergeist'
 
 Capybara.register_driver :poltergeist do |app|
   Capybara::Poltergeist::Driver.new(app, {
-    inspector: true,
+    inspector: 'google-chrome-stable',
     js_errors: true,
     timeout: 1.hour.seconds.to_i,
     phantomjs_options: ['--ignore-ssl-errors=yes'],
