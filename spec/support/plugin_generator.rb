@@ -11,31 +11,37 @@ module PluginGenerator
     #   ActionDispatch::Reloader.prepare!
     # end
 
-    generate_controller!
-    generate_routes!
-    generate_view!
+    generate_autocomplete!
   end
 
-  def self.generate_controller!
-    File.open(Rails.root.join('plugins', 'dummy_plugin', 'app', 'controllers', 'dummy_controller.rb'), 'w') do |file|
-      file.write("class DummyController < ApplicationController\n")
+  def self.generate_autocomplete!
+    generate_autocomplete_controller!
+    generate_autocomplete_routes!
+    generate_autocomplete_view!
+  end
+
+  def self.generate_autocomplete_controller!
+    File.open(Rails.root.join('plugins', 'dummy_plugin', 'app', 'controllers', 'dummy_autocompletes_controller.rb'), 'w') do |file|
+      file.write("class DummyAutocompletesController < ApplicationController\n")
       file.write("  def index\n")
       file.write("  end\n")
       file.write("end\n")
     end
   end
 
-  def self.generate_routes!
+  def self.generate_autocomplete_routes!
     File.open(Rails.root.join('plugins', 'dummy_plugin', 'config', 'routes.rb'), 'w') do |file|
-      file.write("resources :dummy")
+      file.write("resources :dummy_autocompletes")
     end
   end
 
-  def self.generate_view!
-    dir = Rails.root.join('plugins', 'dummy_plugin', 'app', 'views', 'dummy')
+  def self.generate_autocomplete_view!
+    dir = Rails.root.join('plugins', 'dummy_plugin', 'app', 'views', 'dummy_autocompletes')
     Dir.mkdir dir
     File.open(dir.join('index.html.erb'), 'w') do |file|
-      file.write("<%= autocomplete_field_tag('default', ['value1', 'value2'], ['value1']) %>")
+      file.write("<%= form_tag('/dummy_autocompletes', id: 'autocompletes_form') do %>\n")
+      file.write("  <%= autocomplete_field_tag('default', ['value1', 'value2'], ['value1']) %>\n")
+      file.write('<% end %>')
     end
   end
 end
