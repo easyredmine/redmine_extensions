@@ -529,7 +529,11 @@ window.closeFlashMessage = (function($element){
 
             this.loading = true;
             function successFce(json, status, xhr) {
-                data = that.options.rootElement ? json[that.options.rootElement] : json
+                var data = that.options.rootElement ? json[that.options.rootElement] : json
+                if( !data && window.console  ) {
+                    console.warn('Data could not be loaded! Please check the datasource.');
+                    data = [];
+                }
                 that._initData(data);
                 for (var i = that.afterLoaded.length - 1; i >= 0; i--) {
                     that.afterLoaded[i].call(that);
