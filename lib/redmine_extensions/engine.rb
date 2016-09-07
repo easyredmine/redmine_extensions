@@ -1,6 +1,9 @@
 require 'redmine_extensions/patch_manager'
 require 'redmine_extensions/redmine_patches/patches'
 
+require 'redmine_extensions/query_output'
+require 'redmine_extensions/query_outputs/table_output'
+
 module RedmineExtensions
   class Engine < ::Rails::Engine
 
