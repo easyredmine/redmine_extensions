@@ -13,16 +13,18 @@ module RedmineExtensions
       @@registered_outputs ||= {}
     end
 
-    def self.available_outputs_for(query)
+    def self.filter_registered_for(query)
       registered_outputs.select do |name, output|
         output.available_for?(query)
-      end.keys
+      end
+    end
+
+    def self.available_outputs_for(query)
+      filter_registered_for(query).keys
     end
 
     def self.available_output_klasses_for(query)
-      registered_outputs.select do |name, output|
-        output.available_for?(query)
-      end.values
+      filter_registered_for(query).values
     end
 
     def self.output_klass_for(output)
