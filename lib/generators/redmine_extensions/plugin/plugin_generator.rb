@@ -40,11 +40,12 @@ module RedmineExtensions
       template 'gitkeep.erb', "#{plugin_path}/app/views/.gitkeep"
       template 'gitkeep.erb', "#{plugin_path}/db/migrate/.gitkeep"
       template 'gitkeep.erb', "#{plugin_path}/assets/images/.gitkeep"
-      template 'gitkeep.erb', "#{plugin_path}/assets/javascripts/.gitkeep"
       template 'gitkeep.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/easy_patch/redmine/others/.gitkeep"
 
       template 'Gemfile.erb', "#{plugin_path}/Gemfile"
       template 'init.rb.erb', "#{plugin_path}/init.rb"
+      template 'javascript.js', "#{plugin_path}/assets/javascripts/#{plugin_name_underscored}.js"
+      template 'stylesheet.js', "#{plugin_path}/assets/stylesheets/#{plugin_name_underscored}.css"
       template 'en.yml.erb', "#{plugin_path}/config/locales/en.yml"
       template 'routes.rb.erb', "#{plugin_path}/config/routes.rb"
       template 'hooks.rb.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/hooks.rb"
