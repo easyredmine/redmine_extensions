@@ -9,6 +9,7 @@ require 'factory_girl_rails'
 require 'database_cleaner'
 
   Rails.backtrace_cleaner.remove_silencers!
+
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
 # run as spec files by default. This means that files in spec/support that end
@@ -27,6 +28,45 @@ require 'database_cleaner'
 # Checks for pending migrations before tests are run.
 # If you are not using ActiveRecord, you can remove this line.
 ActiveRecord::Migration.maintain_test_schema!
+
+# warning supress for ruby 2.0 and new capybara see https://gist.github.com/ericboehs/7125105
+class WarningSuppressor
+  IGNORES = [
+    /QFont::setPixelSize: Pixel size <= 0/,
+    /CoreText performance note:/,
+    /Heya! This page is using wysihtml5/,
+    /You must provide a success callback to the Chooser to see the files that the user selects/
+  ]
+
+  class << self
+    def write(message)
+      if suppress?(message) then 0 else puts(message);1;end
+    end
+
+    private
+      def suppress?(message)
+        IGNORES.any? { |re| message =~ re }
+      end
+  end
+end
+
+require 'capybara/poltergeist'
+
+Capybara.register_driver :poltergeist do |app|
+  Capybara::Poltergeist::Driver.new(app, {
+    inspector: 'google-chrome-stable',
+    js_errors: true,
+    timeout: 1.hour.seconds.to_i,
+    phantomjs_options: ['--ignore-ssl-errors=yes'],
+    phantomjs_logger: WarningSuppressor
+  })
+end
+
+Capybara.register_driver :chrome do |app|
+  Capybara::Selenium::Driver.new(app, :browser => :chrome)
+end
+
+Capybara.javascript_driver = ENV['JS_DRIVER'].present? ? ENV['JS_DRIVER'].downcase.to_sym : :poltergeist
 
 RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
