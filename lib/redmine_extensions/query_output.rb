@@ -13,20 +13,36 @@ module RedmineExtensions
       @@registered_outputs ||= {}
     end
 
-    def self.available_outputs_for(query)
-      registered_outputs.select do |name, output|
+    def self.registered_per_query
+      @@registered_per_query ||= {}
+    end
+
+    def self.register_output_for_query(klass, query_class_names, **options)
+      register_as ||= (options[:as] || klass.key).to_sym
+      Array.wrap(query_class_names).each do |query_class_name|
+        registered_per_query[query_class_name] ||= {}
+        registered_per_query[query_class_name][register_as] = klass
+      end
+    end
+
+    def self.filter_registered_for(query)
+      res = registered_outputs.select do |name, output|
         output.available_for?(query)
-      end.keys
+      end
+      res.merge(registered_per_query[query.type] || {})
+    end
+
+    def self.available_outputs_for(query)
+      filter_registered_for(query).keys
     end
 
     def self.available_output_klasses_for(query)
-      registered_outputs.select do |name, output|
-        output.available_for?(query)
-      end.values
+      filter_registered_for(query).values
     end
 
-    def self.output_klass_for(output)
-      registered_outputs[output.to_sym]
+    def self.output_klass_for(output, query=nil)
+      filtered = query.nil? ? registered_outputs : filter_registered_for(query)
+      filtered[output.to_sym]
     end
 
     def self.key
