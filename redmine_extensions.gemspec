@@ -25,5 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec-rails', '~> 3.4'
   spec.add_development_dependency 'capybara', '~> 2.6'
   spec.add_development_dependency 'factory_girl_rails', '~> 4.6'
+  spec.add_development_dependency 'poltergeist', '~> 1.10'
   spec.add_development_dependency 'database_cleaner', '~> 1.5'
 end
