@@ -1,9 +1,9 @@
 module RedmineExtensions
   module QueryOutputs
-    class TileOutput < RedmineExtensions::QueryOutput
+    class TilesOutput < RedmineExtensions::QueryOutput
 
       def self.key
-        'tile'
+        'tiles'
       end
 
       def entity

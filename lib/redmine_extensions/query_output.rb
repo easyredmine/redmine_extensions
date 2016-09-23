@@ -26,7 +26,7 @@ module RedmineExtensions
     end
 
     def self.filter_registered_for(query)
-      res = registered_outputs.select do |name, output|
+      res = registered_outputs.select do |_name, output|
         output.available_for?(query)
       end
       res.merge(registered_per_query[query.type] || {})
@@ -52,7 +52,7 @@ module RedmineExtensions
 
     # Take query and decide if it is possible to render it by this output
     def self.available_for?(query)
-      query.class > Query
+      query.is_a? Query
     end
 
     def initialize(query_presenter, outputs=nil)
