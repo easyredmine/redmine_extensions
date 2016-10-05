@@ -121,22 +121,56 @@ class <%= controller_class %>Controller < ApplicationController
   end
 
   def bulk_update
+    unsaved, saved = [], []
+    attributes = parse_params_for_bulk_update([:<%= model_name_underscored %>])
+    @<%= model_name_pluralize_underscored %>.each do |entity|
+      entity.init_journal(User.current) if entity.respond_to? :init_journal
+      entity.safe_attributes = attributes
+      if entity.save
+        saved << entity
+        else
+        unsaved << entity
+      end
+    end
+    respond_to do |format|
+      format.html do
+        if unsaved.blank?
+          flash[:notice] = l(:notice_successful_update)
+        else
+          flash[:error] = unsaved.map{|i| i.errors.full_messages}.flatten.uniq.join(",\n")
+        end
+        redirect_back_or_default :index
+      end
+    end
   end
 
   def context_menu
-    if (@<%= model_name_pluralize_underscored %>.size == 1)
-      @<%= model_name_underscored %> = @<%= model_name_pluralize_underscored %>.first
+    if @<%= model_name_pluralize_underscored %>.size == 1
+      @easy_tenant = @<%= model_name_pluralize_underscored %>.first
     end
-    @<%= model_name_underscored %>_ids = @<%= model_name_pluralize_underscored %>.map(&:id).sort
 
     can_edit = @<%= model_name_pluralize_underscored %>.detect{|c| !c.editable?}.nil?
     can_delete = @<%= model_name_pluralize_underscored %>.detect{|c| !c.deletable?}.nil?
-    @can = {:edit => can_edit, :delete => can_delete}
+    @can = {edit: can_edit, delete: can_delete}
     @back = back_url
 
-    @safe_attributes = @<%= model_name_pluralize_underscored %>.map(&:safe_attribute_names).reduce(:&)
+    @<%= model_name_underscored %>_ids, @safe_attributes, @selected = [], [], {}
+    @<%= model_name_pluralize_underscored %>.each do |e|
+      @<%= model_name_underscored %>_ids << e.id
+      @safe_attributes.concat e.safe_attribute_names(User.current)
+      <%= model_name %>.safe_attribute_names.each do |c|
+        column_name = c.to_sym
+        if @selected.key? column_name
+          @selected[column_name] = nil if @selected[column_name] != e.send(column_name)
+        else
+          @selected[column_name] = e.send(column_name)
+        end
+      end
+    end
 
-    render :layout => false
+    @safe_attributes.uniq!
+
+    render layout: false
   end
 
   def autocomplete
