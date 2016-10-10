@@ -1,7 +1,12 @@
 module RedmineExtensions
   class EntityGenerator < Rails::Generators::Base
     source_root File.expand_path('../templates', __FILE__)
-
+    #TODO chyba vazba sam se sebou
+    #TODO opravit defoultni sloupce query
+    #TODO langfile upravit aby merge sel pres templatu
+    #TODO routy pro nepluralizovatelne modely
+    #TODO fix radio buttony na vygenerovanem formulari
+    #TODO opravit require pole
     argument :plugin_name, type: :string, required: true, banner: 'NameOfNewPlugin'
     argument :model_name, type: :string, required: true, banner: 'Post'
     argument :attributes, type: :array, required: true, banner: 'field[:type][:index] field[:type][:index]'
@@ -50,22 +55,55 @@ module RedmineExtensions
       template 'edit.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/edit.js.erb"
 
       if File.exists?("#{plugin_path}/config/locales/en.yml")
-        append_to_file "#{plugin_path}/config/locales/en.yml" do
-          "\n  activerecord:" +
-            "\n  easy_query:" +
-            "\n    attributes:" +
-            "\n      #{model_name_underscored}:" +
-            db_columns.collect { |column_name, column_options| "\n        #{column_options[:lang_key]}: #{column_name.humanize}" }.join +
-            "\n    name:" +
-            "\n      #{model_name_underscored}_query: #{model_name_pluralize_underscored.titleize}" +
-            "\n  heading_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
-            "\n  heading_#{model_name_underscored}_edit: Edit #{model_name_underscored.titleize}" +
-            "\n  button_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
-            "\n  label_#{model_name_pluralize_underscored}: #{@model_name_pluralize_underscored.titleize}" +
-            "\n  label_#{model_name_underscored}: #{model_name_underscored.titleize}" +
-            "\n  permission_view_#{model_name_pluralize_underscored}: View #{model_name_pluralize_underscored.titleize}" +
-            "\n  permission_manage_#{model_name_pluralize_underscored}: Manage #{model_name_pluralize_underscored.titleize}" +
-            "\n  title_#{model_name_underscored}_new: Click to create new #{model_name_underscored.titleize}"
+        original_langfile = YAML::load(File.open("#{plugin_path}/config/locales/en.yml"))
+        # a = "\n  activerecord:" +
+        #     "\n    attributes:" +
+        #     "\n      #{model_name_underscored}:" +
+        #     db_columns.collect { |column_name, column_options| "\n        #{column_options[:lang_key]}: #{column_name.humanize}" }.join +
+        #     "\n  easy_query:" +
+        #     "\n    name:" +
+        #     "\n      #{model_name_underscored}_query: #{model_name_pluralize_underscored.titleize}" +
+        #     "\n  heading_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
+        #     "\n  heading_#{model_name_underscored}_edit: Edit #{model_name_underscored.titleize}" +
+        #     "\n  button_#{model_name_underscored}_new: New #{model_name_underscored.titleize}" +
+        #     "\n  label_#{model_name_pluralize_underscored}: #{@model_name_pluralize_underscored.titleize}" +
+        #     "\n  label_#{model_name_underscored}: #{model_name_underscored.titleize}" +
+        #     "\n  permission_view_#{model_name_pluralize_underscored}: View #{model_name_pluralize_underscored.titleize}" +
+        #     "\n  permission_manage_#{model_name_pluralize_underscored}: Manage #{model_name_pluralize_underscored.titleize}" +
+        #     "\n  title_#{model_name_underscored}_new: Click to create new #{model_name_underscored.titleize}"
+
+        attributes_hash = Hash.new
+
+        db_columns.each do |column_name, column_options|
+          attributes_hash["#{column_options[:lang_key]}"] = "#{column_name.humanize}"
+        end
+
+        added_translations = {'en' => {
+          'activerecord' => {
+            'attributes' => {
+              "#{model_name_underscored}" => attributes_hash
+            }
+          },
+          'easy_query' => {
+            'name' => {
+              "#{model_name_underscored}_query" => "#{model_name_pluralize_underscored.titleize}"
+            }
+          },
+          "heading_#{model_name_underscored}_new" => "New #{model_name_underscored.titleize}",
+          "heading_#{model_name_underscored}_edit" => "Edit #{model_name_underscored.titleize}",
+          "button_#{model_name_underscored}_new" => "New #{model_name_underscored.titleize}",
+          "label_#{model_name_pluralize_underscored}" => "#{@model_name_pluralize_underscored.titleize}",
+          "label_#{model_name_underscored}" => "#{model_name_underscored.titleize}",
+          "permission_view_#{model_name_pluralize_underscored}" => "View #{model_name_pluralize_underscored.titleize}",
+          "permission_manage_#{model_name_pluralize_underscored}" => "Manage #{model_name_pluralize_underscored.titleize}",
+          "title_#{model_name_underscored}_new" => "Click to create new #{model_name_underscored.titleize}",
+          }
+        }
+
+        merged_langfile = original_langfile.deep_merge(added_translations)
+        binding.pry
+        File.open("#{plugin_path}/config/locales/en.yml","w") do |file|
+          file.write merged_langfile.to_yaml
         end
       else
         template 'en.yml.erb', "#{plugin_path}/config/locales/en.yml"
