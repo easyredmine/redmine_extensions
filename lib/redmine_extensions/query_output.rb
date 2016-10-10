@@ -4,17 +4,21 @@ module RedmineExtensions
     attr_accessor :query
     delegate :options, to: :query
 
-    def self.register_output(klass, options={})
-      register_as = (options[:as] || klass.key).to_sym
-      registered_outputs[register_as] = klass
-    end
-
     def self.registered_outputs
       @@registered_outputs ||= {}
     end
 
     def self.registered_per_query
       @@registered_per_query ||= {}
+    end
+
+    def self.registered_whitelists
+      @@registered_whitelists ||= {}
+    end
+
+    def self.register_output(klass, options={})
+      register_as = (options[:as] || klass.key).to_sym
+      registered_outputs[register_as] = klass
     end
 
     def self.register_output_for_query(klass, query_class_names, **options)
@@ -25,8 +29,18 @@ module RedmineExtensions
       end
     end
 
+    def self.whitelist_outputs_for_query(query_class_names, outputs)
+      Array.wrap(query_class_names).each do |query_class_name|
+        registered_whitelists[query_class_name] ||= []
+        registered_whitelists[query_class_name].concat( Array.wrap(outputs) )
+      end
+    end
+
     def self.filter_registered_for(query)
-      res = registered_outputs.select do |_name, output|
+      whitelist = registered_whitelists[query.type]
+      res = registered_outputs
+      res = res.slice(*whitelist.map(&:to_sym)) if whitelist
+      res = res.select do |name, output|
         output.available_for?(query)
       end
       res.merge(registered_per_query[query.type] || {})
@@ -94,16 +108,21 @@ module RedmineExtensions
     end
 
     def render_edit_box(style=:check_box, options={})
-      raise 'Style of edit box is not allowed' unless [:check_box, :radio_button].include?(style)
-
       box_id = "#{query.modul_uniq_id}output_#{key}"
-
 
       options[:class] = "#{options[:class]} #{query.modul_uniq_id}output_switch #{query.modul_uniq_id}content_switch"
       options[:enabled] = enabled? unless options.key?(:enabled)
+
       r = ''
-      r << h.send("#{style}_tag" , query.block_name.blank? ? 'outputs[]' : "#{query.block_name}[outputs][]", key, options[:enabled], id: box_id, class: options[:class])
-      r << h.label_tag(box_id, h.l('label_my_page_issue_output.' + key), :class => 'inline')
+      case style
+      when :hidden_field
+        r << h.hidden_field_tag(query.block_name.blank? ? 'outputs[]' : "#{query.block_name}[outputs][]", key, id: box_id, class: options[:class])
+      when :check_box, :radio_button
+        r << h.send("#{style}_tag" , query.block_name.blank? ? 'outputs[]' : "#{query.block_name}[outputs][]", key, options[:enabled], id: box_id, class: options[:class])
+        r << h.label_tag(box_id, h.l('label_my_page_issue_output.' + key), :class => 'inline')
+      else
+        raise 'Style of edit box is not allowed'
+      end
       r.html_safe
     end
 
