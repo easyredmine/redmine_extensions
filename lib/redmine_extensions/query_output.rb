@@ -32,7 +32,7 @@ module RedmineExtensions
     def self.whitelist_outputs_for_query(query_class_names, outputs)
       Array.wrap(query_class_names).each do |query_class_name|
         registered_whitelists[query_class_name] ||= []
-        registered_whitelists[query_class_name].concat( Array.wrap(outputs) )
+        registered_whitelists[query_class_name].concat( Array.wrap(outputs).map(&:to_s) ).uniq!
       end
     end
 
