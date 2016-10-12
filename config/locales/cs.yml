@@ -1,6 +1,6 @@
 cs:
-  nothing: Nothing
+  nothing: Nic
   button_update_easy_settings: Uložit nastavení
   label_no_output: Nebyl vybrán žádný výstup
-  label_easy_query_outputs: Outputs
+  label_easy_query_outputs: Výstupy
   text_modal_is_closing: Vyčkejte prosím, toto okno bude zavřeno automaticky.
