@@ -31,8 +31,8 @@ class <%= model_name %>Query < EasyQuery
     @available_columns
   end
 
-  def default_columns_names
-    super.presence || <%= db_columns.collect{|column_name, column_options| (column_options[:query_column_name] || column_name).to_sym}[0..3].to_s %>.flat_map{|c| [c.to_s, c.to_sym]}
+  def default_list_columns
+    super.presence || <%= db_columns.collect{|column_name, column_options| (column_options[:query_column_name] || column_name).to_s}[0..3].to_s %>.flat_map{|c| [c.to_s, c.to_sym]}
   end
 
 end
