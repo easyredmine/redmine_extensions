@@ -25,7 +25,7 @@ class <%= model_name %>Query < EasyQuery
     add_available_column '<%= column_options[:query_column_name] || column_name %>', caption: ::<%= model_name %>.human_attribute_name(:<%= column_name %>), title: ::<%= model_name %>.human_attribute_name(:<%= column_name %>)
       <%- end -%>
     <%- if acts_as_customizable? -%>
-    @available_columns += <%= model_name %>CustomField.visible.collect {|cf| QueryCustomFieldColumn.new(cf) }
+    @available_columns += <%= model_name %>CustomField.visible.collect { |cf| EasyQueryCustomFieldColumn.new(cf, :group => default_cf_group) }
     <%- end -%>
 
     @available_columns
@@ -35,4 +35,7 @@ class <%= model_name %>Query < EasyQuery
     super.presence || <%= db_columns.collect{|column_name, column_options| (column_options[:query_column_name] || column_name).to_s}[0..3].to_s %>.flat_map{|c| [c.to_s, c.to_sym]}
   end
 
+  def default_columns_names
+    super.presence || <%= db_columns.collect{|column_name, column_options| (column_options[:query_column_name] || column_name).to_s}[0..3].to_s %>.flat_map{|c| [c.to_s, c.to_sym]}
+  end
 end

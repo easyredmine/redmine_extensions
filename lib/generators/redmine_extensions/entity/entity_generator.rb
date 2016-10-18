@@ -50,34 +50,11 @@ module RedmineExtensions
       template 'edit.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/edit.js.erb"
 
       if File.exists?("#{plugin_path}/config/locales/en.yml")
-        original_langfile = YAML::load(File.open("#{plugin_path}/config/locales/en.yml"))
+        original_langfile = YAML.load_file("#{plugin_path}/config/locales/en.yml")
 
-        attributes_hash = Hash.new
-        db_columns.each do |column_name, column_options|
-          attributes_hash["#{column_options[:lang_key]}"] = "#{column_name.humanize}"
-        end
-
-        added_translations = {'en' => {
-          'activerecord' => {
-            'attributes' => {
-              "#{model_name_underscored}" => attributes_hash
-            }
-          },
-          'easy_query' => {
-            'name' => {
-              "#{model_name_underscored}_query" => "#{model_name_pluralize_underscored.titleize}"
-            }
-          },
-          "heading_#{model_name_underscored}_new" => "New #{model_name_underscored.titleize}",
-          "heading_#{model_name_underscored}_edit" => "Edit #{model_name_underscored.titleize}",
-          "button_#{model_name_underscored}_new" => "New #{model_name_underscored.titleize}",
-          "label_#{model_name_pluralize_underscored}" => "#{@model_name_pluralize_underscored.titleize}",
-          "label_#{model_name_underscored}" => "#{model_name_underscored.titleize}",
-          "permission_view_#{model_name_pluralize_underscored}" => "View #{model_name_pluralize_underscored.titleize}",
-          "permission_manage_#{model_name_pluralize_underscored}" => "Manage #{model_name_pluralize_underscored.titleize}",
-          "title_#{model_name_underscored}_new" => "Click to create new #{model_name_underscored.titleize}",
-          }
-        }
+        template 'en.yml.erb', "tmp/tmp_en.yml"
+        added_translations = YAML.load_file("tmp/tmp_en.yml")
+        File.delete(Rails.root + 'tmp/tmp_en.yml')
 
         merged_langfile = original_langfile.deep_merge(added_translations)
         File.open("#{plugin_path}/config/locales/en.yml","w") do |file|
@@ -101,7 +78,7 @@ module RedmineExtensions
         template 'mail_updated.text.erb.erb', "#{plugin_path}/app/views/#{model_name_underscored}_mailer/#{model_name_underscored}_updated.text.erb"
       end
 
-      template 'migration.rb.erb', "#{plugin_path}/db/migrate/#{Time.now.strftime('%Y%m%d%H%M%S')}_create_#{@model_name_pluralize_underscored}.rb"
+      template 'migration.rb.erb', "#{plugin_path}/db/migrate/#{Time.now.strftime('%Y%m%d%H%M%S%L')}_create_#{@model_name_pluralize_underscored}.rb"
       template 'model.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}.rb"
       template 'new.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.html.erb"
       template 'new.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.js.erb"
@@ -233,16 +210,15 @@ module RedmineExtensions
         #lang_key = "field_#{model_name_underscored}_#{attr_name.to_s.sub(/_id$/, '').sub(/^.+\./, '')}"
         lang_key = "#{attr_name.to_s.sub(/_id$/, '').sub(/^.+\./, '')}"
         if attr_type == 'timestamp'
-          @db_columns[attr_name] = {type: attr_type, null: true}
           @timestamp_exist = true
         else
-          @db_columns[attr_name] = {type: attr_type || 'string', idx: attr_idx, null: true, safe: true, query_type: attr_type || 'string', lang_key: lang_key}
+          @db_columns[attr_name] = {type: attr_type || 'string', idx: attr_idx, safe: true, query_type: attr_type || 'string', lang_key: lang_key}
         end
       end
 
       @db_columns['project_id'] = {type: 'integer', idx: nil, null: false, safe: false, class: 'Project', list_class_name: 'name', query_type: 'list_optional', query_column_name: 'project', lang_key: "field_#{model_name_underscored}_project"} if project? && !@db_columns.key?('project_id')
       @db_columns['author_id'] = {type: 'integer', idx: nil, null: false, safe: true, class: 'User', list_class_name: 'name', query_type: 'list', query_column_name: 'author', lang_key: "field_#{model_name_underscored}_author"} if author? && !@db_columns.key?('author_id')
-      if !@timestamp_exist
+      if @timestamp_exist
         @db_columns['created_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date', lang_key: "field_#{model_name_underscored}_created_at"}
         @db_columns['updated_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date', lang_key: "field_#{model_name_underscored}_updated_at"}
       end
@@ -281,7 +257,7 @@ module RedmineExtensions
             end
           end
 
-          @db_columns["#{assoc_model_class.underscore.singularize}_id"] = {type: 'integer', idx: true, null: false}
+          @db_columns["#{assoc_model_class.underscore.singularize}_id"] = {type: 'integer', idx: true, lang_key: assoc_model_class.underscore, query_type: 'list_optional'}
         end
       end
     end
