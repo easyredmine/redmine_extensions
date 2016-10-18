@@ -212,7 +212,7 @@ module RedmineExtensions
         if attr_type == 'timestamp'
           @timestamp_exist = true
         else
-          @db_columns[attr_name] = {type: attr_type || 'string', idx: attr_idx, safe: true, query_type: attr_type || 'string', lang_key: lang_key}
+          @db_columns[attr_name] = {type: attr_type || 'string', idx: attr_idx, null: true, safe: true, query_type: attr_type || 'string', lang_key: lang_key}
         end
       end
 
