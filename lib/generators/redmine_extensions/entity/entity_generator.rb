@@ -257,7 +257,7 @@ module RedmineExtensions
             end
           end
 
-          @db_columns["#{assoc_model_class.underscore.singularize}_id"] = {type: 'integer', idx: true, lang_key: assoc_model_class.underscore, query_type: 'list_optional'}
+          @db_columns["#{assoc_model_class.underscore.singularize}_id"] = {type: 'integer', idx: true, lang_key: assoc_model_class.underscore, query_type: 'list_optional', null: true}
         end
       end
     end
