@@ -52,12 +52,12 @@ module RedmineExtensions
       if File.exists?("#{plugin_path}/config/locales/en.yml")
         original_langfile = YAML.load_file("#{plugin_path}/config/locales/en.yml")
 
-        template 'en.yml.erb', "tmp/tmp_en.yml"
-        added_translations = YAML.load_file("tmp/tmp_en.yml")
-        File.delete(Rails.root + 'tmp/tmp_en.yml')
+        template 'en.yml.erb', "#{plugin_path}/tmp/tmp_en.yml"
+        added_translations = YAML.load_file("#{plugin_path}/tmp/tmp_en.yml")
+        File.delete("#{plugin_path}/tmp/tmp_en.yml")
 
         merged_langfile = original_langfile.deep_merge(added_translations)
-        File.open("#{plugin_path}/config/locales/en.yml","w") do |file|
+        File.open("#{plugin_path}/config/locales/en.yml", "w") do |file|
           file.write merged_langfile.to_yaml
         end
       else
