@@ -2,4 +2,5 @@
 <%% ### PAGE CUSTOMS ########################################################## %>
 <%% content_for :sidebar do %>
   <%%= render :partial => '<%= model_name_pluralize_underscored %>/sidebar' %>
+  <%%= render :partial => 'sidebar/saved_easyqueries_by_type', :locals => {:query_class => @query.class, :project => @project} %>
 <%% end %>
