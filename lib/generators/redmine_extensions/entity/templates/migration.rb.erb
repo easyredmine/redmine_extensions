@@ -2,11 +2,7 @@ class Create<%= model_name_pluralize_underscored.camelize %> < ActiveRecord::Mig
   def change
     create_table :<%= model_name_pluralize_underscored %>, force: true do |t|
       <%- db_columns.each do |column_name, column_attrs| -%>
-        <%- if column_attrs[:type] == 'timestamp' -%>
-      t.<%= column_attrs[:type] %> null: false
-        <%- else -%>
       t.<%= column_attrs[:type] %> :<%= column_name %>, null: <%= column_attrs[:null] %>
-        <%- end -%>
       <%- end -%>
     end
   end
