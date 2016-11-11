@@ -11,6 +11,7 @@ class <%= controller_class %>Controller < ApplicationController
 
   helper :<%= model_name_pluralize_underscored %>
   helper :custom_fields
+  helper :context_menus
   helper :attachments
   helper :issues
   include_query_helpers
@@ -158,7 +159,8 @@ class <%= controller_class %>Controller < ApplicationController
     @<%= model_name_pluralize_underscored %>.each do |e|
       @<%= model_name_underscored %>_ids << e.id
       @safe_attributes.concat e.safe_attribute_names
-      e.safe_attribute_names.each do |c|
+      attributes = e.safe_attribute_names - (%w(custom_field_values custom_fields))
+      attributes.each do |c|
         column_name = c.to_sym
         if @selected.key? column_name
           @selected[column_name] = nil if @selected[column_name] != e.send(column_name)
@@ -186,6 +188,7 @@ class <%= controller_class %>Controller < ApplicationController
 
   def find_<%= model_name_pluralize_underscored %>
     @<%= model_name_pluralize_underscored %> = <%= model_name %>.visible.where(id: (params[:id] || params[:ids])).to_a
+    @<%= model_name_underscored %> = @<%= model_name_pluralize_underscored %>.first if @<%= model_name_pluralize_underscored %>.count == 1
     raise ActiveRecord::RecordNotFound if @<%= model_name_pluralize_underscored %>.empty?
     raise Unauthorized unless @<%= model_name_pluralize_underscored %>.all?(&:visible?)
     @projects = @<%= model_name_pluralize_underscored %>.collect(&:project).compact.uniq

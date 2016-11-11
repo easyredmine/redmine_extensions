@@ -106,7 +106,7 @@ module RedmineExtensions
         template 'routes.rb.erb', "#{plugin_path}/config/routes.rb"
       end
 
-      if File.exists?("#{plugin_path}/init.rb")
+      if File.exists?("#{plugin_path}/after_init.rb")
         s = "\nActiveSupport.on_load(:easyproject, yield: true) do"
         s << "\n  require '#{plugin_name_underscored}/#{model_name_underscored}_hooks'\n"
         s << "\n  Redmine::AccessControl.map do |map|"
@@ -138,7 +138,7 @@ module RedmineExtensions
         end
         s << "\nend"
 
-        append_to_file "#{plugin_path}/init.rb", s
+        append_to_file "#{plugin_path}/after_init.rb", s
       end
 
 
