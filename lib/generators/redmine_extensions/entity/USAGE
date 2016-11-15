@@ -1,6 +1,6 @@
 Description:
-    The plugin generator creates stubs for a new Redmine plugin.
-    Plugin is prepared for use in Redmine and Easy Redmine as well.
+    The entity generator creates new entity for Redmine plugin.
+    New entity is prepared for use in Redmine and Easy Redmine as well.
 
 Example:
     rails g redmine_extensions:entity NameOfNewPlugin Post
