@@ -8,7 +8,7 @@
     <ul>
       <%% <%= model_name %>.statuses.keys.each do |s| -%>
         <li>
-          <%%= context_menu_link l("<%= model_name_underscored %>.statuses.#{s}"), bulk_update_<%= model_name_pluralize_underscored %>_path(ids: @<%= model_name_underscored %>_ids, <%= model_name_underscored %>: {status: s}, back_url: @back), method: :put,
+          <%%= context_menu_link l("<%= model_name_underscored %>.statuses.#{s}"), bulk_update_<%= model_name_underscored %>_path(id: @<%= model_name_underscored %>_ids, <%= model_name_underscored %>: {status: s}, back_url: @back), method: :put,
                                   selected: (@selected[:status] == s), disabled: !@can[:edit], confirm: l(:text_are_you_sure) %>
         </li>
       <%% end -%>

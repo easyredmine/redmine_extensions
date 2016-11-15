@@ -18,6 +18,10 @@
     <%- elsif column_options[:query_type] == 'text' -%>
     <%%= f.text_area :<%= column_name %>, :cols => 60, :rows => (<%= model_name_underscored %>.<%= column_name %>.blank? ? 10 : [[10, <%= model_name_underscored %>.<%= column_name %>.length / 50].max, 100].min), :accesskey => accesskey(:edit), :class => 'wiki-edit' %>
     <%%= wikitoolbar_for '<%= model_name_underscored %>_<%= column_name %>' %>
+    <%- elsif column_options[:query_type] == 'boolean' -%>
+    <%%= f.radio_button :<%= column_name %>, false %>
+    <%- else -%>
+    <%%= f.text_field :<%= column_name %> %>
     <%- end -%>
   </p>
   <%% end %>
