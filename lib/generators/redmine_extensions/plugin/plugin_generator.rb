@@ -42,6 +42,7 @@ module RedmineExtensions
       template 'gitkeep.erb', "#{plugin_path}/assets/images/.gitkeep"
       template 'gitkeep.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/easy_patch/redmine/others/.gitkeep"
 
+      template 'after_init.rb.erb', "#{plugin_path}/after_init.rb"
       template 'Gemfile.erb', "#{plugin_path}/Gemfile"
       template 'init.rb.erb', "#{plugin_path}/init.rb"
       template 'javascript.js', "#{plugin_path}/assets/javascripts/#{plugin_name_underscored}.js"

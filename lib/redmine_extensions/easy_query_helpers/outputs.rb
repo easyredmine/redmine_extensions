@@ -31,7 +31,8 @@ module RedmineExtensions
       end
 
       def enabled_outputs
-        res = @query.outputs
+        res = available_output_names.map(&:to_s) if available_output_names.count == 1
+        res ||= @query.outputs
         res << 'list' if res.empty? && available_outputs.empty?
         res
       end
@@ -49,7 +50,18 @@ module RedmineExtensions
       end
 
       def render_edit_selects(style=:check_box, options={})
-        available_output_instances.map{|o| o.render_edit_box(style, options) }.join('').html_safe
+        options.delete(:enabled)
+        if available_outputs.count == 1
+          available_outputs.first.render_edit_box(:hidden_field, options)
+        else
+          h.content_tag(:p) do
+            s = h.content_tag(:label, h.l(:label_easy_query_outputs))
+            available_outputs.each do |o|
+              s << o.render_edit_box(style, options.dup)
+            end
+            s
+          end
+        end
       end
 
       def render_edit
@@ -62,6 +74,10 @@ module RedmineExtensions
         else
           view_context.l(:label_no_output)
         end
+      end
+
+      def h
+        view_context
       end
 
       def method_missing(name, *args)

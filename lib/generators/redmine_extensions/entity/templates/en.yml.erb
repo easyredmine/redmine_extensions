@@ -1,8 +1,7 @@
 en:
   activerecord:
     attributes:
-      <%= model_name_underscored %>:
-<%= db_columns.collect{|column_name, column_options| "\n        #{column_options[:lang_key]}: #{column_name.humanize}"  }.join %>
+      <%= model_name_underscored %>: <%= db_columns.collect{|column_name, column_options| "\n        #{column_options[:lang_key]}: #{column_name.humanize}"  }.join %>
   easy_query:
     name:
       <%= model_name_underscored %>_query: <%= model_name_pluralize_underscored.titleize %>

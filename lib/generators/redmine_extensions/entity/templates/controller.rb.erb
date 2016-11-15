@@ -2,8 +2,8 @@ class <%= controller_class %>Controller < ApplicationController
 
   menu_item :<%= model_name_pluralize_underscored %>
 
-  before_filter :find_<%= model_name_underscored %>, :only => [:show, :edit, :update]
-  before_filter :find_<%= model_name_pluralize_underscored %>, :only => [:context_menu, :bulk_edit, :bulk_update, :destroy]
+  before_filter :find_<%= model_name_underscored %>, only: [:show, :edit, :update]
+  before_filter :find_<%= model_name_pluralize_underscored %>, only: [:context_menu, :bulk_edit, :bulk_update, :destroy]
   <%- if project? -%>
   before_filter :find_project
   <%- end -%>
@@ -11,6 +11,7 @@ class <%= controller_class %>Controller < ApplicationController
 
   helper :<%= model_name_pluralize_underscored %>
   helper :custom_fields
+  helper :context_menus
   helper :attachments
   helper :issues
   include_query_helpers
@@ -58,14 +59,14 @@ class <%= controller_class %>Controller < ApplicationController
           flash[:notice] = l(:notice_successful_create)
           redirect_back_or_default <%= model_name_underscored %>_path(@<%= model_name_underscored %>)
         }
-        format.api { render :action => 'show', :status => :created, :location => <%= model_name_underscored %>_url(@<%= model_name_underscored %>) }
-        format.js { render :template => 'common/close_modal' }
+        format.api { render action: 'show', status: :created, location: <%= model_name_underscored %>_url(@<%= model_name_underscored %>) }
+        format.js { render template: 'common/close_modal' }
       end
     else
       respond_to do |format|
-        format.html { render :action => 'new' }
+        format.html { render action: 'new' }
         format.api { render_validation_errors(@<%= model_name_underscored %>) }
-        format.js { render :action => 'new' }
+        format.js { render action: 'new' }
       end
     end
   end
@@ -92,13 +93,13 @@ class <%= controller_class %>Controller < ApplicationController
           redirect_back_or_default <%= model_name_underscored %>_path(@<%= model_name_underscored %>)
         }
         format.api { render_api_ok }
-        format.js { render :template => 'common/close_modal' }
+        format.js { render template: 'common/close_modal' }
       end
     else
       respond_to do |format|
-        format.html { render :action => 'edit' }
+        format.html { render action: 'edit' }
         format.api { render_validation_errors(@<%= model_name_underscored %>) }
-        format.js { render :action => 'edit' }
+        format.js { render action: 'edit' }
       end
     end
   end
@@ -121,22 +122,57 @@ class <%= controller_class %>Controller < ApplicationController
   end
 
   def bulk_update
+    unsaved, saved = [], []
+    attributes = parse_params_for_bulk_update(params[:<%= model_name_underscored %>])
+    @<%= model_name_pluralize_underscored %>.each do |entity|
+      entity.init_journal(User.current) if entity.respond_to? :init_journal
+      entity.safe_attributes = attributes
+      if entity.save
+        saved << entity
+      else
+        unsaved << entity
+      end
+    end
+    respond_to do |format|
+      format.html do
+        if unsaved.blank?
+          flash[:notice] = l(:notice_successful_update)
+        else
+          flash[:error] = unsaved.map{|i| i.errors.full_messages}.flatten.uniq.join(",\n")
+        end
+        redirect_back_or_default :index
+      end
+    end
   end
 
   def context_menu
-    if (@<%= model_name_pluralize_underscored %>.size == 1)
-      @<%= model_name_underscored %> = @<%= model_name_pluralize_underscored %>.first
+    if @<%= model_name_pluralize_underscored %>.size == 1
+      @easy_tenant = @<%= model_name_pluralize_underscored %>.first
     end
-    @<%= model_name_underscored %>_ids = @<%= model_name_pluralize_underscored %>.map(&:id).sort
 
     can_edit = @<%= model_name_pluralize_underscored %>.detect{|c| !c.editable?}.nil?
     can_delete = @<%= model_name_pluralize_underscored %>.detect{|c| !c.deletable?}.nil?
-    @can = {:edit => can_edit, :delete => can_delete}
+    @can = {edit: can_edit, delete: can_delete}
     @back = back_url
 
-    @safe_attributes = @<%= model_name_pluralize_underscored %>.map(&:safe_attribute_names).reduce(:&)
+    @<%= model_name_underscored %>_ids, @safe_attributes, @selected = [], [], {}
+    @<%= model_name_pluralize_underscored %>.each do |e|
+      @<%= model_name_underscored %>_ids << e.id
+      @safe_attributes.concat e.safe_attribute_names
+      attributes = e.safe_attribute_names - (%w(custom_field_values custom_fields))
+      attributes.each do |c|
+        column_name = c.to_sym
+        if @selected.key? column_name
+          @selected[column_name] = nil if @selected[column_name] != e.send(column_name)
+        else
+          @selected[column_name] = e.send(column_name)
+        end
+      end
+    end
 
-    render :layout => false
+    @safe_attributes.uniq!
+
+    render layout: false
   end
 
   def autocomplete
@@ -151,7 +187,8 @@ class <%= controller_class %>Controller < ApplicationController
   end
 
   def find_<%= model_name_pluralize_underscored %>
-    @<%= model_name_pluralize_underscored %> = <%= model_name %>.visible.where(:id => (params[:id] || params[:ids])).to_a
+    @<%= model_name_pluralize_underscored %> = <%= model_name %>.visible.where(id: (params[:id] || params[:ids])).to_a
+    @<%= model_name_underscored %> = @<%= model_name_pluralize_underscored %>.first if @<%= model_name_pluralize_underscored %>.count == 1
     raise ActiveRecord::RecordNotFound if @<%= model_name_pluralize_underscored %>.empty?
     raise Unauthorized unless @<%= model_name_pluralize_underscored %>.all?(&:visible?)
     @projects = @<%= model_name_pluralize_underscored %>.collect(&:project).compact.uniq
@@ -162,8 +199,8 @@ class <%= controller_class %>Controller < ApplicationController
 
   <%- if project? -%>
   def find_project
-    @project ||= @<%= model_name_underscored %>.project if !@<%= model_name_underscored %>.nil?
-    @project ||= Project.find(params[:project_id]) if !params[:project_id].blank?
+    @project ||= @<%= model_name_underscored %>.project if @<%= model_name_underscored %>
+    @project ||= Project.find(params[:project_id]) if params[:project_id].present?
   rescue ActiveRecord::RecordNotFound
     render_404
   end

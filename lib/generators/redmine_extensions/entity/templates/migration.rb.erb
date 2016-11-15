@@ -1,9 +1,11 @@
 class Create<%= model_name_pluralize_underscored.camelize %> < ActiveRecord::Migration
   def change
     create_table :<%= model_name_pluralize_underscored %>, force: true do |t|
-      <%- db_columns.each do |column_name, column_attrs| -%>
+      <%- columns = db_columns.reject{|k| k.in?(["created_at", "updated_at"])} -%>
+      <%- columns.each do |column_name, column_attrs| -%>
       t.<%= column_attrs[:type] %> :<%= column_name %>, null: <%= column_attrs[:null] %>
       <%- end -%>
+      t.timestamps null: false
     end
   end
 end
