@@ -46,7 +46,7 @@ module RedmineExtensions
       template 'Gemfile.erb', "#{plugin_path}/Gemfile"
       template 'init.rb.erb', "#{plugin_path}/init.rb"
       template 'javascript.js', "#{plugin_path}/assets/javascripts/#{plugin_name_underscored}.js"
-      template 'stylesheet.js', "#{plugin_path}/assets/stylesheets/#{plugin_name_underscored}.css"
+      template 'stylesheet.css', "#{plugin_path}/assets/stylesheets/#{plugin_name_underscored}.css"
       template 'en.yml.erb', "#{plugin_path}/config/locales/en.yml"
       template 'routes.rb.erb', "#{plugin_path}/config/routes.rb"
       template 'hooks.rb.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/hooks.rb"
