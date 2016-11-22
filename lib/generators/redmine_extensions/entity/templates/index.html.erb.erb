@@ -3,5 +3,7 @@
 <%%= context_menu context_menu_<%= model_name_pluralize_underscored %>_path(:project_id => @project) %>
 <%% content_for :sidebar do %>
   <%%= render :partial => '<%= model_name_pluralize_underscored %>/sidebar' %>
-  <%%= render :partial => 'sidebar/saved_easyqueries_by_type', :locals => {:query_class => @query.class, :project => @project} %>
+  <% if Redmine::Plugin.registered_plugins[:easy_extensions] %>
+    <%%= render :partial => 'sidebar/saved_easyqueries_by_type', :locals => {:query_class => @query.class, :project => @project} %>
+  <% end %>
 <%% end %>
