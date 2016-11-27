@@ -15,9 +15,33 @@ module PluginGenerator
   end
 
   def self.generate_autocomplete!
+    generate_dummy_entity!
     generate_autocomplete_controller!
     generate_autocomplete_routes!
     generate_autocomplete_view!
+  end
+
+  def self.generate_dummy_entity!
+    File.open( Rails.root.join('plugins', 'dummy_plugin', 'db', 'migrate', '20162010160230_create_dummy_entities.rb') ) do |file|
+      file.write( <<-END_RUBY )
+        class CreateDummyEntities < ActiveRecord::Migration
+          def change
+            create_table :dummy_entities do |t|
+              t.string :name
+              t.integer :value
+              t.references :project, index: true
+            end
+          end
+        end
+      END_RUBY
+    end
+
+    File.open( Rails.root.join('plugins', 'dummy_plugin', 'app', 'models', 'dummy_entity.rb') ) do |file|
+      file.write( <<-END_RUBY )
+        class DummyEntity < ActiveRecord::Base
+        end
+      END_RUBY
+    end
   end
 
   def self.generate_autocomplete_controller!
@@ -41,11 +65,11 @@ module PluginGenerator
     dir = Rails.root.join('plugins', 'dummy_plugin', 'app', 'views', 'dummy_autocompletes')
     Dir.mkdir dir
     File.open(dir.join('index.html.erb'), 'w') do |file|
-      file.write( <<-END_RUBY )
+      file.write( <<-END_ERB )
         <%= form_tag('/dummy_autocompletes', id: 'autocompletes_form') do %>
           <%= autocomplete_field_tag('default', ['value1', 'value2'], ['value1']) %>
         <% end %>
-      END_RUBY
+      END_ERB
     end
   end
 end

@@ -224,5 +224,9 @@ module RedmineExtensions
       end
     end
 
+    def autocomplete_field(object_name, method, choices, options={}, html_options={})
+      Tags::AutocompleteField.new(object_name, method, self, choices, options, html_options).render
+    end
+
   end
 end
