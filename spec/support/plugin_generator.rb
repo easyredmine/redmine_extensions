@@ -22,7 +22,7 @@ module PluginGenerator
   end
 
   def self.generate_dummy_entity!
-    File.open( Rails.root.join('plugins', 'dummy_plugin', 'db', 'migrate', '20162010160230_create_dummy_entities.rb') ) do |file|
+    File.open( Rails.root.join('plugins', 'dummy_plugin', 'db', 'migrate', '20162010160230_create_dummy_entities.rb'), 'w' ) do |file|
       file.write( <<-END_RUBY )
         class CreateDummyEntities < ActiveRecord::Migration
           def change
@@ -36,7 +36,7 @@ module PluginGenerator
       END_RUBY
     end
 
-    File.open( Rails.root.join('plugins', 'dummy_plugin', 'app', 'models', 'dummy_entity.rb') ) do |file|
+    File.open( Rails.root.join('plugins', 'dummy_plugin', 'app', 'models', 'dummy_entity.rb'), 'w' ) do |file|
       file.write( <<-END_RUBY )
         class DummyEntity < ActiveRecord::Base
         end
