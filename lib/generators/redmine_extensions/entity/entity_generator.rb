@@ -49,6 +49,9 @@ module RedmineExtensions
       template 'edit.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/edit.html.erb"
       template 'edit.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/edit.js.erb"
 
+      template 'controller_spec.rb.erb', "#{plugin_path}/test/spec/controllers/#{model_name_pluralize_underscored}_controller_spec.rb"
+      template 'factories.rb.erb', "#{plugin_path}/test/factories/#{model_name_underscored}.rb"
+
       if File.exists?("#{plugin_path}/config/locales/en.yml")
         original_langfile = YAML.load_file("#{plugin_path}/config/locales/en.yml")
 
