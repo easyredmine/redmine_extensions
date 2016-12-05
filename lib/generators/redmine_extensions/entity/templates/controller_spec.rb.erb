@@ -1,0 +1,78 @@
+require Rails.root.join('plugins', 'easyproject', 'easy_plugins', 'easy_extensions/test/spec/spec_helper')
+
+describe <%= controller_class %>Controller, logged: true do
+  let(:<%= model_name_underscored %>) { FactoryGirl.create(:<%= model_name_underscored %>) }
+  let(:<%= model_name_pluralize_underscored %>) { FactoryGirl.create_list(:<%= model_name_underscored %>, 5) }
+
+  before(:each) do
+    role = Role.non_member
+    role.add_permission! :view_<%= model_name_pluralize_underscored %>
+    role.add_permission! :manage_<%= model_name_pluralize_underscored %>
+  end
+
+  render_views
+
+  it 'index' do
+    <%= model_name_pluralize_underscored %>
+
+    get :index
+    expect(response).to have_http_status(:success)
+    expect(response).to render_template('<%= model_name_pluralize_underscored %>/index')
+  end
+
+  it 'show' do
+    get :index, {id: <%= model_name_underscored %>}
+    expect(response).to have_http_status(:success)
+    expect(response).to render_template('<%= model_name_pluralize_underscored %>/show')
+  end
+
+  it 'new' do
+    get :new
+    expect(response).to have_http_status(:success)
+    expect(response).to render_template('<%= model_name_pluralize_underscored %>/new')
+  end
+
+  it 'create with invalid' do
+    post :create, {<%= model_name_underscored %>: {}}
+    expect(response).to have_http_status(:success)
+    expect(assigns[:<%= model_name_underscored %>]).to be_a_new(<%= model_name %>)
+    expect(response).to render_template('<%= model_name_pluralize_underscored %>/new')
+  end
+
+  it 'create with valid' do
+    post :create, {<%= model_name_underscored %>: FactoryGirl.attributes_for(:<%= model_name_underscored %>)}
+    expect(response).to have_http_status(:success)
+    expect(assigns[:<%= model_name_underscored %>]).not_to be_a_new(<%= model_name %>)
+    expect(response).to redirect_to(<%= model_name_underscored %>_path(assigns[:<%= model_name_underscored %>]))
+  end
+
+  it 'edit' do
+    get :edit, {id: <%= model_name_underscored %>}
+    expect(response).to have_http_status(:success)
+    expect(response).to render_template('<%= model_name_pluralize_underscored %>/edit')
+  end
+
+  it 'update with invalid' do
+    put :update, {<%= model_name_underscored %>: {url: ''}}
+    expect(response).to have_http_status(:success)
+    expect(assigns[:<%= model_name_underscored %>].valid?).to be false
+    expect(response).to render_template('<%= model_name_pluralize_underscored %>/edit')
+  end
+
+  it 'update with valid' do
+    put :update, {<%= model_name_underscored %>: {url: 'http://tlapmazon.easy:123'}}
+    expect(response).to have_http_status(:success)
+    expect(assigns[:<%= model_name_underscored %>].valid?).to be true
+    expect(response).to redirect_to(<%= model_name_underscored %>_path(assigns[:<%= model_name_underscored %>]))
+  end
+
+  it 'destroy' do
+    <%= model_name_underscored %>
+    <%= model_name_pluralize_underscored %>
+
+    expect(<%= model_name %>.count).to eq(6)
+    expect {delete :destroy, {id: <%= model_name_underscored %>}}.to change(<%= model_name %>, :count).by(-1)
+    expect(response).to redirect_to(<%= model_name_pluralize_underscored %>_path)
+    expect(response).to redirect_to(<%= model_name_pluralize_underscored %>_path)
+  end
+end
