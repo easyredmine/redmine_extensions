@@ -13,7 +13,7 @@ module RedmineExtensions
 
         @html_options = html_options
 
-        super(object_name, method_name, template_object, options)
+        super(object_name, method_name, template_object, html_options.merge(options))
       end
 
       def render

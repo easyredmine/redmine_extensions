@@ -30,6 +30,7 @@ module PluginGenerator
               t.string :name
               t.integer :value
               t.references :project, index: true
+              t.text :array_of_dummies
             end
           end
         end
@@ -39,6 +40,30 @@ module PluginGenerator
     File.open( Rails.root.join('plugins', 'dummy_plugin', 'app', 'models', 'dummy_entity.rb'), 'w' ) do |file|
       file.write( <<-END_RUBY )
         class DummyEntity < ActiveRecord::Base
+          include Redmine::SafeAttributes
+          safe_attributes 'name',
+                          'value',
+                          'project_id',
+                          'array_of_dummies'
+
+          attr_protected :id
+
+          serialize :array_of_dummies, Array
+        end
+      END_RUBY
+    end
+
+    File.open(Rails.root.join('plugins', 'dummy_plugin', 'app', 'controllers', 'dummy_entities_controller.rb'), 'w') do |file|
+      file.write( <<-END_RUBY )
+        class DummyEntitiesController < ApplicationController
+          def index
+          end
+
+          def create
+            @entity = DummyEntity.new
+            @entity.safe_attributes = params[:dummy_entity]
+            @entity.save
+          end
         end
       END_RUBY
     end
@@ -57,7 +82,10 @@ module PluginGenerator
 
   def self.generate_autocomplete_routes!
     File.open(Rails.root.join('plugins', 'dummy_plugin', 'config', 'routes.rb'), 'w') do |file|
-      file.write("resources :dummy_autocompletes")
+      file.write( <<-END_ROUTES )
+        resources :dummy_autocompletes
+        resources :dummy_entities
+      END_ROUTES
     end
   end
 
@@ -68,6 +96,10 @@ module PluginGenerator
       file.write( <<-END_ERB )
         <%= form_tag('/dummy_autocompletes', id: 'autocompletes_form') do %>
           <%= autocomplete_field_tag('default', ['value1', 'value2'], ['value1']) %>
+        <% end %>
+
+        <%= form_for(DummyEntity.new(array_of_dummies: ['value1'])) do |f| %>
+          <%= f.autocomplete_field(:array_of_dummies, ['value1', 'value2'], {}, id: 'dummy_entities_autocomplete') %>
         <% end %>
       END_ERB
     end
