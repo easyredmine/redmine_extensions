@@ -57,6 +57,9 @@ module RedmineExtensions
       ActiveSupport.on_load(:active_record) do
         include RedmineExtensions::RailsPatches::ActiveRecord
       end
+      ActiveSupport.on_load(:action_view) do
+        default_form_builder.send(:include, RedmineExtensions::RailsPatches::FormBuilderPatch)
+      end
     end
 
     initializer 'redmine_extensions.initialize_easy_plugins', after: :load_config_initializers do

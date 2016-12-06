@@ -37,7 +37,7 @@ task :generate_test_plugin do
   require RedmineExtensions::Engine.root.join('spec', 'support', 'plugin_generator').to_s
   PluginGenerator.generate_test_plugin!
 end
-RSpec::Core::RakeTask.new(spec: :generate_test_plugin) do |spec|
+RSpec::Core::RakeTask.new(spec: [:generate_test_plugin, 'app:redmine:plugins:migrate']) do |spec|
   spec.pattern = 'spec/**/*_spec.rb'
   spec.exclude_pattern = 'spec/redmine/**/*_spec.rb'
 end
