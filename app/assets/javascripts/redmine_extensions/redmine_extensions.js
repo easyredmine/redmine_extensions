@@ -564,7 +564,7 @@ window.closeFlashMessage = (function($element){
             } else {
                 this.element.val(value.value);
                 this.valueElement.val(value.id);
-                this.valueElement.change();
+                this.element.trigger('change');
             }
         },
 
