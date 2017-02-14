@@ -64,7 +64,6 @@ module RedmineExtensions
 
     initializer 'redmine_extensions.initialize_easy_plugins', after: :load_config_initializers do
       require 'redmine_extensions/hooks'
-      RedmineExtensions.load_easy_plugins
 
       unless Redmine::Plugin.installed?(:easy_extensions)
         ActiveSupport.run_load_hooks(:easyproject, self)
