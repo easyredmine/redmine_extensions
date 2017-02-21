@@ -11,7 +11,9 @@
 <%- end -%>
 <%- end -%>
     <%% end %>
+    <%- if acts_as_customizable? -%>
     <%%= render_custom_fields_rows(@<%= model_name_underscored %>) %>
+    <%- end -%>
     <%%= call_hook(:view_<%= model_name_pluralize_underscored %>_show_details_bottom, :<%= model_name_underscored %> => @<%= model_name_underscored %>) %>
   </table>
 <%- if description_column? -%>

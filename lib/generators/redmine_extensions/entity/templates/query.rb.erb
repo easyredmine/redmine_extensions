@@ -20,12 +20,17 @@ class <%= model_name %>Query < EasyQuery
 
   def available_columns
     return @available_columns if @available_columns
+    group = l("label_filter_group_#{self.class.name.underscore}")
 
     <%- db_columns.each do |column_name, column_options| -%>
-    add_available_column '<%= column_options[:query_column_name] || column_name %>', caption: ::<%= model_name %>.human_attribute_name(:<%= column_name %>), title: ::<%= model_name %>.human_attribute_name(:<%= column_name %>)
+    add_available_column '<%= column_options[:query_column_name] || column_name %>', caption: ::<%= model_name %>.human_attribute_name(:<%= column_name %>), title: ::<%= model_name %>.human_attribute_name(:<%= column_name %>), group: group
       <%- end -%>
     <%- if acts_as_customizable? -%>
-    @available_columns += <%= model_name %>CustomField.visible.collect { |cf| EasyQueryCustomFieldColumn.new(cf, :group => default_cf_group) }
+    <% if Redmine::Plugin.installed?(:easy_extensions) %>
+    @available_columns += <%= model_name %>CustomField.visible.collect { |cf| EasyQueryCustomFieldColumn.new(cf, :group => l(:label_filter_group_custom_fields)) }
+    <% else %>
+    @available_columns += <%= model_name %>CustomField.visible.collect { |cf| QueryCustomFieldColumn.new(cf) }
+    <%- end -%>
     <%- end -%>
 
     @available_columns
