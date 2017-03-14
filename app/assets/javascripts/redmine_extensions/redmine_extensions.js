@@ -315,6 +315,7 @@ window.closeFlashMessage = (function($element){
             preload: true, // load all possible values
             position: {collision: 'flip'},
             autofocus: false,
+            combo: false,
             inputName: null, // defaults to element prop name
             render_item: function(ul, item) {
                 return $("<li>")
@@ -435,10 +436,18 @@ window.closeFlashMessage = (function($element){
                 },
                 change: function(event, ui) {
                     if (!ui.item) {
-                        $(this).val('');
-                        if( !that.options.multiple ) {
-                            that.valueElement.val('');
-                            that.valueElement.change();
+                        if (that.options.combo) {
+                            $(this).val(that.element.val());
+                            if( !that.options.multiple ) {
+                                that.valueElement.val(that.element.val());
+                                that.valueElement.change();
+                            }
+                        }else{
+                            $(this).val('');
+                            if( !that.options.multiple ) {
+                                that.valueElement.val('');
+                                that.valueElement.change();
+                            }
                         }
                     }
                 },
