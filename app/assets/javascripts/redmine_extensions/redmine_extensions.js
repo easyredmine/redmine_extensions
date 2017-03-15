@@ -438,13 +438,13 @@ window.closeFlashMessage = (function($element){
                     if (!ui.item) {
                         if (that.options.combo) {
                             $(this).val(that.element.val());
-                            if( !that.options.multiple ) {
+                            if (!that.options.multiple) {
                                 that.valueElement.val(that.element.val());
                                 that.valueElement.change();
                             }
-                        }else{
+                        } else {
                             $(this).val('');
-                            if( !that.options.multiple ) {
+                            if (!that.options.multiple) {
                                 that.valueElement.val('');
                                 that.valueElement.change();
                             }

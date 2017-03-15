@@ -240,7 +240,7 @@ module RedmineExtensions
 
       content_tag(:span, :class => 'easy-multiselect-tag-container') do
         text_field_tag('', '', (options[:html_options] || {}).merge(id: options[:id])) +
-          javascript_tag("$('##{options[:id]}').easymultiselect({multiple: #{options[:multiple]}, rootElement: #{options[:rootElement].to_json}, inputName: '#{name}', preload: #{options[:preload]}, combo: #{options[:combo]}, source: #{source}, selected: #{selected_values.to_json}, show_toggle_button: #{options[:show_toggle_button]}, select_first_value: #{options[:select_first_value]}, load_immediately: #{options[:load_immediately]}, autocomplete_options: #{(options[:jquery_auto_complete_options]||{}).to_json} });")
+          javascript_tag("$('##{options[:id]}').easymultiselect({multiple: #{options[:multiple]}, rootElement: #{options[:rootElement].to_json}, inputName: '#{name}', preload: #{options[:preload]}, combo: #{options[:combo] || false}, source: #{source}, selected: #{selected_values.to_json}, show_toggle_button: #{options[:show_toggle_button]}, select_first_value: #{options[:select_first_value]}, load_immediately: #{options[:load_immediately]}, autocomplete_options: #{(options[:jquery_auto_complete_options]||{}).to_json} });")
       end
     end
 
