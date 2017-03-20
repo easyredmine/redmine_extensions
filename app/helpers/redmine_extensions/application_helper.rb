@@ -227,7 +227,7 @@ module RedmineExtensions
     # * +rootElement+ - Has sence only if jsonpath is used for available values. It tells if the json response has values wrapped under root element.
     #                     For response like <tt>{projects: [[<name>, <id>], [<name2>, <id2>]]}</tt> user option <tt>rootElement: 'projects'</tt>
     def autocomplete_field_tag(name, jsonpath_or_array, selected_values, options = {})
-      options.reverse_merge!({select_first_value: false, show_toggle_button: false, load_immediately: false, preload: true, multiple: true})
+      options.reverse_merge!({select_first_value: false, show_toggle_button: false, load_immediately: false, preload: true, multiple: true, combo: false})
       options[:id] ||= sanitize_to_id(name)
 
       selected_values ||= []
@@ -240,7 +240,7 @@ module RedmineExtensions
 
       content_tag(:span, :class => 'easy-multiselect-tag-container') do
         text_field_tag('', '', (options[:html_options] || {}).merge(id: options[:id])) +
-          javascript_tag("$('##{options[:id]}').easymultiselect({multiple: #{options[:multiple]}, rootElement: #{options[:rootElement].to_json}, inputName: '#{name}', preload: #{options[:preload]}, source: #{source}, selected: #{selected_values.to_json}, show_toggle_button: #{options[:show_toggle_button]}, select_first_value: #{options[:select_first_value]}, load_immediately: #{options[:load_immediately]}, autocomplete_options: #{(options[:jquery_auto_complete_options]||{}).to_json} });")
+          javascript_tag("$('##{options[:id]}').easymultiselect({multiple: #{options[:multiple]}, rootElement: #{options[:rootElement].to_json}, inputName: '#{name}', preload: #{options[:preload]}, combo: #{options[:combo]}, source: #{source}, selected: #{selected_values.to_json}, show_toggle_button: #{options[:show_toggle_button]}, select_first_value: #{options[:select_first_value]}, load_immediately: #{options[:load_immediately]}, autocomplete_options: #{(options[:jquery_auto_complete_options]||{}).to_json} });")
       end
     end
 
