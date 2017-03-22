@@ -608,12 +608,13 @@ window.closeFlashMessage = (function($element){
                 if( values[i] instanceof Object && !Array.isArray(values[i]) && values[i] !== null ) {
                     selected.push( values[i] );
                 } else if( this.options.preload )  {
+                    var that = this;
                     this.load(function(){
-                        if( !Array.isArray(this.possibleValues) )
+                        if( !Array.isArray(that.possibleValues) )
                             return;
-                        for(var j = this.possibleValues.length - 1; j >= 0; j-- ) {
-                            if ( values[i] == this.possibleValues[j].id || values[i] == this.possibleValues[j].id.toString() ) {
-                                selected.push(this.possibleValues[j]);
+                        for(var j = that.possibleValues.length - 1; j >= 0; j-- ) {
+                            if ( values[i] === that.possibleValues[j].id || values[i] === that.possibleValues[j].id.toString() ) {
+                                selected.push(that.possibleValues[j]);
                                 break;
                             }
                         }
