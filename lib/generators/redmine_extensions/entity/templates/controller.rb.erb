@@ -147,7 +147,7 @@ class <%= controller_class %>Controller < ApplicationController
 
   def context_menu
     if @<%= model_name_pluralize_underscored %>.size == 1
-      @easy_tenant = @<%= model_name_pluralize_underscored %>.first
+      @<%= model_name_underscored %> = @<%= model_name_pluralize_underscored %>.first
     end
 
     can_edit = @<%= model_name_pluralize_underscored %>.detect{|c| !c.editable?}.nil?

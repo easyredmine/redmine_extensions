@@ -9,8 +9,7 @@ Redmine::Plugin.register :<%= plugin_name_underscored %> do
   settings easy_settings: {  }
 end
 
-
-easy_extensions = Redmine::Plugin.registered_plugins[:easy_extensions]
-if easy_extensions.nil? || Gem::Version.new(easy_extensions.version) < Gem::Version.new('2016.03.00')
+unless Redmine::Plugin.registered_plugins[:easy_extensions]
   require_relative 'after_init'
 end
+
