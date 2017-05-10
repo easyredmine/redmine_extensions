@@ -584,12 +584,10 @@ window.closeFlashMessage = (function($element){
                 return false;
 
             if( this.options.preload ) {
-                this.load(function(){
-                    if( that.options.multiple ) {
-                        that.valueElement.entityArray('clear');
-                    }
-                    that._setValues(values);
-                });
+                if( that.options.multiple ) {
+                    that.valueElement.entityArray('clear');
+                }
+                that._setValues(values);
             } else {
                 if( that.options.multiple ) {
                     that.valueElement.entityArray('clear');
@@ -609,13 +607,18 @@ window.closeFlashMessage = (function($element){
                 var identifier, label;
                 if( values[i] instanceof Object && !Array.isArray(values[i]) && values[i] !== null ) {
                     selected.push( values[i] );
-                } else if( this.options.preload && Array.isArray(this.possibleValues) )  {
-                    for(var j = this.possibleValues.length - 1; j >= 0; j-- ) {
-                        if ( values[i] == this.possibleValues[j].id || values[i] == this.possibleValues[j].id.toString() ) {
-                            selected.push(this.possibleValues[j]);
-                            break;
+                } else if( this.options.preload )  {
+                    var that = this;
+                    this.load(function(){
+                        if( !Array.isArray(that.possibleValues) )
+                            return;
+                        for(var j = that.possibleValues.length - 1; j >= 0; j-- ) {
+                            if ( values[i] === that.possibleValues[j].id || values[i] === that.possibleValues[j].id.toString() ) {
+                                selected.push(that.possibleValues[j]);
+                                break;
+                            }
                         }
-                    }
+                    });
                 } else {
                     selected.push( {id: values[i], value: values[i]} );
                 }
