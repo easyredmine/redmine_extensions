@@ -11,7 +11,6 @@ RSpec.describe 'autocomplete', type: :feature, js: true do
 
     it 'generate autocomplete_field in form_for' do
       visit '/dummy_autocompletes'
-      binding.pry
       expect(page).to have_css('input#dummy_entities_autocomplete[type="text"]')
       expect(page).to have_css('input[type="hidden"][name="dummy_entity[array_of_dummies][]"][value="value1"]', visible: false)
     end
