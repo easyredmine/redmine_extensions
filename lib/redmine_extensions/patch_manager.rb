@@ -345,7 +345,7 @@ module RedmineExtensions
       end
 
       def apply_patch
-        if (cond = @options.delete(:if)) && cond.respond_to?(:call)
+        if (cond = @options[:if]) && cond.respond_to?(:call)
           return unless cond.call
         end
 
