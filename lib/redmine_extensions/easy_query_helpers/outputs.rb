@@ -31,9 +31,13 @@ module RedmineExtensions
       end
 
       def enabled_outputs
-        res = available_output_names.map(&:to_s) if available_output_names.count == 1
-        res ||= @query.outputs
-        res << 'list' if res.empty? && available_outputs.empty?
+        available = available_output_names.map(&:to_s)
+        res = if available.one?
+          available
+        else
+          Array(@query.outputs).map(&:to_s) & available
+        end
+        res << 'list' if res.empty?
         res
       end
 
