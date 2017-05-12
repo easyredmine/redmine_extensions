@@ -383,13 +383,14 @@ window.closeFlashMessage = (function($element){
                 var $elem = $(this);
                 evt.preventDefault();
                 that.load(function(){
-                    select = $('<select>').prop('multiple', true).prop('size', 5).prop('name', that.inputName);
+                    var select = $('<select>').prop('multiple', true).prop('size', 5).prop('name', that.inputName);
+                    var option;
                     $.each(that.possibleValues, function(i, v) {
                         option = $('<option>').prop('value', v.id).text(v.value);
                         option.prop('selected', that.getValue().indexOf(v.id) > -1);
                         select.append(option);
                     });
-                    $container = $elem.closest('.easy-multiselect-tag-container');
+                    var $container = $elem.closest('.easy-multiselect-tag-container');
                     $container.find(':input').prop('disabled', true);
                     $container.children().hide();
                     $container.append(select);
@@ -416,7 +417,7 @@ window.closeFlashMessage = (function($element){
                             response();
                         });
                     } else { // asking server everytime
-                        if( typeof that.options.source == 'function' ) {
+                        if( typeof that.options.source === 'function' ) {
                             that.options.source(function(json){
                                 response(that.options.rootElement ? json[that.options.rootElement] : json);
                             });
@@ -431,7 +432,7 @@ window.closeFlashMessage = (function($element){
                 },
                 minLength: 0,
                 select: function(event, ui) {
-                    that.selectValue(ui.item)
+                    that.selectValue(ui.item);
                     return false;
                 },
                 change: function(event, ui) {
@@ -515,8 +516,8 @@ window.closeFlashMessage = (function($element){
             this.valuesLoaded = true;
 
             this.selectedValues = this.selectedValues ? this.selectedValues : [];
-            if( this.selectedValues.length == 0 && this.options.preload && this.options.select_first_value && this.possibleValues.length > 0 ) {
-                this.selectedValues.push(this.possibleValues[0]['id'])
+            if( this.selectedValues.length === 0 && this.options.preload && this.options.select_first_value && this.possibleValues.length > 0 ) {
+                this.selectedValues.push(this.possibleValues[0]['id']);
             }
 
             this.setValue(this.selectedValues);
@@ -538,7 +539,7 @@ window.closeFlashMessage = (function($element){
 
             this.loading = true;
             function successFce(json, status, xhr) {
-                var data = that.options.rootElement ? json[that.options.rootElement] : json
+                var data = that.options.rootElement ? json[that.options.rootElement] : json;
                 if( !data && window.console  ) {
                     console.warn('Data could not be loaded! Please check the datasource.');
                     data = [];
@@ -584,10 +585,12 @@ window.closeFlashMessage = (function($element){
                 return false;
 
             if( this.options.preload ) {
-                if( that.options.multiple ) {
-                    that.valueElement.entityArray('clear');
-                }
-                that._setValues(values);
+                this.load(function(){
+                  if( that.options.multiple ) {
+                      that.valueElement.entityArray('clear');
+                  }
+                  that._setValues(values);
+                });
             } else {
                 if( that.options.multiple ) {
                     that.valueElement.entityArray('clear');
@@ -599,17 +602,15 @@ window.closeFlashMessage = (function($element){
         _setValues: function(values) {
             var selected = [];
 
-            if( values.length == 0 )
+            if( values.length === 0 )
                 return false;
 
             // allows the combination of only id values and values with label
             for (var i = values.length - 1; i >= 0; i--) {
-                var identifier, label;
                 if( values[i] instanceof Object && !Array.isArray(values[i]) && values[i] !== null ) {
                     selected.push( values[i] );
                 } else if( this.options.preload )  {
                     var that = this;
-                    this.load(function(){
                         if( !Array.isArray(that.possibleValues) )
                             return;
                         for(var j = that.possibleValues.length - 1; j >= 0; j-- ) {
@@ -618,7 +619,6 @@ window.closeFlashMessage = (function($element){
                                 break;
                             }
                         }
-                    });
                 } else {
                     selected.push( {id: values[i], value: values[i]} );
                 }
