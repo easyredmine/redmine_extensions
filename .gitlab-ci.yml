@@ -45,17 +45,17 @@ Spec / Postgresql:
   except:
   - master
 
-Pure Redmine / MySQL:
-  stage: tests
-  script:
-  - export ADAPTER="mysql2"
-  - export DB_USERNAME="root"
-  - export DB_PWD=$MYSQL_PASS
-  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.3-stable spec/redmine
-  - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
-  - $SHELL ./.run-tests.sh
-  except:
-  - master
+# Pure Redmine / MySQL:
+#  stage: tests
+#  script:
+#  - export ADAPTER="mysql2"
+#  - export DB_USERNAME="root"
+#  - export DB_PWD=$MYSQL_PASS
+#  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.3-stable spec/redmine
+#  - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
+#  - $SHELL ./.run-tests.sh
+#  except:
+#  - master
 
 Pure Redmine / Postgresql:
   stage: tests
