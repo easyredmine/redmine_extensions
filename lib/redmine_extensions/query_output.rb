@@ -37,7 +37,7 @@ module RedmineExtensions
     end
 
     def self.filter_registered_for(query, whitelist = [])
-      whitelist += registered_whitelists[query.type]
+      whitelist += registered_whitelists[query.type] || []
       res = registered_outputs
       res = res.slice(*whitelist.map(&:to_sym)) if whitelist
       res = res.select do |_name, output|
