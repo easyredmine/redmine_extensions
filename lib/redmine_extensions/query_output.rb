@@ -46,8 +46,8 @@ module RedmineExtensions
       res.merge(registered_per_query[query.type] || {})
     end
 
-    def self.output_availible?(query, ouput)
-      self.filter_registered_for(query, Array[ouput]).any?
+    def self.output_availible?(query, output)
+      self.filter_registered_for(query, [output]).any?
     end
 
     def self.available_outputs_for(query)
