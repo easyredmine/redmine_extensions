@@ -2,6 +2,7 @@
 # it uses a presenter, wich prefixes the settings name by a plugin id automatically
 class EasySettingsController < ApplicationController
 
+  before_filter :require_admin, only: [:edit, :update]
   before_filter :find_optional_project
   before_filter :prepare_presenter
   before_filter :find_plugin, only: [:edit, :update]
