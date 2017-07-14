@@ -3,6 +3,7 @@
 #
 class EasySettingsController < ApplicationController
 
+  before_filter :require_admin, only: [:edit, :update]
   before_filter :find_optional_project
   before_filter :find_plugin, only: [:edit, :update]
 
