@@ -99,9 +99,9 @@ class EasySetting < ActiveRecord::Base
     @@mapper.validate(self)
   end
 
-  def from_params(value)
+  def from_params(raw_value)
     return if disabled_from_params?
-    self.value = @@mapper.from_params(self, value)
+    self.value = @@mapper.from_params(self, raw_value)
   end
 
   def disabled_from_params?

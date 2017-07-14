@@ -2,7 +2,7 @@ module EasySettings
   class Mapper
 
     def initialize
-      @keys = {}
+      @all_keys = {}
     end
 
     # Be careful for double definition of the same key
@@ -17,7 +17,7 @@ module EasySettings
       end
 
       EasySetting.mapper_clear_caches
-      @keys[name] = Key.init(name, options)
+      @all_keys[name] = Key.init(name, options)
     end
     alias_method :add_key, :key
 
@@ -28,41 +28,48 @@ module EasySettings
     end
     alias_method :add_keys, :keys
 
+    # Shortcust due to frequent usage
+    def boolean_keys(*names)
+      names.each do |name|
+        key(name, type: 'boolean')
+      end
+    end
+
     def default_values
       values = {}
-      @keys.each do |name, key|
+      @all_keys.each do |name, key|
         values[name] = key.default
       end
       values
     end
 
     def validate(easy_setting)
-      if @keys.has_key?(easy_setting.name)
-        @keys[easy_setting.name].validate(easy_setting)
+      if @all_keys.has_key?(easy_setting.name)
+        @all_keys[easy_setting.name].validate(easy_setting)
       else
         true
       end
     end
 
     def after_save(easy_setting)
-      if @keys.has_key?(easy_setting.name)
-        @keys[easy_setting.name].after_save(easy_setting)
+      if @all_keys.has_key?(easy_setting.name)
+        @all_keys[easy_setting.name].after_save(easy_setting)
       else
         true
       end
     end
 
     def from_params(easy_setting, value)
-      if @keys.has_key?(easy_setting.name)
-        @keys[easy_setting.name].from_params(easy_setting, value)
+      if @all_keys.has_key?(easy_setting.name)
+        @all_keys[easy_setting.name].from_params(easy_setting, value)
       else
         value
       end
     end
 
     def disabled_from_params?(easy_setting)
-      if @keys.has_key?(easy_setting.name)
-        @keys[easy_setting.name].disabled_from_params?
+      if @all_keys.has_key?(easy_setting.name)
+        @all_keys[easy_setting.name].disabled_from_params?
       else
         false
       end
