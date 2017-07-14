@@ -84,20 +84,20 @@ module EasySettings
         @options[:default] = new_default
       end
 
-      def from_params(new_from_params)
-        @options[:from_params] = new_from_params
-      end
-
-      def validate(&block)
-        @options[:validate] = block
-      end
-
       def disabled_from_params
         @options[:disabled_from_params] = true
       end
 
-      def after_save(&block)
-        @options[:after_save] = block
+      def from_params(func=nil, &block)
+        @options[:from_params] = func || block
+      end
+
+      def validate(func=nil, &block)
+        @options[:validate] = func || block
+      end
+
+      def after_save(func=nil, &block)
+        @options[:after_save] = func || block
       end
 
     end
@@ -146,6 +146,8 @@ module EasySettings
       def from_params(easy_setting, value)
         if options[:from_params].is_a?(Proc)
           easy_setting.instance_exec(value, &options[:from_params])
+        else
+          value
         end
       end
 

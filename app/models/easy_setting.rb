@@ -1,3 +1,5 @@
+require 'redmine_extensions/easy_settings'
+
 ##
 # EasySetting
 #
@@ -233,8 +235,9 @@ end
 EasySetting.map do
 
   key :easy_gantt_ondra1 do
-    type 'integer'
+    # type 'integer'
 
+    from_params {|v| binding.pry; v }
     after_save { binding.pry }
     validate { binding.pry }
   end
@@ -242,7 +245,7 @@ EasySetting.map do
   key :easy_gantt_ondra2 do
     default "ondra2"
 
-    from_params lambda {|v| binding.pry; v }
+    # from_params lambda {|v| binding.pry; v }
     after_save { binding.pry }
     validate {  binding.pry }
   end
