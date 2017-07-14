@@ -11,19 +11,19 @@ require 'redmine_extensions/easy_settings'
 # default::
 #   (default: nil)
 #
-# from_params::
-#   Accept lambda with one argument for raw_value (from params)
-#   (default: none)
-#
-# validate::
-#   Accept block which will be trigered in EasySetting instance
-#   (default: none)
-#
 # disabled_from_params::
 #   (default: false)
 #
+# from_params::
+#   Accept block or lambda with one argument for raw_value. Evaluated in EasySetting instance.
+#   (default: none)
+#
+# validate::
+#   Accept block or lambda. Evaluated in EasySetting instance.
+#   (default: none)
+#
 # after_save::
-#   Accept block which will be trigered in EasySetting instance
+#   Accept block or lambda. Evaluated in EasySetting instance.
 #   (default: none)
 #
 # == Mapping examples
@@ -229,30 +229,5 @@ class EasySetting < ActiveRecord::Base
     def update_cache
       Rails.cache.write("EasySetting/#{name}/#{project_id}", value)
     end
-
-end
-
-EasySetting.map do
-
-  key :easy_gantt_ondra1 do
-    # type 'integer'
-
-    from_params {|v| binding.pry; v }
-    after_save { binding.pry }
-    validate { binding.pry }
-  end
-
-  key :easy_gantt_ondra2 do
-    default "ondra2"
-
-    # from_params lambda {|v| binding.pry; v }
-    after_save { binding.pry }
-    validate {  binding.pry }
-  end
-
-  key :easy_gantt_ondra3 do
-    disabled_from_params
-    default "ondra3 default"
-  end
 
 end
