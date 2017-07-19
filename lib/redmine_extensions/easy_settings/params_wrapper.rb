@@ -56,13 +56,14 @@ module EasySettings
       end
 
       def prepare_easy_settings
-        saved_settings = EasySetting.where(name: @params.keys, project_id: @project).to_a
+        saved_settings = EasySetting.where(name: @params.keys, project: @project).map{|e| [e.name, e] }.to_h
 
         @easy_settings = []
         @params.each do |name, value|
-          setting = saved_settings.find{|es| es.name == name }
-          setting ||= EasySetting.new(name: name, project_id: @project)
+          setting = saved_settings[name]
+          setting ||= EasySetting.new(name: name, project: @project)
           next if setting.disabled_from_params?
+          next if value.blank? && setting.skip_blank_params?
 
           setting.from_params(value)
           @easy_settings << setting

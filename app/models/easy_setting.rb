@@ -14,6 +14,9 @@ require 'redmine_extensions/easy_settings'
 # disabled_from_params::
 #   (default: false)
 #
+# skip_blank_params::
+#   (default: false)
+#
 # from_params::
 #   Accept block or lambda with one argument for raw_value. Evaluated in EasySetting instance.
 #   (default: none)
@@ -106,6 +109,10 @@ class EasySetting < ActiveRecord::Base
 
   def disabled_from_params?
     @@mapper.disabled_from_params?(self)
+  end
+
+  def skip_blank_params?
+    @@mapper.skip_blank_params?(self)
   end
 
   def self.boolean_keys
