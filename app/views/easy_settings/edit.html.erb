@@ -1,4 +1,4 @@
-<%= form_for(@easy_settings, html: { class: 'form-box easy-setting-plugin-form' }) do |f| %>
+<%= form_for(@easy_settings, url: easy_setting_path(@plugin.id), html: { class: 'form-box easy-setting-plugin-form' }) do |f| %>
   <%= hidden_field_tag :back_url, params[:back_url] %>
 
   <%= render "easy_settings/#{@plugin.id}", easy_settings: @easy_settings, settings: @settings, form: f %>

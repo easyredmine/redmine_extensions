@@ -1,17 +1,16 @@
 module EasySettings
   ##
-  # EasySettings::PluginModel
+  # EasySettings::FormModel
   #
   # Fake models/proxy for easy seettings. Usable in rails form.
   #
-  #   plugin = Redmine::Plugin.find('easy_gantt')
-  #   settings = EasySettings::PluginModel.new(plugin)
+  #   settings = EasySettings::FormModel.new(prefix: 'easy_gantt')
   #   settings.show_holidays == EasySetting.value(:easy_gantt_show_holidays)
   #
-  class PluginModel
+  class FormModel
 
-    def initialize(plugin, project: nil)
-      @plugin = plugin
+    def initialize(prefix: nil, project: nil)
+      @prefix = "#{prefix}_" if prefix.present?
       @project = project
       @project = project.id if project.is_a?(Project)
     end
@@ -28,12 +27,13 @@ module EasySettings
       self
     end
 
-    def to_param
-      @plugin.id
-    end
+    # Called for missing :id parameter
+    #
+    # def to_param
+    # end
 
     def method_missing(name, *args)
-      EasySetting.value("#{@plugin.id}_#{name}", @project)
+      EasySetting.value("#{@prefix}#{name}", @project)
     end
 
   end

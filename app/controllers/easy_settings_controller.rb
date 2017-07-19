@@ -20,7 +20,7 @@ class EasySettingsController < ApplicationController
 
   def edit
     @settings = Setting.send("plugin_#{@plugin.id}")
-    @easy_settings = EasySettings::PluginModel.new(@plugin, project: @project)
+    @easy_settings = EasySettings::FormModel.new(prefix: @plugin.id, project: @project)
   end
 
   def update
