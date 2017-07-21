@@ -11,8 +11,7 @@ module EasySettings
 
     def initialize(prefix: nil, project: nil)
       @prefix = "#{prefix}_" if prefix.present?
-      @project = project
-      @project = project.id if project.is_a?(Project)
+      @project_id = project.is_a?(Project) ? project.id : project
     end
 
     def model_name
@@ -33,7 +32,7 @@ module EasySettings
     # end
 
     def method_missing(name, *args)
-      EasySetting.value("#{@prefix}#{name}", @project)
+      EasySetting.value("#{@prefix}#{name}", @project_id)
     end
 
   end

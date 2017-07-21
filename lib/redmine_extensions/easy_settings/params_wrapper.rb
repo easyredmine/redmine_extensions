@@ -13,8 +13,7 @@ module EasySettings
 
     def initialize(raw_params, project, prefix)
       @raw_params = raw_params
-      @project = project
-      @project = project.id if project.is_a?(Project)
+      @project_id = project.is_a?(Project) ? project.id : project
       @prefix = "#{prefix}_" if prefix.present?
       @errors = []
 
@@ -56,12 +55,12 @@ module EasySettings
       end
 
       def prepare_easy_settings
-        saved_settings = EasySetting.where(name: @params.keys, project: @project).map{|e| [e.name, e] }.to_h
+        saved_settings = EasySetting.where(name: @params.keys, project_id: @project_id).map{|e| [e.name, e] }.to_h
 
         @easy_settings = []
         @params.each do |name, value|
           setting = saved_settings[name]
-          setting ||= EasySetting.new(name: name, project: @project)
+          setting ||= EasySetting.new(name: name, project_id: @project_id)
           next if setting.disabled_from_params?
           next if value.blank? && setting.skip_blank_params?
 
