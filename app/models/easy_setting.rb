@@ -133,8 +133,8 @@ class EasySetting < ActiveRecord::Base
   end
 
   def self.copy_project_settings(setting_name, source_project_id, target_project_id)
-    source = EasySetting.find_by(name: setting_name, project_id: source_project_id)
-    target = EasySetting.find_by(name: setting_name, project_id: target_project_id)
+    source = EasySetting.where(name: setting_name, project_id: source_project_id).first
+    target = EasySetting.where(name: setting_name, project_id: target_project_id).first
 
     if source.nil? && !target.nil?
       target.destroy
