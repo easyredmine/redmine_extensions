@@ -95,7 +95,7 @@
    * @type {{out: boolean, late: EASY.schedule.late, require: EASY.schedule.require, main: EASY.schedule.main}}
    */
   EASY.schedule = {
-    out: true,
+    out: false,
     /**
      * Functions, which should be executed right after "DOMContentLoaded" event
      * @param {Function} func
