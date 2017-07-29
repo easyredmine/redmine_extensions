@@ -5,7 +5,6 @@ class EasySetting < ActiveRecord::Base
   serialize :value
 
   validates :name, :presence => true
-  attr_protected :id
 
   after_save :update_cache
   after_destroy :invalidate_cache

@@ -2,21 +2,10 @@
 # it uses a presenter, wich prefixes the settings name by a plugin id automatically
 class EasySettingsController < ApplicationController
 
-  before_filter :require_admin, only: [:edit, :update]
-  before_filter :find_optional_project
-  before_filter :prepare_presenter
-  before_filter :find_plugin, only: [:edit, :update]
-
-  def new
-  end
-
-  def create
-    if @easy_settings.save
-      redirect_to :back
-    else
-      render :new
-    end
-  end
+  before_action :require_admin, only: [:edit, :update]
+  before_action :find_optional_project
+  before_action :prepare_presenter
+  before_action :find_plugin, only: [:edit, :update]
 
   def edit
     @settings = Setting.send "plugin_#{@plugin.id}"
@@ -38,7 +27,8 @@ class EasySettingsController < ApplicationController
     end
 
     def prepare_presenter
-      @easy_settings = RedmineExtensions::EasySettingPresenter.new(params[:easy_setting], @project)
+      easy_setting = params[:easy_setting] ? params[:easy_setting].permit!.to_h : nil
+      @easy_settings = RedmineExtensions::EasySettingPresenter.new(easy_setting, @project)
     end
 
     def find_plugin
