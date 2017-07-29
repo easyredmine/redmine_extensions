@@ -18,7 +18,7 @@ module RedmineExtensions
     config.eager_load_paths << config.root.join('app', 'models', 'easy_queries')
 
     #config.to_prepare goes after Reloader.to_prepare
-    ActionDispatch::Reloader.to_prepare do
+    RedmineExtensions::Reloader.to_prepare do
       RedmineExtensions::QueryOutput.register_output RedmineExtensions::QueryOutputs::ListOutput
       RedmineExtensions::QueryOutput.register_output RedmineExtensions::QueryOutputs::TilesOutput
       # RedmineExtensions::BasePresenter.register 'RedmineExtensions::EasyQueryPresenter', 'EasyQuery'

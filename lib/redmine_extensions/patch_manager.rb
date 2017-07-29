@@ -358,12 +358,30 @@ module RedmineExtensions
     end
 
   end
+
+  module Reloader
+    def self.to_prepare(*args, &block)
+      if defined? ActiveSupport::Reloader
+        ActiveSupport::Reloader.to_prepare(*args, &block)
+      else
+        ActionDispatch::Reloader.to_prepare(*args, &block)
+      end
+    end
+
+    def self.to_cleanup(*args, &block)
+      if defined? ActiveSupport::Reloader
+        ActiveSupport::Reloader.to_complete(*args, &block)
+      else
+        ActionDispatch::Reloader.to_cleanup(*args, &block)
+      end
+    end
+  end
 end
 
 ActiveSupport.on_load(:easyproject, yield: true) do
   RedmineExtensions::PatchManager.apply_persisting_patches
 end
 
-ActionDispatch::Reloader.to_prepare do
+RedmineExtensions::Reloader.to_prepare do
   RedmineExtensions::PatchManager.apply_reloadable_patches
 end
