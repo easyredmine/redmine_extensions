@@ -2,8 +2,8 @@ module RedmineExtensions
   module ApplicationControllerPatch
 
     def self.included(base)
-      base.extend(ClassMethods)
-      base.send(:include, InstanceMethods)
+      base.extend ClassMethods
+      base.include InstanceMethods
 
       base.class_eval do
         helper_method :easy_extensions?

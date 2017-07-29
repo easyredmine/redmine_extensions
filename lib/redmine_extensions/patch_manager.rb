@@ -352,7 +352,7 @@ module RedmineExtensions
         pm_klass = patching_module.constantize
         oktp_klass = original_klass_to_patch.constantize
 
-        oktp_klass.send(:include, pm_klass) # unless oktp_klass.include?(pm_klass)
+        oktp_klass.include pm_klass # unless oktp_klass.include?(pm_klass)
       end
 
     end

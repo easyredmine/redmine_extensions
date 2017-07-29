@@ -3,8 +3,8 @@ require 'query'
 module RedmineExtensions
   module QueryColumnAdapter
     def self.included(base)
-      base.extend(ClassMethods)
-      base.send(:include, InstanceMethods)
+      base.extend ClassMethods
+      base.include InstanceMethods
 
       base.class_eval do
         attr_accessor :includes
@@ -168,8 +168,8 @@ end
 if Redmine::Plugin.installed?(:easy_extensions)
   # EasyQuery exist
 else
-  QueryColumn.__send__(:include, RedmineExtensions::QueryColumnAdapter)
+  QueryColumn.include RedmineExtensions::QueryColumnAdapter
   RedmineExtensions::PatchManager.register_model_patch('Query', 'RedmineExtensions::QueryAdapter')
   EasyQuery = EasyQueryAdapter
-  EasyQuery.__send__(:prepend, RedmineExtensions::QueryAdapterDefaults)
+  EasyQuery.prepend RedmineExtensions::QueryAdapterDefaults
 end

@@ -23,11 +23,11 @@ module RedmineExtensions
       RedmineExtensions::QueryOutput.register_output RedmineExtensions::QueryOutputs::TilesOutput
       # RedmineExtensions::BasePresenter.register 'RedmineExtensions::EasyQueryPresenter', 'EasyQuery'
       # ApplicationController.send :include, RedmineExtensions::RailsPatches::ControllerQueryHelpers
-      ApplicationController.send :include, RedmineExtensions::RenderingHelper
+      ApplicationController.include RedmineExtensions::RenderingHelper
     end
 
     initializer 'redmine_extensions.initialize' do |app|
-      ActionDispatch::Routing::RouteSet::Generator.send(:include, RedmineExtensions::RailsPatches::RouteSetGeneratorPatch)
+      ActionDispatch::Routing::RouteSet::Generator.prepend RedmineExtensions::RailsPatches::RouteSetGeneratorPatch
     end
 
     initializer 'redmine_extensions.append_migrations' do |app|
@@ -58,7 +58,7 @@ module RedmineExtensions
         include RedmineExtensions::RailsPatches::ActiveRecord
       end
       ActiveSupport.on_load(:action_view) do
-        default_form_builder.send(:include, RedmineExtensions::RailsPatches::FormBuilderPatch)
+        default_form_builder.include RedmineExtensions::RailsPatches::FormBuilderPatch
       end
     end
 
