@@ -4,10 +4,12 @@ module RedmineExtensions
     attr_accessor :project_id, :plugin
 
     def self.boolean_keys
-      @boolean_keys ||= []
+      @boolean_keys ||= BooleanKeysAlsoToMapperKey.new
     end
 
     def initialize(settings_params={}, project = nil)
+      ActiveSupport::Deprecation.warn('RedmineExtensions::EasySettingPresenter is deprecated in favor of EasySettings::ParamsWrapper.')
+
       @settings = settings_params || {}
       @settings = @settings.dup.symbolize_keys
       self.project = project
@@ -122,6 +124,21 @@ module RedmineExtensions
       else
         super
       end
+    end
+
+    # To keep backward compatibility with old presenter
+    class BooleanKeysAlsoToMapperKey < Array
+
+      def <<(key)
+        EasySetting.map.key(key, type: 'boolean')
+        super
+      end
+
+      def concat(keys)
+        EasySetting.map.keys(*keys, type: 'boolean')
+        super
+      end
+
     end
 
   end

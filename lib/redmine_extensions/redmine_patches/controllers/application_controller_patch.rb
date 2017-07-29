@@ -27,6 +27,16 @@ module RedmineExtensions
         self.class.easy_extensions?
       end
 
+      private
+
+      def save_easy_settings(project = nil)
+        if params[:easy_setting]
+          wrapper = EasySettings::ParamsWrapper.from_params(params[:easy_setting].permit!.to_h, project: project)
+          wrapper.save
+          wrapper
+        end
+      end
+
     end
 
     module ClassMethods
