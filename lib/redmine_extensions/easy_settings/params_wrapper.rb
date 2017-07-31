@@ -4,6 +4,9 @@ module EasySettings
     attr_reader :errors
 
     def self.from_params(raw_params, project: nil, prefix: nil)
+      if !raw_params.is_a?(Hash) && !raw_params.is_a?(ActionController::Parameters)
+        raw_params = {}
+      end
       new(raw_params, project, prefix)
     end
 

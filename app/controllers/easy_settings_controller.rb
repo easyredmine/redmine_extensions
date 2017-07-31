@@ -14,11 +14,11 @@ class EasySettingsController < ApplicationController
 
   def update
     if params[:settings]
-      Setting.send("plugin_#{@plugin.id}=", params[:settings].permit!.to_h)
+      Setting.send("plugin_#{@plugin.id}=", params[:settings].permit!)
     end
 
     if params[:easy_setting]
-      @easy_settings = EasySettings::ParamsWrapper.from_params(params[:easy_setting].permit!.to_h, project: @project, prefix: @plugin.id)
+      @easy_settings = EasySettings::ParamsWrapper.from_params(params[:easy_setting].permit!, project: @project, prefix: @plugin.id)
 
       if @easy_settings.save
         # All good
