@@ -116,8 +116,8 @@ module RedmineExtensions
         controller_klass = Object.const_get(controller_klass_name)
 
         @registered_easy_page_helpers.each do |helper_klass_name|
-          if m = helper_klass_name.match(/\A(\S+)Helper\z/)
-            helper_klass_symbol = m[1]
+          if helper_klass_name.end_with?('Helper')
+            helper_klass_symbol = helper_klass_name[0, helper_klass_name.index('Helper')]
           end
 
           controller_klass.class_eval "helper :#{helper_klass_symbol.underscore}" if helper_klass_symbol
