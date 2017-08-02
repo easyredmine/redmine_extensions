@@ -113,7 +113,7 @@ module RedmineExtensions
     def self.apply_easy_page_patches
       return if @registered_easy_page_controllers.nil? || @registered_easy_page_helpers.nil?
       @registered_easy_page_controllers.each do |controller_klass_name|
-        controller_klass = controller_klass_name.constantize
+        controller_klass = Object.const_get(controller_klass_name)
 
         @registered_easy_page_helpers.each do |helper_klass_name|
           if m = helper_klass_name.match(/\A(\S+)Helper\z/)
@@ -349,10 +349,14 @@ module RedmineExtensions
           return unless cond.call
         end
 
-        pm_klass = patching_module.constantize
-        oktp_klass = original_klass_to_patch.constantize
+        pm_klass = Object.const_get(patching_module)
+        oktp_klass = Object.const_get(original_klass_to_patch)
 
-        oktp_klass.include pm_klass # unless oktp_klass.include?(pm_klass)
+        if @options[:prepend]
+          oktp_klass.prepend pm_klass # unless oktp_klass.include?(pm_klass)
+        else
+          oktp_klass.include pm_klass # unless oktp_klass.include?(pm_klass)
+        end
       end
 
     end
