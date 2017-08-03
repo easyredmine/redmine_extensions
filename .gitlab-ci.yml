@@ -26,7 +26,7 @@ Spec / MySQL:
   - export DB_USERNAME="root"
   - export DB_PWD=$MYSQL_PASS
   - export ONLY_SPEC='true'
-  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.4-stable spec/redmine
+  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.3-stable spec/redmine
   - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
   - $SHELL ./.run-tests.sh
   except:
@@ -39,7 +39,7 @@ Spec / Postgresql:
   - export DB_USERNAME="postgres"
   - export DB_PWD=""
   - export ONLY_SPEC='true'
-  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.4-stable spec/redmine
+  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.3-stable spec/redmine
   - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
   - $SHELL ./.run-tests.sh
   except:
@@ -51,7 +51,7 @@ Pure Redmine / MySQL:
   - export ADAPTER="mysql2"
   - export DB_USERNAME="root"
   - export DB_PWD=$MYSQL_PASS
-  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.4-stable spec/redmine
+  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.3-stable spec/redmine
   - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
   - $SHELL ./.run-tests.sh
   except:
@@ -63,7 +63,7 @@ Pure Redmine / Postgresql:
   - export ADAPTER="postgresql"
   - export DB_USERNAME="postgres"
   - export DB_PWD=""
-  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.4-stable spec/redmine
+  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.3-stable spec/redmine
   - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
   - $SHELL ./.run-tests.sh
   except:
