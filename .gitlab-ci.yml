@@ -45,17 +45,17 @@ Spec / Postgresql:
   except:
   - master
 
-# Pure Redmine / MySQL:
-#  stage: tests
-#  script:
-#  - export ADAPTER="mysql2"
-#  - export DB_USERNAME="root"
-#  - export DB_PWD=$MYSQL_PASS
-#  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.3-stable spec/redmine
-#  - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
-#  - $SHELL ./.run-tests.sh
-#  except:
-#  - master
+Pure Redmine / MySQL:
+  stage: tests
+  script:
+  - export ADAPTER="mysql2"
+  - export DB_USERNAME="root"
+  - export DB_PWD=$MYSQL_PASS
+  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.3-stable spec/redmine
+  - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
+  - $SHELL ./.run-tests.sh
+  except:
+  - master
 
 Pure Redmine / Postgresql:
   stage: tests
@@ -73,7 +73,7 @@ Easy Redmine Fast / Mysql:
    stage: tests
    script:
    - rm -rf spec/redmine
-   - git clone --depth 1 ssh://git@git.easy.cz/easyproject/stable-2016.git spec/redmine
+   - git clone --depth 1 ssh://git@git.easy.cz/easyredmine/devel-2016.git spec/redmine
    - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
    - export EASY='true'
    - export ADAPTER="mysql2"
@@ -89,7 +89,7 @@ Easy Redmine Fast / Postgresql:
    stage: tests
    script:
    - rm -rf spec/redmine
-   - git clone --depth 1 ssh://git@git.easy.cz/easyproject/stable-2016.git spec/redmine
+   - git clone --depth 1 ssh://git@git.easy.cz/easyredmine/devel-2016.git spec/redmine
    - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
    - export EASY='true'
    - export ADAPTER="postgresql"
@@ -105,7 +105,7 @@ Easy Redmine Slow / Mysql:
    stage: tests
    script:
    - rm -rf spec/redmine
-   - git clone --depth 1 ssh://git@git.easy.cz/easyproject/stable-2016.git spec/redmine
+   - git clone --depth 1 ssh://git@git.easy.cz/easyredmine/devel-2016.git spec/redmine
    - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
    - export EASY='true'
    - export ADAPTER="mysql2"
@@ -121,7 +121,7 @@ Easy Redmine Slow / Postgresql:
    stage: tests
    script:
    - rm -rf spec/redmine
-   - git clone --depth 1 ssh://git@git.easy.cz/easyproject/stable-2016.git spec/redmine
+   - git clone --depth 1 ssh://git@git.easy.cz/easyredmine/devel-2016.git spec/redmine
    - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
    - export EASY='true'
    - export ADAPTER="postgresql"
