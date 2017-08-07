@@ -2,8 +2,8 @@ module RedmineExtensions
   module ApplicationControllerPatch
 
     def self.included(base)
-      base.extend(ClassMethods)
-      base.send(:include, InstanceMethods)
+      base.extend ClassMethods
+      base.include InstanceMethods
 
       base.class_eval do
         helper_method :easy_extensions?
@@ -29,13 +29,11 @@ module RedmineExtensions
 
       private
 
-        def save_easy_settings(project = nil)
-          if params[:easy_setting].is_a?(Hash) || params[:easy_setting].is_a?(ActionController::Parameters)
-            wrapper = EasySettings::ParamsWrapper.from_params(params.delete(:easy_setting), project: project)
-            wrapper.save
-            wrapper
-          end
-        end
+      def save_easy_settings(project = nil)
+        wrapper = EasySettings::ParamsWrapper.from_params(params.require(:easy_setting).permit, project: project)
+        wrapper.save
+        wrapper
+      end
 
     end
 

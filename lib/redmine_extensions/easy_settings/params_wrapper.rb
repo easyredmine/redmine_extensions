@@ -7,7 +7,6 @@ module EasySettings
       if !raw_params.is_a?(Hash) && !raw_params.is_a?(ActionController::Parameters)
         raw_params = {}
       end
-
       new(raw_params, project, prefix)
     end
 

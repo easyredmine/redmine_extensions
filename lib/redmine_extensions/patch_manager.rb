@@ -113,11 +113,11 @@ module RedmineExtensions
     def self.apply_easy_page_patches
       return if @registered_easy_page_controllers.nil? || @registered_easy_page_helpers.nil?
       @registered_easy_page_controllers.each do |controller_klass_name|
-        controller_klass = controller_klass_name.constantize
+        controller_klass = Object.const_get(controller_klass_name)
 
         @registered_easy_page_helpers.each do |helper_klass_name|
-          if m = helper_klass_name.match(/\A(\S+)Helper\z/)
-            helper_klass_symbol = m[1]
+          if helper_klass_name.end_with?('Helper')
+            helper_klass_symbol = helper_klass_name[0, helper_klass_name.index('Helper')]
           end
 
           controller_klass.class_eval "helper :#{helper_klass_symbol.underscore}" if helper_klass_symbol
@@ -349,14 +349,36 @@ module RedmineExtensions
           return unless cond.call
         end
 
-        pm_klass = patching_module.constantize
-        oktp_klass = original_klass_to_patch.constantize
+        pm_klass = Object.const_get(patching_module)
+        oktp_klass = Object.const_get(original_klass_to_patch)
 
-        oktp_klass.send(:include, pm_klass) # unless oktp_klass.include?(pm_klass)
+        if @options[:prepend]
+          oktp_klass.prepend pm_klass # unless oktp_klass.include?(pm_klass)
+        else
+          oktp_klass.include pm_klass # unless oktp_klass.include?(pm_klass)
+        end
       end
 
     end
 
+  end
+
+  module Reloader
+    def self.to_prepare(*args, &block)
+      if defined? ActiveSupport::Reloader
+        ActiveSupport::Reloader.to_prepare(*args, &block)
+      else
+        ActionDispatch::Reloader.to_prepare(*args, &block)
+      end
+    end
+
+    def self.to_cleanup(*args, &block)
+      if defined? ActiveSupport::Reloader
+        ActiveSupport::Reloader.to_complete(*args, &block)
+      else
+        ActionDispatch::Reloader.to_cleanup(*args, &block)
+      end
+    end
   end
 end
 
@@ -364,6 +386,6 @@ ActiveSupport.on_load(:easyproject, yield: true) do
   RedmineExtensions::PatchManager.apply_persisting_patches
 end
 
-ActionDispatch::Reloader.to_prepare do
+RedmineExtensions::Reloader.to_prepare do
   RedmineExtensions::PatchManager.apply_reloadable_patches
 end

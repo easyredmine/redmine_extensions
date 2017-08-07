@@ -3,20 +3,9 @@
 #
 class EasySettingsController < ApplicationController
 
-  before_filter :require_admin, only: [:edit, :update]
-  before_filter :find_optional_project
-  before_filter :find_plugin, only: [:edit, :update]
-
-  def new
-  end
-
-  def create
-    if @easy_settings.save
-      redirect_to :back
-    else
-      render :new
-    end
-  end
+  before_action :require_admin, only: [:edit, :update]
+  before_action :find_optional_project
+  before_action :find_plugin, only: [:edit, :update]
 
   def edit
     @settings = Setting.send("plugin_#{@plugin.id}")
@@ -25,11 +14,11 @@ class EasySettingsController < ApplicationController
 
   def update
     if params[:settings]
-      Setting.send("plugin_#{@plugin.id}=", params[:settings])
+      Setting.send("plugin_#{@plugin.id}=", params[:settings].permit!)
     end
 
     if params[:easy_setting]
-      @easy_settings = EasySettings::ParamsWrapper.from_params(params[:easy_setting], project: @project, prefix: @plugin.id)
+      @easy_settings = EasySettings::ParamsWrapper.from_params(params[:easy_setting].permit!, project: @project, prefix: @plugin.id)
 
       if @easy_settings.save
         # All good

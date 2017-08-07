@@ -73,7 +73,6 @@ class EasySetting < ActiveRecord::Base
   after_save :mapper_after_save
   after_destroy :invalidate_cache
 
-  attr_protected :id
   serialize :value
 
   @@mapper = EasySettings::Mapper.new
