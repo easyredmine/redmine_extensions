@@ -20,6 +20,7 @@ module RedmineExtensions
       unless defined?(EasyExtensions)
         javascript_include_tag('redmine_extensions/blocking_polyfill') +
         javascript_include_tag('redmine_extensions/blocking_schedule') +
+        javascript_include_tag('redmine_extensions/blocking_module') +
         javascript_include_tag('redmine_extensions/jquery.entityarray') +
         javascript_include_tag('redmine_extensions/redmine_extensions') +
         javascript_include_tag('redmine_extensions/easy_togglers')
