@@ -39,7 +39,7 @@ if [ "$EASY" = "true" ]; then
   bundle exec rake db:drop db:create db:migrate
   bundle exec rake easyproject:install RAILS_ENV=production
   bundle exec rake test:prepare RAILS_ENV=test
-  bundle exec rake easyproject:tests:spec$TAGS RAILS_ENV=test
+  bundle exec rake easyproject:tests:spec$TAGS RAILS_ENV=test JS_DRIVER=chrome CHROME_OPTIONS="headless no-sandbox disable-gpu window-size=1920,1080"
 elif [ "$ONLY_SPEC" = "true" ]; then
   bundle exec rake db:drop db:create db:migrate RAILS_ENV=test
   bundle exec rake spec RAILS_ENV=test
