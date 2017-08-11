@@ -1,4 +1,4 @@
-class CreateEntityAssignments < ActiveRecord::Migration
+class CreateEntityAssignments < ActiveRecord::Migration[4.2]
   def self.up
     unless table_exists?(:easy_entity_assignments)
       create_table :easy_entity_assignments do |t|

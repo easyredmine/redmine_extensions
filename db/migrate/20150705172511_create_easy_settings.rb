@@ -1,4 +1,4 @@
-class CreateEasySettings < ActiveRecord::Migration
+class CreateEasySettings < ActiveRecord::Migration[4.2]
   def up
     if table_exists?(:easy_settings)
       add_column(:easy_settings, :type, :string, null: true) unless column_exists?(:easy_settings, :type)
