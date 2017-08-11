@@ -1,8 +1,8 @@
 require 'active_support/dependencies'
-require 'redmine_extensions/patch_manager'
-require 'redmine_extensions/redmine_patches/patches'
+require_relative './patch_manager'
+require_relative './redmine_patches/patches'
 
-require 'redmine_extensions/query_output'
+require_relative './query_output'
 
 module RedmineExtensions
   class Engine < ::Rails::Engine
@@ -63,18 +63,18 @@ module RedmineExtensions
     end
 
     initializer 'redmine_extensions.initialize_easy_plugins', after: :load_config_initializers do
-      require 'redmine_extensions/hooks'
+      require_relative './hooks'
 
       unless Redmine::Plugin.installed?(:easy_extensions)
         ActiveSupport.run_load_hooks(:easyproject, self)
       end
 
-      require 'redmine_extensions/easy_query_adapter'
-      require 'redmine_extensions/easy_entity_formatters/easy_entity_formatter'
+      require_relative './easy_query_adapter'
+      require_relative './easy_entity_formatters/easy_entity_formatter'
     end
 
     # initializer :add_html_formatting do |app|
-    #   require "redmine_extensions/html_formatting"
+    #   require_relative "./html_formatting"
     #   Redmine::WikiFormatting.register(:HTML, RedmineExtensions::HTMLFormatting::Formatter, RedmineExtensions::HTMLFormatting::Helper)
     # end
 
