@@ -2,6 +2,7 @@ Description:
     The plugin generator creates stubs for new Redmine plugin.
     Plugin is prepared for use in Redmine and Easy Redmine as well.
     You can use --customer flag to generate a special plugin if you can make just a few changes to code. Backup this plugin before Redmine or Easy Redmine upgrade and move back for keep you changes.
+    You can use --path flag to specify parent directory.
 
 Example:
     rails g redmine_extensions:plugin NameOfNewPlugin
