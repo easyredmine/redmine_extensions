@@ -108,6 +108,21 @@ module RedmineExtensions
       end
     end
 
+    def late_javascript_tag(content_or_options_with_block = nil, html_options = {}, &block)
+      content =
+        if block_given?
+          html_options = content_or_options_with_block if content_or_options_with_block.is_a?(Hash)
+          capture(&block)
+        else
+          content_or_options_with_block
+        end
+      html_options.reverse_merge!({type:'application/javascript'})
+      priority = html_options.delete(:priority) || 0
+      content = "  EASY.schedule.late(function(){#{content}  }, #{priority});"
+
+      content_tag(:script, javascript_cdata_section(content), html_options)
+    end
+
 
     # ==== Options
     # * <tt>class: Hash or String</tt> - This option can be used to add custom CSS classes. It can be *String* or *Hash*.
@@ -240,7 +255,7 @@ module RedmineExtensions
 
       content_tag(:span, :class => 'easy-multiselect-tag-container') do
         text_field_tag('', '', (options[:html_options] || {}).merge(id: options[:id])) +
-          javascript_tag("$('##{options[:id]}').easymultiselect({multiple: #{options[:multiple]}, rootElement: #{options[:rootElement].to_json}, inputName: '#{name}', preload: #{options[:preload]}, combo: #{options[:combo]}, source: #{source}, selected: #{selected_values.to_json}, show_toggle_button: #{options[:show_toggle_button]}, select_first_value: #{options[:select_first_value]}, load_immediately: #{options[:load_immediately]}, autocomplete_options: #{(options[:jquery_auto_complete_options]||{}).to_json} });")
+          late_javascript_tag("$('##{options[:id]}').easymultiselect({multiple: #{options[:multiple]}, rootElement: #{options[:rootElement].to_json}, inputName: '#{name}', preload: #{options[:preload]}, combo: #{options[:combo]}, source: #{source}, selected: #{selected_values.to_json}, show_toggle_button: #{options[:show_toggle_button]}, select_first_value: #{options[:select_first_value]}, load_immediately: #{options[:load_immediately]}, autocomplete_options: #{(options[:jquery_auto_complete_options]||{}).to_json} });")
       end
     end
 
