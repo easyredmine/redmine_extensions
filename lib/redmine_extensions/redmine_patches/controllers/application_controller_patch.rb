@@ -30,9 +30,11 @@ module RedmineExtensions
       private
 
       def save_easy_settings(project = nil)
-        wrapper = EasySettings::ParamsWrapper.from_params(params.require(:easy_setting).permit!, project: project)
-        wrapper.save
-        wrapper
+        if params[:easy_setting]
+          wrapper = EasySettings::ParamsWrapper.from_params(params.require(:easy_setting).permit!, project: project)
+          wrapper.save
+          wrapper
+        end
       end
 
     end
