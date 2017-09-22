@@ -8,7 +8,10 @@
       end
     else
       if params['combine_by_pipeline'] == 'false'
-        javascript_include_tag('dart/debug', plugin: plugin, defer: true)
+        #javascript_include_tag('dart/debug', plugin: plugin, defer: true)
+        if ENV['DART'] == '1'
+          javascript_include_tag('dart/localhost', plugin: plugin)
+        end
       else
         javascript_include_tag("#{plugin}.dart", defer: true)
       end
