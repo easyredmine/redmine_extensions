@@ -80,7 +80,7 @@
         user: {
             id: User.current.id,
             name: User.current.name,
-            avatar_url: avatar_url(user)
+            avatar_url: easy_avatar_url(user)
         },
         standard_lang_files: Hash[*standard_lang_files.collect { |v| [v, l(v)] }.flatten]
     }

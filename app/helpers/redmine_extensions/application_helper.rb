@@ -124,7 +124,7 @@ module RedmineExtensions
     end
 
 
-    def avatar_url(user = nil)
+    def easy_avatar_url(user = nil)
       user ||= User.current
       result = if Setting.gravatar_enabled?
         options = {:ssl => (request && request.ssl?), :default => Setting.gravatar_default}
