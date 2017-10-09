@@ -124,6 +124,25 @@ module RedmineExtensions
     end
 
 
+    def easy_avatar_url(user = nil)
+      user ||= User.current
+      result = if Setting.gravatar_enabled?
+        options = {:ssl => (request && request.ssl?), :default => Setting.gravatar_default}
+        email = nil
+        if user.respond_to?(:mail)
+          email = user.mail
+        elsif user.to_s =~ %r{<(.+?)>}
+          email = $1
+        end
+        email ? gravatar_url(email, options) : ''
+      elsif user.easy_avatar_url.present?
+        user.easy_avatar_url
+      elsif user.respond_to?(:easy_avatar) && (av = user.easy_avatar).present? && (img_url = av.image.url(:small))
+        get_easy_absolute_uri_for(img_url).to_s
+      end
+      result
+    end
+
     # ==== Options
     # * <tt>class: Hash or String</tt> - This option can be used to add custom CSS classes. It can be *String* or *Hash*.
     #       class: {heading: 'heading-additional-css', container: 'container-additional-css'}

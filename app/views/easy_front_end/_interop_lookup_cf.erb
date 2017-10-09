@@ -1,0 +1,37 @@
+<script>
+  function interopAdapterForLookupCustomFieldDialog(url, closeButtonLabel, submitButtonLabel, fieldId, selectedValues, onClose) {
+    $.post(url, {'selected_values': selectedValues}, function (data) {
+      var ajaxModal = $("#ajax-modal");
+      if ($('#easy_modal').length === 0) {
+        ajaxModal.parent().append($("<div/>").attr({id: "easy_modal"}).hide());
+      }
+      var modal = $('#easy_modal');
+      modal.html(data);
+
+      EASY.modalSelector.showEasyModal(function () {
+        return [url + '&' + $('#modal_selector_query_form, .modal-selected-values form').serialize() + '&page=', ''];
+      });
+
+      var btns = [];
+
+      btns.push({
+        text: closeButtonLabel,
+        click: function () {
+          $(this).dialog('close');
+        },
+        'class': 'button'
+      });
+
+      btns.push({
+        text: submitButtonLabel,
+        click: function () {
+          EASY.modalSelector.saveAndCloseModal(fieldId);
+          onClose();
+        },
+        'class': 'button-positive'
+      });
+
+      modal.dialog({title: $("#" + fieldId + "_lookup_trigger_container").prev("label").text(), buttons: btns});
+    });
+  }
+</script>
