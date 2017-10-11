@@ -172,7 +172,7 @@ class EasySetting < ActiveRecord::Base
       EasySetting.where(name: key, project_id: project_id).limit(1).pluck(:value).first
     end
 
-    if use_fallback && result.blank?
+    if use_fallback && result.nil?
       result = Rails.cache.fetch(fallback_cache_key) do
         EasySetting.where(name: key, project_id: nil).limit(1).pluck(:value).first
       end
