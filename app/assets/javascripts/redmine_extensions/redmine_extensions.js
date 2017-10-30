@@ -252,8 +252,7 @@ window.closeFlashMessage = (function($element){
                         return;
                     }
                     $(this).blur();
-                    if(!that.options.preload)
-                        that.element.focus().val('');
+                    that.element.focus().val('');
                     that.element.trigger('keydown');
                     that.element.autocomplete("search", that.element.val());
                 });
