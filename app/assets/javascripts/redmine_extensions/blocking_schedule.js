@@ -39,9 +39,6 @@
     if (lateArray.length) {
       if (lateDelay === 0) {
         lateArray.sort(sortFunction);
-        // console.log(lateArray.map(function (p1) {
-        //   return p1.priority
-        // }));
         var limitPriority = lateArray[0].priority - 5;
         for (i = 0; i < lateArray.length; i++) {
           if (lateArray[i].priority <= limitPriority) break;
@@ -60,7 +57,7 @@
       }
     }
     if (EASY.schedule.out && (count1 || count2 || count3)) {
-      console.log("EE: " + count1 + " REQ: " + count2 + " LATE: " + count3);
+      console.log("MAIN: " + count1 + " REQ: " + count2 + " LATE: " + count3);
     }
   };
   var isNotNull = function (a) {
@@ -70,10 +67,11 @@
   var executePrerequisites = function () {
     if (prerequisiteArray.length === 0) return 0;
     var count = 0;
+    var prerequisite;
     for (var i = 0; i < prerequisiteArray.length; i++) {
-      if (prerequisiteArray[i].pre()) {
+      if (prerequisite = prerequisiteArray[i].pre()) {
         count++;
-        prerequisiteArray[i].func.call(window);
+        prerequisiteArray[i].func.call(window, prerequisite);
         prerequisiteArray[i] = null;
       }
     }
@@ -86,7 +84,7 @@
 
   var cycle = function scheduleCycle() {
     tick();
-    window.requestAnimationFrame(cycle);
+    setTimeout(cycle, 10);
   };
   document.addEventListener("DOMContentLoaded", cycle);
   window.EASY = window.EASY || {};
