@@ -23,6 +23,7 @@ module RedmineExtensions
         javascript_include_tag('redmine_extensions/blocking_module') +
         javascript_include_tag('redmine_extensions/blocking_polyfill') +
         javascript_include_tag('redmine_extensions/blocking_render') +
+        javascript_include_tag('redmine_extensions/blocking_utils') +
         javascript_include_tag('redmine_extensions/jquery.entityarray') +
         javascript_include_tag('redmine_extensions/render_polyfill') +
         javascript_include_tag('redmine_extensions/redmine_extensions') +

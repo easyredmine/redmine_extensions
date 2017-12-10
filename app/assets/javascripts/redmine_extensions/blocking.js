@@ -6,3 +6,4 @@
 //= require ./blocking_module
 //= require ./blocking_polyfill
 //= require ./blocking_render
+//= require ./blocking_utils
