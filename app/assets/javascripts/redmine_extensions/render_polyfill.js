@@ -1,4 +1,4 @@
-EASY.modules.require(["jQuery"], function () {
+EASY.schedule.require(function (jQuery) {
   var running,
       animate = function (elem) {
         if (running) {
@@ -16,5 +16,5 @@ EASY.modules.require(["jQuery"], function () {
   jQuery.fx.stop = function () {
     running = false;
   };
-});
+},'jQuery');
 
