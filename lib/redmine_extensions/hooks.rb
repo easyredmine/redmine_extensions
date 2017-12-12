@@ -1,18 +1,14 @@
 module RedmineExtensions
   class Hooks < Redmine::Hook::ViewListener
-    @visited = false
     def easy_extensions_blocking_javascripts_hook(context={})
       if defined?(EasyExtensions)
-        @visited = true
         context[:template].require_asset('redmine_extensions/blocking')
       end
     end
 
     def easy_extensions_javascripts_hook(context={})
       if defined?(EasyExtensions)
-        context[:template].require_asset('redmine_extensions/blocking') unless @visited
         context[:template].require_asset('redmine_extensions/application')
-        # context[:hook_caller].javascript_include_tag('redmine_extensions/application')
       end
     end
 
@@ -20,7 +16,7 @@ module RedmineExtensions
       unless defined?(EasyExtensions)
         javascript_include_tag('redmine_extensions/event_bus') +
         javascript_include_tag('redmine_extensions/blocking_schedule') +
-        javascript_include_tag('redmine_extensions/blocking_module') +
+        # javascript_include_tag('redmine_extensions/blocking_module') +
         javascript_include_tag('redmine_extensions/blocking_polyfill') +
         javascript_include_tag('redmine_extensions/blocking_render') +
         javascript_include_tag('redmine_extensions/blocking_utils') +

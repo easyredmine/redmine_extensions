@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  return;
 
   var modules = {};
   var waiters = {};
