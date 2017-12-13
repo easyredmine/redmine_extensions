@@ -202,6 +202,9 @@
       if(mainArray.length>0) return false;
       if(prerequisiteArray.length>0) return false;
       return lateArray.length <= 0;
+    },
+    lateIsLoaded:function () {
+      return lateArray.length <= 0;
     }
   };
 })();
