@@ -68,7 +68,7 @@ window.closeFlashMessage = (function ($element) {
   });
 });
 
-EASY.schedule.require(function () {
+EasyGem.schedule.require(function () {
   $.widget('easy.easymultiselect', {
     options: {
       source: null,
@@ -416,6 +416,4 @@ EASY.schedule.require(function () {
 
   });
 
-}, function () {
-  return $.widget;
-});
+}, 'jQueryUI');

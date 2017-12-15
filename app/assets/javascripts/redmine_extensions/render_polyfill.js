@@ -1,4 +1,4 @@
-EASY.schedule.require(function (jQuery) {
+EasyGem.schedule.require(function (jQuery) {
   var running,
       animate = function (elem) {
         if (running) {

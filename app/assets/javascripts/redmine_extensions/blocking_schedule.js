@@ -7,8 +7,7 @@
   /**
    * @typedef {{func:Function,[priority]:number,[pre]:SchedulePrerequisite,[pres]:Array.<SchedulePrerequisite>}} ScheduleTask
    */
-  var lateMaxDelay = 3;
-  var lateDelay = lateMaxDelay;
+  // noinspection JSMismatchedCollectionQueryUpdate
   /** @type {Array.<ScheduleTask>} */
   var mainArray = [];
   /** @type {Array.<ScheduleTask>} */
@@ -20,7 +19,7 @@
       return window.jQuery;
     },
     jqueryui: function () {
-      return window.jQuery && $.fn.widget;
+      return window.jQuery && $.fn.Widget;
     }
   };
   var moduleInstances = {};
@@ -38,32 +37,31 @@
     if (mainArray.length > 0) {
       count1 = mainArray.length;
       mainArray.sort(sortFunction);
-      for (var i = 0; i < mainArray.length; i++) {
-        mainArray[i].func();
-      }
+      var queue = mainArray;
       mainArray = [];
-      lateDelay = lateMaxDelay;
+      for (var i = 0; i < queue.length; i++) {
+        queue[i].func();
+      }
     }
     var count2 = executePrerequisites();
     var count3 = 0;
-    if (lateArray.length) {
-      if (lateDelay === 0) {
-        lateArray.sort(sortFunction);
-        var limitPriority = lateArray[0].priority - 5;
-        for (i = 0; i < lateArray.length; i++) {
-          if (lateArray[i].priority <= limitPriority) break;
-          lateArray[i].func.call(window);
-        }
-        if (i === lateArray.length) {
-          count3 = lateArray.length;
-          lateArray = [];
-          lateDelay = lateMaxDelay;
-        } else {
-          lateArray = lateArray.slice(i);
-          count3 = i;
-        }
+    if (lateArray.length && count1 === 0 && count2 === 0) {
+      lateArray.sort(sortFunction);
+      var limitPriority = lateArray[0].priority - 5;
+      for (i = 0; i < lateArray.length; i++) {
+        if (lateArray[i].priority <= limitPriority) break;
+      }
+      count3 = i;
+      if (i === lateArray.length) {
+        queue = lateArray;
+        lateArray = [];
       } else {
-        lateDelay--;
+        queue = lateArray.slice(0, i);
+        lateArray = lateArray.slice(i);
+      }
+      for (i = 0; i < queue.length; i++) {
+        if (queue[i].priority <= limitPriority) break;
+        queue[i].func.call(window);
       }
     }
     if (writeOut && (count1 || count2 || count3)) {
@@ -132,16 +130,15 @@
   };
 
   var cycle = function scheduleCycle() {
+    setTimeout(cycle, 30);
     tick();
-    setTimeout(cycle, 10);
   };
   document.addEventListener("DOMContentLoaded", cycle);
-  window.EASY = window.EASY || {};
   /**
    *
    * @type {{out: boolean, late: EASY.schedule.late, require: EASY.schedule.require, main: EASY.schedule.main, define: EASY.schedule.define}}
    */
-  EASY.schedule = {
+  EasyGem.schedule = {
     /**
      * Functions, which should be executed right after "DOMContentLoaded" event
      * @param {Function} func
@@ -193,18 +190,35 @@
       moduleGetters[name.toLocaleLowerCase()] = getter;
     }
   };
-  EASY.test = EASY.test || {};
-  EASY.test.schedule = {
+  EASY.schedule = EasyGem.schedule;
+  EasyGem.test.schedule = {
     setOut: function (state) {
-      writeOut=state;
+      writeOut = state;
     },
-    isLoaded:function () {
-      if(mainArray.length>0) return false;
-      if(prerequisiteArray.length>0) return false;
+    isLoaded: function () {
+      if (mainArray.length > 0) return false;
+      if (prerequisiteArray.length > 0) return false;
       return lateArray.length <= 0;
     },
-    lateIsLoaded:function () {
+    lateIsLoaded: function () {
       return lateArray.length <= 0;
+    },
+    queueContents: function () {
+      var modules = [];
+      for (var i = 0; i < prerequisiteArray.length; i++) {
+        var prerequisite = prerequisiteArray[i];
+        if (typeof prerequisite.pre === "string") {
+          modules.push(prerequisite.pre);
+        } else if (prerequisite.pres) {
+          for (var j = 0; j < prerequisite.pres.length; j++) {
+            var pre = prerequisite.pres[j];
+            if (typeof pre === "string") {
+              modules.push(pre);
+            }
+          }
+        }
+      }
+      return {main: mainArray.length, late: lateArray, require: prerequisiteArray.length, waitsFor: modules};
     }
   };
 })();

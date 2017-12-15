@@ -1,4 +1,4 @@
-EASY.extend = function (deep, target, source) {
+EasyGem.extend = function (deep, target, source) {
   var copyIsArray;
   if (typeof deep !== "boolean") {
     source = target;
@@ -37,3 +37,4 @@ EASY.extend = function (deep, target, source) {
   }
   return target;
 };
+EASY.extend = EasyGem.extend;
