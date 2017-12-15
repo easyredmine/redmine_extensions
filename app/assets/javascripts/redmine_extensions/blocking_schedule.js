@@ -19,7 +19,7 @@
       return window.jQuery;
     },
     jqueryui: function () {
-      return window.jQuery && $.fn.Widget;
+      return window.jQuery && $.Widget;
     }
   };
   var moduleInstances = {};
