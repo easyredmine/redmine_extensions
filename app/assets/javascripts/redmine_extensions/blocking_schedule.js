@@ -19,7 +19,13 @@
       return window.jQuery;
     },
     jqueryui: function () {
-      return window.jQuery && $.Widget;
+      return window.jQuery && jQuery.Widget;
+    },
+    c3:function () {
+      return window.c3;
+    },
+    ckeditor:function () {
+      return window.CKEDITOR;
     }
   };
   var moduleInstances = {};
