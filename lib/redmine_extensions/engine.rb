@@ -1,6 +1,6 @@
 require 'active_support/dependencies'
 require_relative './patch_manager'
-require_relative './redmine_patches/patches'
+require_relative './redmine_patches/controllers/application_controller_patch'
 
 require_relative './query_output'
 

@@ -1,4 +1,4 @@
-require 'query'
+require_dependency 'query'
 
 module RedmineExtensions
   module QueryColumnAdapter
