@@ -1,20 +1,35 @@
 (function () {
   "use strict";
   /**
-   * @typedef {Function} SchedulePrerequisite
+   * @callback SchedulePrerequisite
    * @return {boolean}
    */
   /**
-   * @typedef {{func:Function,[priority]:number,[pre]:SchedulePrerequisite}} ScheduleTask
+   * @typedef {{func:Function,[priority]:number,[pre]:SchedulePrerequisite,[pres]:Array.<SchedulePrerequisite>}} ScheduleTask
    */
-  var lateMaxDelay = 3;
-  var lateDelay = lateMaxDelay;
+  // noinspection JSMismatchedCollectionQueryUpdate
   /** @type {Array.<ScheduleTask>} */
   var mainArray = [];
   /** @type {Array.<ScheduleTask>} */
   var lateArray = [];
-  /** @type {Array.<ScheduleTask|null>} */
+  /** @type {Array.<?ScheduleTask>} */
   var prerequisiteArray = [];
+  var moduleGetters = {
+    jquery: function () {
+      return window.jQuery;
+    },
+    jqueryui: function () {
+      return window.jQuery && jQuery.Widget;
+    },
+    c3:function () {
+      return window.c3;
+    },
+    ckeditor:function () {
+      return window.CKEDITOR;
+    }
+  };
+  var moduleInstances = {};
+  var writeOut = false;
 
   /** @param {ScheduleTask} a
    * @param {ScheduleTask} b
@@ -28,39 +43,35 @@
     if (mainArray.length > 0) {
       count1 = mainArray.length;
       mainArray.sort(sortFunction);
-      for (var i = 0; i < mainArray.length; i++) {
-        mainArray[i].func();
-      }
+      var queue = mainArray;
       mainArray = [];
-      lateDelay = lateMaxDelay;
+      for (var i = 0; i < queue.length; i++) {
+        queue[i].func();
+      }
     }
     var count2 = executePrerequisites();
     var count3 = 0;
-    if (lateArray.length) {
-      if (lateDelay === 0) {
-        lateArray.sort(sortFunction);
-        // console.log(lateArray.map(function (p1) {
-        //   return p1.priority
-        // }));
-        var limitPriority = lateArray[0].priority - 5;
-        for (i = 0; i < lateArray.length; i++) {
-          if (lateArray[i].priority <= limitPriority) break;
-          lateArray[i].func.call(window);
-        }
-        if (i === lateArray.length) {
-          count3 = lateArray.length;
-          lateArray = [];
-          lateDelay = lateMaxDelay;
-        } else {
-          lateArray = lateArray.slice(i);
-          count3 = i;
-        }
+    if (lateArray.length && count1 === 0 && count2 === 0) {
+      lateArray.sort(sortFunction);
+      var limitPriority = lateArray[0].priority - 5;
+      for (i = 0; i < lateArray.length; i++) {
+        if (lateArray[i].priority <= limitPriority) break;
+      }
+      count3 = i;
+      if (i === lateArray.length) {
+        queue = lateArray;
+        lateArray = [];
       } else {
-        lateDelay--;
+        queue = lateArray.slice(0, i);
+        lateArray = lateArray.slice(i);
+      }
+      for (i = 0; i < queue.length; i++) {
+        if (queue[i].priority <= limitPriority) break;
+        queue[i].func.call(window);
       }
     }
-    if (EASY.schedule.out && (count1 || count2 || count3)) {
-      console.log("EE: " + count1 + " REQ: " + count2 + " LATE: " + count3);
+    if (writeOut && (count1 || count2 || count3)) {
+      console.log("MAIN: " + count1 + " REQ: " + count2 + " LATE: " + count3);
     }
   };
   var isNotNull = function (a) {
@@ -71,9 +82,8 @@
     if (prerequisiteArray.length === 0) return 0;
     var count = 0;
     for (var i = 0; i < prerequisiteArray.length; i++) {
-      if (prerequisiteArray[i].pre()) {
+      if(executeOnePrerequisite(prerequisiteArray[i])) {
         count++;
-        prerequisiteArray[i].func.call(window);
         prerequisiteArray[i] = null;
       }
     }
@@ -83,19 +93,60 @@
     }
     return count;
   };
+  var executeOnePrerequisite = function (pack) {
+    var getter, getters, instance, instances;
+    if (getter = pack.pre) {
+      instance = preparePrerequisite(getter);
+      if (instance) {
+        pack.func.call(window, instance);
+        return true;
+      }
+      return false;
+    } else if (getters = pack.pres) {
+      instances = [];
+      for (var j = 0; j < getters.length; j++) {
+        getter = getters[j];
+        instance = preparePrerequisite(getter);
+        if (!instance) break;
+        instances.push(instance);
+      }
+      if (instances.length !== getters.length) return false;
+      pack.func.apply(window, instances);
+      return true;
+    }
+  };
+  /**
+   * @param {(Function|string)} getter
+   * @return {(Object|null)}
+   */
+  var preparePrerequisite = function (getter) {
+    var instance;
+    if (typeof getter === "string") {
+      if (moduleInstances[getter]) {
+        return moduleInstances[getter];
+      } else if (moduleGetters[getter]) {
+        instance = moduleGetters[getter]();
+        if (instance) {
+          moduleInstances[getter] = instance;
+        }
+        return instance;
+      }
+      return null;
+    } else {
+      return getter();
+    }
+  };
 
   var cycle = function scheduleCycle() {
+    setTimeout(cycle, 30);
     tick();
-    window.requestAnimationFrame(cycle);
   };
   document.addEventListener("DOMContentLoaded", cycle);
-  window.EASY = window.EASY || {};
   /**
    *
-   * @type {{out: boolean, late: EASY.schedule.late, require: EASY.schedule.require, main: EASY.schedule.main}}
+   * @type {{out: boolean, late: EASY.schedule.late, require: EASY.schedule.require, main: EASY.schedule.main, define: EASY.schedule.define}}
    */
-  EASY.schedule = {
-    out: false,
+  EasyGem.schedule = {
     /**
      * Functions, which should be executed right after "DOMContentLoaded" event
      * @param {Function} func
@@ -105,20 +156,83 @@
       mainArray.push({func: func, priority: priority || 0})
     },
     /**
-     * Functions, which should wait for prerequisite fulfillment
+     * Functions, which should wait for [prerequisite] fulfillment
+     * After that [func] is executed with return value of [prerequisite] as parameter
      * @param {Function} func
-     * @param {SchedulePrerequisite} prerequisite
+     * @param {...(SchedulePrerequisite|string)} prerequisite
      */
     require: function (func, prerequisite) {
-      prerequisiteArray.push({func: func, pre: prerequisite})
+      if (arguments.length > 2) {
+        var pres = [];
+        for (var i = 1; i < arguments.length; i++) {
+          if (typeof arguments[i] === "string") {
+            pres.push(arguments[i].toLocaleLowerCase());
+          } else {
+            pres.push(arguments[i]);
+          }
+        }
+        var pack = {func: func, pres: pres};
+        if (!executeOnePrerequisite(pack)) {
+          prerequisiteArray.push(pack);
+        }
+      } else {
+        if (typeof prerequisite === "string") {
+          prerequisite = prerequisite.toLocaleLowerCase();
+        }
+        pack = {func: func, pre: prerequisite};
+        if (!executeOnePrerequisite(pack)) {
+          prerequisiteArray.push(pack);
+        }
+      }
     },
     /**
      * Functions, which should be executed after several render loops after "DOMContentLoaded" event
+     * each 5 levels of priority increase delay by one stack
      * @param {Function} func
      * @param {number} [priority]
      */
     late: function (func, priority) {
       lateArray.push({func: func, priority: priority || 0})
+    },
+    /**
+     * Define module, which will be loaded by [require] function with [name] argument
+     * Only one instance will be created
+     * @param {string} name
+     * @param {Function} getter
+     */
+    define: function (name, getter) {
+      moduleGetters[name.toLocaleLowerCase()] = getter;
+    }
+  };
+  EASY.schedule = EasyGem.schedule;
+  EasyGem.test.schedule = {
+    setOut: function (state) {
+      writeOut = state;
+    },
+    isLoaded: function () {
+      if (mainArray.length > 0) return false;
+      if (prerequisiteArray.length > 0) return false;
+      return lateArray.length <= 0;
+    },
+    lateIsLoaded: function () {
+      return lateArray.length <= 0;
+    },
+    queueContents: function () {
+      var modules = [];
+      for (var i = 0; i < prerequisiteArray.length; i++) {
+        var prerequisite = prerequisiteArray[i];
+        if (typeof prerequisite.pre === "string") {
+          modules.push(prerequisite.pre);
+        } else if (prerequisite.pres) {
+          for (var j = 0; j < prerequisite.pres.length; j++) {
+            var pre = prerequisite.pres[j];
+            if (typeof pre === "string") {
+              modules.push(pre);
+            }
+          }
+        }
+      }
+      return {main: mainArray.length, late: lateArray, require: prerequisiteArray.length, waitsFor: modules};
     }
   };
 })();

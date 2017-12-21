@@ -1,29 +1,40 @@
 module RedmineExtensions
   class Hooks < Redmine::Hook::ViewListener
-    @visited = false
-    def easy_extensions_blocking_javascripts_hook(context={})
-      if defined?(EasyExtensions)
-        @visited = true
-        context[:template].require_asset('redmine_extensions/blocking')
-      end
-    end
 
-    def easy_extensions_javascripts_hook(context={})
-      if defined?(EasyExtensions)
-        context[:template].require_asset('redmine_extensions/blocking') unless @visited
-        context[:template].require_asset('redmine_extensions/application')
-        # context[:hook_caller].javascript_include_tag('redmine_extensions/application')
-      end
-    end
+    if defined?(EasyExtensions)
+      if EasyExtensions.try(:deferred_js)
 
-    def view_layouts_base_html_head(context={})
-      unless defined?(EasyExtensions)
-        javascript_include_tag('redmine_extensions/blocking_polyfill') +
-        javascript_include_tag('redmine_extensions/blocking_schedule') +
-        javascript_include_tag('redmine_extensions/blocking_module') +
-        javascript_include_tag('redmine_extensions/jquery.entityarray') +
-        javascript_include_tag('redmine_extensions/redmine_extensions') +
-        javascript_include_tag('redmine_extensions/easy_togglers')
+        ### DEFERRED JAVASCRIPTS ###
+        def easy_extensions_blocking_javascripts_hook(context = {})
+          context[:template].require_asset('redmine_extensions/blocking')
+        end
+
+        def easy_extensions_javascripts_hook(context = {})
+          context[:template].require_asset('redmine_extensions/application')
+        end
+      else
+        ### JAVASCRIPTS IN HEADER ###
+        def easy_extensions_javascripts_hook(context = {})
+          context[:template].require_asset('redmine_extensions/blocking')
+          context[:template].require_asset('redmine_extensions/application')
+        end
+      end
+    else
+      ### JAVASCRIPTS IN REDMINE ###
+      def view_layouts_base_html_head(context = {})
+        ## BLOCKING ##
+        javascript_include_tag('redmine_extensions/blocking_namespace') +
+          javascript_include_tag('redmine_extensions/blocking_schedule') +
+          javascript_include_tag('redmine_extensions/blocking_polyfill') +
+          javascript_include_tag('redmine_extensions/blocking_render') +
+          javascript_include_tag('redmine_extensions/blocking_utils') +
+
+          ## DEFERRED ##
+          javascript_include_tag('redmine_extensions/easy_togglers') +
+          javascript_include_tag('redmine_extensions/jquery.entityarray') +
+          javascript_include_tag('redmine_extensions/render_polyfill') +
+          javascript_include_tag('redmine_extensions/dynamic_loading') +
+          javascript_include_tag('redmine_extensions/redmine_extensions')
       end
     end
   end
