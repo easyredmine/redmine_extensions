@@ -1,6 +1,6 @@
 require 'active_support/dependencies'
 require_relative './patch_manager'
-require_relative './redmine_patches/patches'
+require_relative './redmine_patches/controllers/application_controller_patch'
 
 require_relative './query_output'
 
@@ -70,9 +70,6 @@ module RedmineExtensions
       unless Redmine::Plugin.installed?(:easy_extensions)
         ActiveSupport.run_load_hooks(:easyproject, self)
       end
-
-      require_relative './easy_query_adapter'
-      require_relative './easy_entity_formatters/easy_entity_formatter'
     end
 
     # initializer :add_html_formatting do |app|
