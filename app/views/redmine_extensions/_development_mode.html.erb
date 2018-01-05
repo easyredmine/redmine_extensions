@@ -1,0 +1,33 @@
+<% if RedmineExtensions::PatchManager.reloadable_patches_applied > 1 %>
+  <div class="patches-applied">
+    <i class="icon icon-reload"></i> Patches applied (<%= RedmineExtensions::PatchManager.reloadable_patches_applied %>x)
+  </div>
+
+  <style>
+    .patches-applied {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      padding: 2px 10px;
+      background: #f44336;
+      border-top: 1px solid #b71c1c;
+      border-right: 1px solid #b71c1c;
+      animation: patches-applied-pulse 2s 5;
+      color: #fff;
+      z-index: 9999999;
+    }
+
+    @keyframes patches-applied-pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(229, 115, 115, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 20px rgba(229, 115, 115, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(229, 115, 115, 0);
+      }
+    }
+  </style>
+<% end %>
+

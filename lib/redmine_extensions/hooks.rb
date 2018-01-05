@@ -1,6 +1,10 @@
 module RedmineExtensions
   class Hooks < Redmine::Hook::ViewListener
 
+    if Rails.env.development?
+      render_on :view_layouts_base_body_bottom, partial: 'redmine_extensions/development_mode'
+    end
+
     if defined?(EasyExtensions)
       if EasyExtensions.try(:deferred_js)
 
@@ -37,5 +41,6 @@ module RedmineExtensions
           javascript_include_tag('redmine_extensions/redmine_extensions')
       end
     end
+
   end
 end
