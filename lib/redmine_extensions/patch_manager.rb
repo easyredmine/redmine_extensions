@@ -4,6 +4,11 @@ module RedmineExtensions
 
     PERSISTING_PATCHES = [:force_first, :ruby, :rails, :redmine_plugins, :others]
 
+    @@patches_locations = {}
+
+    @@reloading_code = false
+    @@reloadable_patches_applied = 0
+
     # is called after EasyPatchesSection load
     def self.initialize_sections
       @@registered_patches ||= ActiveSupport::OrderedHash.new
@@ -18,6 +23,20 @@ module RedmineExtensions
       @@registered_patches[:models] ||= EasyPatchesSection.new
     end
 
+    def self.patches_locations
+      @@patches_locations
+    end
+
+    def self.with_reloading_code
+      @@reloading_code = true
+      yield
+    ensure
+      @@reloading_code = false
+    end
+
+    def self.reloadable_patches_applied
+      @@reloadable_patches_applied
+    end
 
     # register_patch
     # => original_klass_to_patch: 'Project', 'CustomField'
@@ -29,7 +48,18 @@ module RedmineExtensions
     # =>          :last
     # =>          :if => Proc.new{ Object.const_defined?(:EasyBudgetSheetQuery) }
     def self.register_patch(original_klasses_to_patch, patching_module, options={})
+      return if @@reloading_code
+
       options ||= {}
+
+      begin
+        const = patching_module.constantize
+        @@patches_locations[patching_module] = const.methods(false).map{|m| const.method(m) }.first.source_location.first
+      rescue
+        # [0] is register_*_patch
+        from_location = caller_locations[1]
+        @@patches_locations[patching_module] = from_location.absolute_path
+      end
 
       raise ArgumentError, 'EasyPatchManager->register_patch: The \'patching_module\' have to be a string!' unless patching_module.is_a?(String)
 
@@ -136,14 +166,21 @@ module RedmineExtensions
 
     def self.apply_reloadable_patches
       (@@registered_patches.keys - PERSISTING_PATCHES).each do |section|
-        # pp "applying #{@@registered_patches[section].count} patches for section '#{section}'"
+        reloading_log "Applying #{section} patches (#{@@registered_patches[section].count})"
         @@registered_patches[section].apply_all_patches
       end
 
+      reloading_log("Applying page module patches")
       apply_easy_page_patches
+
+      @@reloadable_patches_applied += 1
       true
     end
 
+    def self.reloading_log(message)
+      return if @@reloadable_patches_applied <= 1
+      puts "PatchManager: #{message}"
+    end
 
     class EasyPatchesSection
       include Enumerable
@@ -349,13 +386,29 @@ module RedmineExtensions
           return unless cond.call
         end
 
-        pm_klass = patching_module.constantize
-        oktp_klass = original_klass_to_patch.constantize
+        pm_klass = easy_constantize(patching_module)
+        # pm_klass.class_eval { unloadable }
+
+        oktp_klass = easy_constantize(original_klass_to_patch)
 
         if @options[:prepend]
           oktp_klass.prepend pm_klass # unless oktp_klass.include?(pm_klass)
         else
           oktp_klass.include pm_klass # unless oktp_klass.include?(pm_klass)
+        end
+      end
+
+      def easy_constantize(name)
+        const = name.constantize
+      rescue NameError
+        if RedmineExtensions::PatchManager.patches_locations.has_key?(name)
+          RedmineExtensions::PatchManager.with_reloading_code do
+            load RedmineExtensions::PatchManager.patches_locations[patching_module]
+          end
+
+          name.constantize
+        else
+          raise
         end
       end
 
