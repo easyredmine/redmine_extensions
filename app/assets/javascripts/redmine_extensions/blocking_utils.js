@@ -16,19 +16,18 @@ EasyGem.extend = function (deep, target, source) {
 
     // Prevent never-ending loop
     if (trg === src) continue;
-    if (deep && src && (typeof src === "object" ||
-            (copyIsArray = Array.isArray(src)))) {
-
+    if (deep && src && typeof src === "object") {
+      copyIsArray = Array.isArray(src);
       if (copyIsArray) {
         copyIsArray = false;
         var clone = trg && Array.isArray(trg) ? trg : [];
 
       } else {
-        clone = trg && (typeof src === "object") ? trg : {};
+        clone = trg && (typeof trg === "object") ? trg : {};
       }
 
       // Never move original objects, clone them
-      target[name] = EASY.extend(deep, trg, src);
+      target[name] = EasyGem.extend(deep, clone, src);
 
       // Don't bring in undefined values
     } else if (src !== undefined) {
