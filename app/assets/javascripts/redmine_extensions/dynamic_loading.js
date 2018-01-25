@@ -1,6 +1,13 @@
 EasyGem.dynamic = {
   /**
    * Append Javascript <script> tag to page
+   * @example
+   * EasyGem.dynamic.jsTag("/plugin_assets/my_plugin/javascripts/counter.js");
+   * EasyGem.schedule.require(function(counter){
+   *   setInterval(counter.count(), 1000);
+   * }, function(){
+   *   return window.utils.counter;
+   * })
    * @param {String} src - absolute path to requested file
    */
   jsTag: function (src) {
