@@ -15,6 +15,14 @@
   var renderPhase = false;
   var lastTime = 0.0;
   /**
+   * Wrapper for safe execution of [body] function only in read phase to prevent force-redraws.
+   * @example
+   * // fill storage with values from DOM
+   * var storage = {};
+   * EasyGem.read(function(){
+   *   this.offset = $element.offset();
+   *   this.scrollTop = $(window).scrollTop();
+   * }, storage);
    * @param {RenderFunction} body
    * @param {Object} [context]
    */
@@ -26,7 +34,13 @@
     }
   };
   /**
-   * @param {RenderFunction} body
+   * Wrapper for safe execution of [body] function only in render phase to prevent force-redraws.
+   * @example
+   * var left = $element.css("left");
+   * EasyGem.render(function(){
+   *   $element.css({left: (left + 5) + "px"});
+   * });
+   * @param {RenderFunction} body - obtain execution time as first parameter
    * @param {Object} [context]
    */
   EasyGem.render = function (body, context) {
@@ -37,8 +51,19 @@
     }
   };
   /**
+   * Complex and most-safe wrapper for DOM-manipulation code
+   * Execute [read] and [render] function only in proper phases.
+   * @example
+   * // prevents layout thrashing
+   * $table.find("td.first_column").each(function() {
+   *   EasyGem.readAndRender(function() {
+   *     return this.width();
+   *   }, function(width, time) {
+   *     this.next().width(width);
+   *   }, $(this));
+   * });
    * @param {RenderFunction} read
-   * @param {RenderFunction} render
+   * @param {RenderFunction} render - function(readResult, time) callback
    * @param {Object} [context]
    */
   EasyGem.readAndRender = function (read, render, context) {
@@ -75,7 +100,7 @@
         renderQueue = [];
         for (var i = 0; i < queue.length; i++) {
           var pack = queue[i];
-          pack.body.call(pack.ctx, time, pack.value);
+          pack.body.call(pack.ctx, pack.value, time);
         }
         renderQueue = [];
       }

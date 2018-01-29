@@ -1,10 +1,25 @@
 EasyGem.dynamic = {
+  /**
+   * Append Javascript <script> tag to page
+   * @example
+   * EasyGem.dynamic.jsTag("/plugin_assets/my_plugin/javascripts/counter.js");
+   * EasyGem.schedule.require(function(counter){
+   *   setInterval(counter.count(), 1000);
+   * }, function(){
+   *   return window.utils.counter;
+   * })
+   * @param {String} src - absolute path to requested file
+   */
   jsTag: function (src) {
     var jsScript = document.createElement("script");
     jsScript.setAttribute("src", src);
     jsScript.setAttribute("defer", "true");
     document.head.appendChild(jsScript);
   },
+  /**
+   * Append CSS <link> tag to page
+   * @param {String} src - absolute path to requested file
+   */
   cssTag: function (src) {
     var link = document.createElement('link');
     link.rel = "stylesheet";
@@ -13,14 +28,22 @@ EasyGem.dynamic = {
     link.media = "all";
     document.head.appendChild(link);
   },
-  jsTags: function (array, plugin) {
+  /**
+   * Load multiple JS files into page
+   * @param {Array.<String>} array
+   */
+  jsTags: function (array) {
     for (var i = 0; i < array.length; i++) {
-      this.jsTag(array[i], plugin);
+      this.jsTag(array[i]);
     }
   },
-  cssTags: function (array, plugin) {
+  /**
+   * Load multiple CSS files into page
+   * @param {Array.<String>} array
+   */
+  cssTags: function (array) {
     for (var i = 0; i < array.length; i++) {
-      this.cssTag(array[i], plugin);
+      this.cssTag(array[i]);
     }
   }
 };

@@ -1,3 +1,10 @@
+/**
+ * Duplication of $.extend(), so whole jQuery dont have to be loaded
+ * @param {boolean|Object} deep
+ * @param {Object} target
+ * @param {Object} [source]
+ * @return {Object}
+ */
 EasyGem.extend = function (deep, target, source) {
   var copyIsArray;
   if (typeof deep !== "boolean") {

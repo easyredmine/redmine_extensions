@@ -14,6 +14,10 @@
   var lateArray = [];
   /** @type {Array.<?ScheduleTask>} */
   var prerequisiteArray = [];
+  /**
+   * Predefined getters for [require] function. Just specify the name of the module
+   * @type {{jquery: jquery, jqueryui: jqueryui, c3: c3, ckeditor: ckeditor}}
+   */
   var moduleGetters = {
     jquery: function () {
       return window.jQuery;
@@ -21,10 +25,10 @@
     jqueryui: function () {
       return window.jQuery && jQuery.Widget;
     },
-    c3:function () {
+    c3: function () {
       return window.c3;
     },
-    ckeditor:function () {
+    ckeditor: function () {
       return window.CKEDITOR;
     }
   };
@@ -82,7 +86,7 @@
     if (prerequisiteArray.length === 0) return 0;
     var count = 0;
     for (var i = 0; i < prerequisiteArray.length; i++) {
-      if(executeOnePrerequisite(prerequisiteArray[i])) {
+      if (executeOnePrerequisite(prerequisiteArray[i])) {
         count++;
         prerequisiteArray[i] = null;
       }
@@ -148,9 +152,10 @@
    */
   EasyGem.schedule = {
     /**
-     * Functions, which should be executed right after "DOMContentLoaded" event
+     * Functions, which should be executed right after "DOMContentLoaded" event.
      * @param {Function} func
-     * @param {number} [priority]
+     * @param {number} [priority=0] - Greater the priority, sooner [func] are called. Each 5 priority delays execution
+     *                              by 30ms. Also negative values are accepted.
      */
     main: function (func, priority) {
       mainArray.push({func: func, priority: priority || 0})
@@ -158,8 +163,19 @@
     /**
      * Functions, which should wait for [prerequisite] fulfillment
      * After that [func] is executed with return value of [prerequisite] as parameter
-     * @param {Function} func
-     * @param {...(SchedulePrerequisite|string)} prerequisite
+     * @example
+     * // execute function after jQuery and window.logger are present
+     * EasyGem.schedule.require(function($,logger){
+     *   logger.log($.fn.jquery);
+     * },'jQuery',function(){
+     *   return window.logger;
+     * });
+     * @param {Function} func - function which will be called when all prerequisites are met. Results of prerequisites
+     *                          are send into [func] as parameters
+     * @param {...(SchedulePrerequisite|string)} prerequisite - more than one prerequisite can be specified here
+     *                                           as rest parameters. Function or String are accepted. If String is used,
+     *                                           predefined getter from [moduleGetters] or getter defined by [define]
+     *                                           are called.
      */
     require: function (func, prerequisite) {
       if (arguments.length > 2) {
@@ -186,19 +202,27 @@
       }
     },
     /**
-     * Functions, which should be executed after several render loops after "DOMContentLoaded" event
-     * each 5 levels of priority increase delay by one stack
+     * Functions, which should be executed after several loops after "DOMContentLoaded" event.
+     * Each 5 levels of priority increase delay by one stack.
      * @param {Function} func
-     * @param {number} [priority]
+     * @param {number} [priority=0]
      */
     late: function (func, priority) {
       lateArray.push({func: func, priority: priority || 0})
     },
     /**
-     * Define module, which will be loaded by [require] function with [name] argument
-     * Only one instance will be created
+     * Define module, which will be loaded by [require] function with [name] prerequisite
+     * Only one instance will be created and cached also for future use.
+     * If no one request the module, getter is never called.
+     * @example
+     * EasyGem.schedule.define('Counter', function () {
+     *   var count = 0;
+     *   return function () {
+     *     console.log("Count: " + count++);
+     *   }
+     * });
      * @param {string} name
-     * @param {Function} getter
+     * @param {Function} getter - getter or constructor
      */
     define: function (name, getter) {
       moduleGetters[name.toLocaleLowerCase()] = getter;
