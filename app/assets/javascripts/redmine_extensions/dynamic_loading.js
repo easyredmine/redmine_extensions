@@ -1,4 +1,5 @@
 EasyGem.dynamic = {
+  _alreadyLoaded: {},
   /**
    * Append Javascript <script> tag to page
    * @example
@@ -11,6 +12,8 @@ EasyGem.dynamic = {
    * @param {String} src - absolute path to requested file
    */
   jsTag: function (src) {
+    if (this._alreadyLoaded[src]) return;
+    this._alreadyLoaded[src] = true;
     var jsScript = document.createElement("script");
     jsScript.setAttribute("src", src);
     jsScript.setAttribute("defer", "true");
@@ -21,6 +24,8 @@ EasyGem.dynamic = {
    * @param {String} src - absolute path to requested file
    */
   cssTag: function (src) {
+    if (this._alreadyLoaded[src]) return;
+    this._alreadyLoaded[src] = true;
     var link = document.createElement('link');
     link.rel = "stylesheet";
     link.type = "text/css";

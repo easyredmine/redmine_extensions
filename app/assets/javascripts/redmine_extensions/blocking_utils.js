@@ -12,7 +12,7 @@ EasyGem.extend = function (deep, target, source) {
     target = deep;
     deep = false;
   }
-  if (!source) return;
+  if (source === undefined) return target;
   if (typeof target !== "object") {
     target = {};
   }
