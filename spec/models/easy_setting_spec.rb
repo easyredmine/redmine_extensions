@@ -18,7 +18,7 @@ RSpec.describe EasySetting, type: :model do
 
   it 'destroys settings when the project is destroyed' do
     easy_setting
-    expect( easy_setting.project.destroy ).to change(EasySetting, :count).by(-1)
+    expect{ easy_setting.project.destroy }.to change(EasySetting, :count).by(-1)
   end
 
   it 'updates cache when changed' do
