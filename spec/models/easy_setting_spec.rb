@@ -16,6 +16,11 @@ RSpec.describe EasySetting, type: :model do
     expect( easy_setting ).to be_persisted
   end
 
+  it 'destroys settings when the project is destroyed' do
+    easy_setting
+    expect( easy_setting.project.destroy ).to change(EasySetting, :count).by(-1)
+  end
+
   it 'updates cache when changed' do
     new_value = 'my_new_value'
     easy_setting_global.value = new_value
