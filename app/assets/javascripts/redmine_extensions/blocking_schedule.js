@@ -182,7 +182,7 @@
         var pres = [];
         for (var i = 1; i < arguments.length; i++) {
           if (typeof arguments[i] === "string") {
-            pres.push(arguments[i].toLocaleLowerCase());
+            pres.push(arguments[i].toLowerCase());
           } else {
             pres.push(arguments[i]);
           }
@@ -193,7 +193,7 @@
         }
       } else {
         if (typeof prerequisite === "string") {
-          prerequisite = prerequisite.toLocaleLowerCase();
+          prerequisite = prerequisite.toLowerCase();
         }
         pack = {func: func, pre: prerequisite};
         if (!executeOnePrerequisite(pack)) {
@@ -225,7 +225,7 @@
      * @param {Function} getter - getter or constructor
      */
     define: function (name, getter) {
-      moduleGetters[name.toLocaleLowerCase()] = getter;
+      moduleGetters[name.toLowerCase()] = getter;
     }
   };
   EASY.schedule = EasyGem.schedule;
