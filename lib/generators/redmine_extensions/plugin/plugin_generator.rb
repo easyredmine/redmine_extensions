@@ -2,18 +2,19 @@ module RedmineExtensions
   class PluginGenerator < Rails::Generators::NamedBase
     source_root File.expand_path('../templates', __FILE__)
 
-    attr_reader :plugin_path, :plugin_name_underscored, :plugin_pretty_name, :plugin_title
+    attr_reader :plugin_path, :plugin_name_underscored, :plugin_pretty_name, :plugin_title, :easy
 
     class_option :customer, type: :boolean, default: false, banner: '', :desc => 'plugin will act as customer modification. It is useful for changing few things and be uptodate with the core.'
     class_option :path, type: :string, default: nil, banner: '', :desc => 'relative path to parent directory for plugin.'
+    class_option :easy, type: :boolean, default: false, banner: '', :desc => 'generate easy plugin'
 
     def initialize(*args)
       super
-
+      @easy = options[:easy]
       @plugin_name_underscored = options[:customer] ? "modification_#{file_name.underscore}" : file_name.underscore
       @plugin_pretty_name = plugin_name_underscored.titleize
 
-      @plugin_path = (options[:path] || "plugins") + "/#{plugin_name_underscored}"
+      @plugin_path = (options[:path] || easy ? "plugins/easyproject/easy_plugins" : "plugins") + "/#{plugin_name_underscored}"
       @plugin_title = @plugin_name_underscored.camelize
     end
 
@@ -45,7 +46,7 @@ module RedmineExtensions
       template 'gitkeep.erb', "#{plugin_path}/lib/#{plugin_name_underscored}/easy_patch/redmine/others/.gitkeep"
 
       template 'after_init.rb.erb', "#{plugin_path}/after_init.rb"
-      template 'Gemfile.erb', "#{plugin_path}/Gemfile"
+      template 'Gemfile.erb', "#{plugin_path}/Gemfile" unless easy
       template 'init.rb.erb', "#{plugin_path}/init.rb"
       template 'javascript.js', "#{plugin_path}/assets/javascripts/#{plugin_name_underscored}.js"
       template 'stylesheet.css', "#{plugin_path}/assets/stylesheets/#{plugin_name_underscored}.css"
