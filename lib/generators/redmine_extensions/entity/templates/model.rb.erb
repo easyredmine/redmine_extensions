@@ -45,13 +45,11 @@ class <%= model_name %> < ActiveRecord::Base
   <%= values[:type] %> :<%= assoc_name %><%= options %>
   <%- end -%>
   <%- end -%>
-
-  <%- if safe_columns.any? -%>
-  safe_attributes <%= safe_columns.collect{|column_name, _| "'#{column_name}'"}.join(', ') %>
-  <%- end -%>
-  <%- if acts_as_customizable? -%>
-  safe_attributes 'custom_field_values', 'custom_fields'
-  <%- end -%>
+  <% attributes = [] %>
+  <% attributes += safe_columns.keys if safe_columns.any? %>
+  <% attributes += ['custom_field_values', 'custom_fields'] if acts_as_customizable? %>
+  <% attributes += associations.keys.map{ |assoc| "#{assoc}_id" } %>
+  safe_attributes *%w(<%= attributes.join(' ') %>)
   <%- if project? -%>
   safe_attributes 'project_id', if: ->(<%= model_name_underscored %>, _user) { <%= model_name_underscored %>.new_record? }
   <%- end -%>
