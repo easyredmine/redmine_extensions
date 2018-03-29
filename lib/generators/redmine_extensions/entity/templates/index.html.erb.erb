@@ -1,15 +1,15 @@
 <% if Redmine::Plugin.installed?(:easy_extensions) %>
 <%%= render @query %>
 <%% ### PAGE CUSTOMS ########################################################## %>
-<%%= context_menu context_menu_<%= model_name_pluralize_underscored %>_path(:project_id => @project) %>
+<%%= context_menu context_menu_<%= model_name_pluralize_underscored %>_path(project_id: @project) %>
 <%% content_for :sidebar do %>
-  <%%= render :partial => '<%= model_name_pluralize_underscored %>/sidebar' %>
-  <%%= render :partial => 'sidebar/saved_easyqueries_by_type', :locals => {:query_class => @query.class, :project => @project} %>
+  <%%= render partial: '<%= model_name_pluralize_underscored %>/sidebar' %>
+  <%%= render partial: 'sidebar/saved_easyqueries_by_type', locals: {query_class: @query.class, project: @project} %>
 <%% end %>
 <% else %>
 <div class="contextual">
-  <%% if User.current.allowed_to?(:add_<%= model_name_pluralize_underscored %>, @project, :global => true) %>
-    <%%= link_to l(:button_<%= model_name_underscored %>_new), new_<%= model_name_underscored %>_path, :class => 'icon icon-add' %>
+  <%% if User.current.allowed_to?(:add_<%= model_name_pluralize_underscored %>, @project, global: true) %>
+    <%%= link_to l(:button_<%= model_name_underscored %>_new), new_<%= model_name_underscored %>_path, class: 'icon icon-add' %>
   <%% end %>
 </div>
 <h2><%%= @query.queried_class.to_s %></h2>

@@ -2,7 +2,7 @@ class <%= model_name %> < ActiveRecord::Base
   include Redmine::SafeAttributes
 
   <%= 'belongs_to :project' if project? %>
-  <%= 'belongs_to :author, class_name: \'User\''  if author? %>
+  <%= 'belongs_to :author, class_name: \'User\'' if author? %>
 
   scope :visible, lambda { |*args|
     where(<%= model_name %>.visible_condition(args.shift || User.current, *args))<%= '.joins(:project)' if project? %>
@@ -11,7 +11,7 @@ class <%= model_name %> < ActiveRecord::Base
   scope :sorted, lambda { order("#{table_name}.<%= name_column %> ASC") }
   <% end %>
 
-  <% if acts_as_searchable? %>
+  <%- if acts_as_searchable? -%>
   acts_as_searchable columns: [<%= string_columns.collect{|c, _| "\"\#{#{model_name}.table_name}.#{c}\"" }.join(', ') %>],
                      date_column: :created_at
   <%- end -%>
@@ -45,10 +45,10 @@ class <%= model_name %> < ActiveRecord::Base
   <%= values[:type] %> :<%= assoc_name %><%= options %>
   <%- end -%>
   <%- end -%>
-  <% attributes = [] %>
-  <% attributes += safe_columns.keys if safe_columns.any? %>
-  <% attributes += ['custom_field_values', 'custom_fields'] if acts_as_customizable? %>
-  <% attributes += associations.keys.map{ |assoc| "#{assoc}_id" } %>
+  <%- attributes = [] -%>
+  <%- attributes += safe_columns.keys if safe_columns.any? -%>
+  <%- attributes += ['custom_field_values', 'custom_fields'] if acts_as_customizable? -%>
+  <%-attributes += associations.keys.map{ |assoc| "#{assoc}_id" } -%>
   safe_attributes *%w(<%= attributes.join(' ') %>)
   <%- if project? -%>
   safe_attributes 'project_id', if: ->(<%= model_name_underscored %>, _user) { <%= model_name_underscored %>.new_record? }
