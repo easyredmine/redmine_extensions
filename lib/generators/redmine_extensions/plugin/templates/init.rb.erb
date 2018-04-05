@@ -7,12 +7,12 @@ Redmine::Plugin.register :<%= plugin_name_underscored %> do
 
   #into easy_settings goes available setting as a symbol key, default value as a value
   settings easy_settings: {  }
-  <% if easy %>
+  <% if easy_plugin %>
   plugin_in_relative_subdirectory File.join('easyproject', 'easy_plugins')
   <% end %>
 end
 
-<% unless easy %>
+<% unless easy_plugin %>
 unless Redmine::Plugin.registered_plugins[:easy_extensions]
   require_relative 'after_init'
 end
