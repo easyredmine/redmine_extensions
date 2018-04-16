@@ -8,3 +8,4 @@
 //= require ./blocking_polyfill
 //= require ./blocking_render
 //= require ./blocking_utils
+//= require ./blocking_dynamic_loading
