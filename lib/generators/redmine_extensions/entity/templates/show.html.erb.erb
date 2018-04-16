@@ -22,7 +22,7 @@
     <%% end %>
     <%- if acts_as_customizable? -%>
       <hr />
-    <%%= render partial: 'custom_fields/rows', :locals => { :custom_field_values => @<%= model_name_underscored %>.visible_custom_field_values } %>
+    <%%= render partial: 'redmine_extensions/custom_field_rows', :locals => { :custom_field_values => @<%= model_name_underscored %>.visible_custom_field_values } %>
     <%- end -%>
     <%%= call_hook(:view_<%= model_name_pluralize_underscored %>_show_details_bottom, :<%= model_name_underscored %> => @<%= model_name_underscored %>) %>
   </table>
