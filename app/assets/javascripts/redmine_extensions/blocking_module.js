@@ -149,15 +149,4 @@
   };
   //####################################################################################################################
 
-  EASY.modules.toModule("jQuery", function () {
-    return window.jQuery;
-  });
-  EASY.modules.toModule("$", function () {
-    return window.jQuery;
-  });
-  EASY.modules.toModule("jQueryUI", function () {
-    if (window.jQuery && window.jQuery.widget) {
-      return window.jQuery;
-    }
-  });
 })();
