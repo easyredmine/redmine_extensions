@@ -1,0 +1,38 @@
+class <%= model_name %>Query < EasyQuery
+
+  self.queried_class = <%= model_name %>
+
+    def initialize_available_filters
+    <%- db_columns.each do |column_name, column_options| -%>
+    <%- if project? && column_name == 'project_id' -%>
+      if project.nil?
+        add_available_filter '<%= column_name %>', name: <%= model_name %>.human_attribute_name(:<%= column_name %>), type: :<%= column_options[:query_type] %>, values: all_projects_values
+      end
+    <%- else -%>
+      add_available_filter '<%= column_name %>', name: <%= model_name %>.human_attribute_name(:<%= column_name %>), type: :<%= column_options[:query_type] %>
+    <%- end -%>
+    <%- end -%>
+    <%- if acts_as_customizable? -%>
+      add_custom_fields_filters(<%= model_name %>CustomField)
+    <%- end -%>
+    end
+
+  def initialize_available_columns
+    return @available_columns if @available_columns
+    group = l("label_filter_group_#{self.class.name.underscore}")
+
+  <%- db_columns.each do |column_name, column_options| -%>
+    add_available_column '<%= column_options[:query_column_name] || column_name %>', caption: <%= model_name %>.human_attribute_name(:<%= column_name %>), title: <%= model_name %>.human_attribute_name(:<%= column_name %>), group: group
+  <%- end -%>
+  <%- if acts_as_customizable? -%>
+    @available_columns += <%= model_name %>CustomField.visible.collect { |cf| EasyQueryCustomFieldColumn.new(cf, :group => l(:label_filter_group_custom_fields)) }
+  <%- end -%>
+
+    @available_columns
+  end
+
+  def default_list_columns
+    super.presence || <%= db_columns.collect{|column_name, column_options| (column_options[:query_column_name] || column_name).to_s}[0..3].to_s %>.flat_map{|c| [c.to_s, c.to_sym]}
+  end
+
+end

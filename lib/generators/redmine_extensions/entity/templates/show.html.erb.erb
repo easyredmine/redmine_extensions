@@ -10,9 +10,19 @@
       <%% rows.right ::<%= model_name %>.human_attribute_name(:<%= column[0] %>), format_object(@<%= model_name_underscored %>.<%= column[0] %>) %>
 <%- end -%>
 <%- end -%>
+<% associations.each_with_index do |assoc, idx| %>
+<%- next if assoc[1][:type] == 'has_many' -%>
+<% association_name = assoc[0] %>
+<%- if idx % 2 == 0 -%>
+      <%% rows.left l(:label_<%= association_name %>), format_object(@<%= model_name_underscored %>.<%= association_name %>) %>
+<%- else -%>
+      <%% rows.right l(:label_<%= association_name %>), format_object(@<%= model_name_underscored %>.<%= association_name %>) %>
+<%- end -%>
+<%- end -%>
     <%% end %>
     <%- if acts_as_customizable? -%>
-    <%%= render_custom_fields_rows(@<%= model_name_underscored %>) %>
+      <hr />
+    <%%= render partial: 'redmine_extensions/custom_field_rows', :locals => { :custom_field_values => @<%= model_name_underscored %>.visible_custom_field_values } %>
     <%- end -%>
     <%%= call_hook(:view_<%= model_name_pluralize_underscored %>_show_details_bottom, :<%= model_name_underscored %> => @<%= model_name_underscored %>) %>
   </table>

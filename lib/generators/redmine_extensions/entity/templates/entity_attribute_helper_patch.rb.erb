@@ -1,0 +1,10 @@
+module <%= plugin_name.camelcase %>Patch
+  module EntityAttributeHelperPatch
+    def self.included(base)
+      base.class_eval do
+
+      end
+    end
+  end
+end
+EasyExtensions::PatchManager.register_helper_patch 'EntityAttributeHelper', '<%= plugin_name.camelcase %>Patch::EntityAttributeHelperPatch'
