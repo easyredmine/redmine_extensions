@@ -223,9 +223,19 @@
      * });
      * @param {string} name
      * @param {Function} getter - getter or constructor
+     * @param {...(SchedulePrerequisite|string)} [prerequisite] - more than one prerequisite can be specified here
+     *                                           as rest parameters. Function or String are accepted. If String is used,
+     *                                           predefined getter from [moduleGetters] or getter defined by [define]
+     *                                           are called.
      */
-    define: function (name, getter) {
-      moduleGetters[name.toLowerCase()] = getter;
+    define: function (name, getter, prerequisite) {
+      if (prerequisite) {
+        this.require.apply(this, [function () {
+          moduleGetters[name.toLowerCase()] = getter;
+        }].concat(Array.prototype.slice.call(arguments, 2)));
+      } else {
+        moduleGetters[name.toLowerCase()] = getter;
+      }
     }
   };
   EASY.schedule = EasyGem.schedule;
