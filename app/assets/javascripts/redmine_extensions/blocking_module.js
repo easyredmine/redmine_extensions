@@ -89,7 +89,7 @@
   function loadModule(moduleName) {
     var url = urls[moduleName];
     if (url) {
-      EasyGem.dynamic.jsTag(url);
+      EasyGem.dynamic.sourceTag(url);
     }
   }
 
