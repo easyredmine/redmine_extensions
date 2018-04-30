@@ -22,7 +22,6 @@
    */
   function EasyModule(moduleName) {
     this.name = moduleName;
-    // this.dependencies = [];
     setTimeout(function () {
       executeWaiters();
     }, 0);
@@ -40,7 +39,7 @@
       var instances = waiter.dependencies.map(function (moduleName) {
         return moduleInstances[moduleName];
       });
-      waiter.callback.apply(instance, instances);
+      instance = waiter.callback.apply(instance, instances) || instance;
     }
     moduleInstances[this.name] = instance;
   };
@@ -89,7 +88,7 @@
   function loadModule(moduleName) {
     var url = urls[moduleName];
     if (url) {
-      EasyGem.dynamic.sourceTag(url);
+      EasyGem.dynamic.jsTag(url);
     }
   }
 
@@ -209,7 +208,6 @@
   };
   EasyGem.module.transform("jQuery", "jQuery");
   EasyGem.module.transform("jQueryUI", "jQueryUI");
-  EasyGem.module.transform("CKEDITOR", "CKEDITOR");
 
 
 })();

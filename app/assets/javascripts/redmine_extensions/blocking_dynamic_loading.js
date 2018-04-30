@@ -36,18 +36,6 @@
       document.head.appendChild(link);
     },
     /**
-     * Append JS or CSS file, depends on suffix
-     * @param {String} src
-     */
-    sourceTag: function(src){
-      var end=src.substring(src.length-3);
-      if(end===".js"){
-        this.jsTag(src);
-      }else if(end === "css"){
-        this.cssTag(src);
-      }
-    },
-    /**
      * Load multiple JS files into page
      * @param {Array.<String>} array
      */
