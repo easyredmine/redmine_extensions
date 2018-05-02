@@ -118,15 +118,32 @@
 
   /**
    *
-   * @type {{urls: Object<String, String>, module: EasyGem.module.module, part: EasyGem.module.part, head: EasyGem.module.head, transform: EasyGem.module.transform, setUrl: EasyGem.module.setUrl}}
+   * @type {{urls: Object<String, String>, module: EasyGem.module.module, part: EasyGem.module.part, transform: EasyGem.module.transform, setUrl: EasyGem.module.setUrl}}
    */
   EasyGem.module = {
+    /**
+     * Object containing urls for modules. Filling the urls is recommended to do in <head>.
+     * Use [moduleName] as key and absolute path (with or without a hostname) as value
+     *   If url have to be specified later, use EasyGem.module.setUrl() instead.
+     * @type {Object<String, String>}
+     * @example
+     *   EasyGem.module.urls["myModule"] = "/assets/my_module.js"
+     */
     urls: urls,
     /**
-     * Define
+     * Define module in one separate file. Use this method as first line of the file
+     * Module can be downloaded on-demand by loadModules() if url is provided by setUrl() function.
+     * @example
+     *   EasyGem.module.module("myModule", ["jQuery", "c3"], function($, c3) {
+     *     return {
+     *       init: function(){
+     *         c3.init($("#graph"));
+     *       }
+     *     }
+     *   }
      * @param {String} moduleName
-     * @param {Array.<String>} prerequisites
-     * @param {Function} getter
+     * @param {Array.<String>} prerequisites - other modules needed for construction of module
+     * @param {Function} getter - factory function
      */
     module: function (moduleName, prerequisites, getter) {
       var module = moduleDefinitions[moduleName] = new EasyModule(moduleName);
@@ -134,7 +151,11 @@
       module.waiters = [new Waiter(prerequisites, getter)];
     },
     /**
-     *
+     * Define module part if module code is distributed into many separate files.
+     *   For dynamic loading by url, all files have to be combine by pipeline into one.
+     * Module is executed only if all [prerequisites] from all parts of the module is fulfilled, but only part's
+     *   [prerequisites] will be used as arguments for [getter].
+     * [prerequisites] argument can be omitted if no prerequisites are required
      * @param {String} moduleName
      * @param {Array.<String>|Function} prerequisites
      * @param {Function} [getter]
@@ -145,7 +166,11 @@
         prerequisites = [];
       }
       var module = moduleDefinitions[moduleName];
-      if (!module) throw "Missing module head " + moduleName;
+      if (!module){
+        module = moduleDefinitions[moduleName] = new EasyModule(moduleName);
+        module.waiters = [];
+        module.dependencies = [];
+      }
       module.waiters.push(new Waiter(prerequisites, getter));
       for (var i = 0; i < prerequisites.length; i++) {
         var prerequisite = prerequisites[i];
@@ -155,29 +180,29 @@
       }
     },
     /**
-     *
+     * Transform simple EasyGem.schedule.require [prerequisite] into proper module.
+     * Use it sparingly if module have to be defined for usage in other modules as prerequisite.
+     * If named getter is saved by EasyGem.schedule.define, the name can also be used.
      * @param {String} moduleName
+     * @param {String|Function} prerequisite - getter function
+     * @example
+     *   EasyGem.module.transform("c3", function() {
+     *     return window.c3;
+     *   });
+     *     -- OR --
+     *   EasyGem.module.transform("c3", "c3");
      */
-    head: function (moduleName) {
-      var module = moduleDefinitions[moduleName] = new EasyModule(moduleName);
-      module.waiters = [];
-      module.dependencies = [];
-    },
-    /**
-     *
-     * @param {String} moduleName
-     * @param {String|Function} getter
-     */
-    transform: function (moduleName, getter) {
+    transform: function (moduleName, prerequisite) {
       EasyGem.schedule.require(function (instance) {
         moduleInstances[moduleName] = instance;
         executeWaiters();
-      }, getter);
+      }, prerequisite);
     },
     /**
-     *
+     * Save url for later dynamic load of the module. Use it only if url is defined later in page parsing.
+     *   If you can specify url in header, use EasyGem.module.urls object instead;
      * @param {String} moduleName
-     * @param {String} url
+     * @param {String} url - absolute url of the module file, with or without hostname
      */
     setUrl: function (moduleName, url) {
       urls[moduleName] = url;
@@ -185,9 +210,15 @@
     }
   };
   /**
-   *
+   * Load specified modules and execute [callback].
+   * Module instances are constructed if not constructed before.
+   * Missing modules are downloaded if url is provided.
    * @param {Array.<String>} moduleNames
-   * @param {Function} callback
+   * @param {Function} callback - function with module instances as arguments
+   * @example
+   *   EasyGem.loadModules(["jQuery", "myModule"], function($, myModule) {
+   *     myModule.init($("#my_module_container"));
+   *   });
    */
   EasyGem.loadModules = function (moduleNames, callback) {
     var waiter = new Waiter(moduleNames, callback);
@@ -195,19 +226,19 @@
       executeWaiter(waiter);
     } else {
       waiters.push(waiter);
-      setTimeout(findMissingModules, 3000);
+      setTimeout(findMissingModules, 5000);
     }
   };
   /**
-   *
+   * Same as EasyGem.loadModules, but only for one module.
    * @param {String} moduleName
-   * @param {Function} callback
+   * @param {Function} callback - function with the module instance as first argument
    */
   EasyGem.loadModule = function (moduleName, callback) {
     this.loadModules([moduleName], callback);
   };
-  EasyGem.module.transform("jQuery", "jQuery");
-  EasyGem.module.transform("jQueryUI", "jQueryUI");
-
+  var transform = EasyGem.module.transform;
+  transform("jQuery", "jQuery");
+  transform("jQueryUI", "jQueryUI");
 
 })();
