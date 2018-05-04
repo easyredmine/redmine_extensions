@@ -34,7 +34,7 @@ trap before_exit SIGHUP SIGINT SIGTERM EXIT
 bundle update
 if [ "$EASY" = "true" ]; then
   cd $REDMINE_SUBDIR
-  find plugins/* -maxdepth 0 -type d ! -name 'easyproject' ! -name 'easy_job' -exec rm -rf {} +
+  find plugins/* -maxdepth 0 -type d ! -name 'easyproject' ! -name 'easy_job' ! -name 'easysoftware' -exec rm -rf {} +
   find plugins/easyproject/easy_plugins/* -maxdepth 0 -type d ! -name 'easy_extensions' -exec rm -rf {} +
   bundle exec rake db:drop db:create db:migrate
   bundle exec rake easyproject:install RAILS_ENV=production
