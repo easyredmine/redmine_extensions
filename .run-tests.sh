@@ -31,20 +31,22 @@ function before_exit {
 
 trap before_exit SIGHUP SIGINT SIGTERM EXIT
 
-bundle update
 if [ "$EASY" = "true" ]; then
   cd $REDMINE_SUBDIR
-  find plugins/* -maxdepth 0 -type d ! -name 'easyproject' ! -name 'easy_job' -exec rm -rf {} +
+  find plugins/* -maxdepth 0 -type d ! -name 'easyproject' ! -name 'easy_job' ! -name 'easysoftware' -exec rm -rf {} +
   find plugins/easyproject/easy_plugins/* -maxdepth 0 -type d ! -name 'easy_extensions' -exec rm -rf {} +
+  bundle update
   bundle exec rake db:drop db:create db:migrate
   bundle exec rake easyproject:install RAILS_ENV=production
   bundle exec rake test:prepare RAILS_ENV=test
   bundle exec rake easyproject:tests:spec$TAGS RAILS_ENV=test JS_DRIVER=chrome CHROME_OPTIONS="headless no-sandbox disable-gpu window-size=1920,1080"
 elif [ "$ONLY_SPEC" = "true" ]; then
+  bundle update
   bundle exec rake db:drop db:create db:migrate RAILS_ENV=test
   bundle exec rake spec RAILS_ENV=test
 else
   cd $REDMINE_SUBDIR
+  bundle update
   bundle exec rake db:drop db:create db:migrate
   bundle exec rake test:prepare RAILS_ENV=test
   bundle exec rake test RAILS_ENV=test
