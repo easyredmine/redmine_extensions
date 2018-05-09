@@ -86,9 +86,21 @@
     if (prerequisiteArray.length === 0) return 0;
     var count = 0;
     for (var i = 0; i < prerequisiteArray.length; i++) {
-      if (executeOnePrerequisite(prerequisiteArray[i])) {
-        count++;
-        prerequisiteArray[i] = null;
+      var pack = prerequisiteArray[i];
+      if (pack.pre) {
+        var instance = preparePrerequisite(pack.pre);
+        if (instance) {
+          count++;
+          prerequisiteArray[i] = null;
+          pack.func.call(window, instance);
+        }
+      } else {
+        var instances = prepareMorePrerequisites(pack.pres);
+        if (instances) {
+          count++;
+          prerequisiteArray[i] = null;
+          pack.func.apply(window, instances);
+        }
       }
     }
     if (count) {
@@ -96,28 +108,6 @@
       count += executePrerequisites();
     }
     return count;
-  };
-  var executeOnePrerequisite = function (pack) {
-    var getter, getters, instance, instances;
-    if (getter = pack.pre) {
-      instance = preparePrerequisite(getter);
-      if (instance) {
-        pack.func.call(window, instance);
-        return true;
-      }
-      return false;
-    } else if (getters = pack.pres) {
-      instances = [];
-      for (var j = 0; j < getters.length; j++) {
-        getter = getters[j];
-        instance = preparePrerequisite(getter);
-        if (!instance) break;
-        instances.push(instance);
-      }
-      if (instances.length !== getters.length) return false;
-      pack.func.apply(window, instances);
-      return true;
-    }
   };
   /**
    * @param {(Function|string)} getter
@@ -140,6 +130,15 @@
       return getter();
     }
   };
+  var prepareMorePrerequisites = function (getters) {
+    var instance, instances = [];
+    for (var j = 0; j < getters.length; j++) {
+      instance = preparePrerequisite(getters[j]);
+      if (!instance) return null;
+      instances.push(instance);
+    }
+    return instances;
+  };
 
   var cycle = function scheduleCycle() {
     setTimeout(cycle, 30);
@@ -148,7 +147,7 @@
   document.addEventListener("DOMContentLoaded", cycle);
   /**
    *
-   * @type {{out: boolean, late: EASY.schedule.late, require: EASY.schedule.require, main: EASY.schedule.main, define: EASY.schedule.define}}
+   * @type {{late: EasyGem.schedule.late, require: EasyGem.schedule.require, main: EasyGem.schedule.main, define: EasyGem.schedule.define}}
    */
   EasyGem.schedule = {
     /**
@@ -187,17 +186,21 @@
             pres.push(arguments[i]);
           }
         }
-        var pack = {func: func, pres: pres};
-        if (!executeOnePrerequisite(pack)) {
-          prerequisiteArray.push(pack);
+        var instances = prepareMorePrerequisites(pres);
+        if (instances) {
+          func.apply(window, instances);
+        } else {
+          prerequisiteArray.push({func: func, pres: pres});
         }
       } else {
         if (typeof prerequisite === "string") {
           prerequisite = prerequisite.toLowerCase();
         }
-        pack = {func: func, pre: prerequisite};
-        if (!executeOnePrerequisite(pack)) {
-          prerequisiteArray.push(pack);
+        var instance = preparePrerequisite(prerequisite);
+        if (instance) {
+          func.call(window, instance);
+        } else {
+          prerequisiteArray.push({func: func, pre: prerequisite});
         }
       }
     },

@@ -48,19 +48,6 @@
      */
     cssTags: function (array) {
       array.forEach(this.cssTag);
-    },
-    /**
-     * Order file from server and when the file is loaded, execute [callback] with [name] as first argument
-     * It is necessary to define module with [name] in the file = EasyGem.schedule.define(name,function(){...});
-     * @param {String} url
-     * @param {Function} callback
-     * @param {String} name
-     * @param {String...} [prerequisites]
-     */
-    loadAndRun: function (url, callback, name, prerequisites) {
-      this.jsTag(url);
-      var args = Array.prototype.slice.call(arguments, 1);
-      EasyGem.schedule.require.apply(window, args);
     }
   };
 })();
