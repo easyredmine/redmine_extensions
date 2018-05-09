@@ -87,6 +87,10 @@
     var count = 0;
     for (var i = 0; i < prerequisiteArray.length; i++) {
       var pack = prerequisiteArray[i];
+      if (!pack) {
+        count++;
+        continue;
+      }
       if (pack.pre) {
         var instance = preparePrerequisite(pack.pre);
         if (instance) {
