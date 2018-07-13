@@ -19,6 +19,8 @@ module RedmineExtensions
     config.eager_load_paths << config.root.join('app', 'models', 'easy_queries')
     config.assets.precompile << 'redmine_extensions/applications.js'
     config.assets.precompile << 'redmine_extensions/blocking.js'
+    config.assets.precompile << 'redmine_extensions/jasmine_lib/jasmine_lib.js'
+    config.assets.precompile << 'redmine_extensions/jasmine.css'
 
     #config.to_prepare goes after Reloader.to_prepare
     RedmineExtensions::Reloader.to_prepare do

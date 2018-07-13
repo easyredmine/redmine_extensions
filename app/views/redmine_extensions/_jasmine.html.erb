@@ -1,0 +1,11 @@
+<% if defined?(EasyExtensions) %>
+  <%= javascript_include_tag('redmine_extensions/jasmine_lib/jasmine_lib.js') %>
+  <%= stylesheet_link_tag('redmine_extensions/jasmine.css') %>
+<% else %>
+  <%= javascript_include_tag(
+          'redmine_extensions/jasmine/jasmine_lib/boot.js',
+          'redmine_extensions/jasmine/jasmine_lib/jasmine.js',
+          'redmine_extensions/jasmine/jasmine_lib/jasmine-html.js',
+          'redmine_extensions/jasmine/jasmine_lib/jasmine_helper.js') %>
+  <%= stylesheet_link_tag('redmine_extensions/jasmine.css') %>
+<% end %>
