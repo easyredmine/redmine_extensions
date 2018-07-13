@@ -176,7 +176,7 @@
         return "success";
       }
       result += " RESULTS: " + shortReport + "\n" + report;
-      $("#content").text(result.replace("\n", "<br>"));
+      //$("#content").text(result.replace("\n", "<br>"));
       return result;
     },
     /**
