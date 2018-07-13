@@ -5,7 +5,7 @@ require 'spec_helper'
 require File.expand_path("../redmine/config/environment.rb",  __FILE__)
 # Add additional requires below this line. Rails is not loaded until this point!
 require 'rspec/rails'
-require 'factory_girl_rails'
+require 'factory_bot_rails'
 require 'database_cleaner'
 
   Rails.backtrace_cleaner.remove_silencers!
@@ -63,7 +63,13 @@ Capybara.register_driver :poltergeist do |app|
 end
 
 Capybara.register_driver :chrome do |app|
-  Capybara::Selenium::Driver.new(app, :browser => :chrome)
+  capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
+    'chromeOptions' => {
+      'args' => ENV['CHROME_OPTIONS'].to_s.split(' ')
+    }
+  )
+
+  Capybara::Selenium::Driver.new(app, browser: :chrome, desired_capabilities: capabilities)
 end
 
 Capybara.javascript_driver = ENV['JS_DRIVER'].present? ? ENV['JS_DRIVER'].downcase.to_sym : :poltergeist

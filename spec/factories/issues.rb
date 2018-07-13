@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
 
   factory :enumeration do
     name 'TestEnum'
@@ -41,7 +41,7 @@ FactoryGirl.define do
     start_date { Date.today }
     due_date { Date.today + 7.days }
     status { tracker.default_status }
-    priority { IssuePriority.default || FactoryGirl.create(:issue_priority, :default) }
+    priority { IssuePriority.default || FactoryBot.create(:issue_priority, :default) }
     association :author, :factory => :user, :firstname => "Author"
     association :assigned_to, :factory => :user, :firstname => "Assignee"
 
@@ -65,7 +65,7 @@ FactoryGirl.define do
 
     trait :with_journals do
       after(:create) do |issue|
-        FactoryGirl.create_list(:journal, 2, issue: issue, journalized_type: 'Issue')
+        FactoryBot.create_list(:journal, 2, issue: issue, journalized_type: 'Issue')
       end
     end
 
@@ -75,7 +75,7 @@ FactoryGirl.define do
 
     trait :with_attachment do
       after(:create) do |issue|
-        FactoryGirl.create_list(:attachment, 1, container: issue)
+        FactoryBot.create_list(:attachment, 1, container: issue)
       end
     end
 
@@ -83,7 +83,7 @@ FactoryGirl.define do
 
     after :build do |issue, evaluator|
       if evaluator.factory_is_child
-        issue.parent_issue_id = FactoryGirl.create(:issue, :project => issue.project).id
+        issue.parent_issue_id = FactoryBot.create(:issue, :project => issue.project).id
       end
     end
   end

@@ -7,7 +7,6 @@ gemspec
 
 stored = []
 stored << @dependencies.find { |d| d.name == 'redmine_extensions' }
-stored << @dependencies.find { |d| d.name == 'factory_girl_rails' }
 stored.compact!
 stored.each{|dep| @dependencies.delete dep }
 
@@ -26,5 +25,4 @@ group :development, :test do
 end
 
 @dependencies.delete @dependencies.find { |d| d.name == 'redmine_extensions' }
-@dependencies.delete @dependencies.find { |d| d.name == 'factory_girl_rails' }
 @dependencies.concat(stored)

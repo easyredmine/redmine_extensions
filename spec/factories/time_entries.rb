@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
 
   factory :time_entry_activity, :parent => :enumeration, :class => 'TimeEntryActivity' do
     name 'TestActivity'

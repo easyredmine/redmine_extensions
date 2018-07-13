@@ -1,7 +1,7 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :project do
     transient do
-      number_of_issues 1
+      number_of_issues 0
       number_of_members 0
       number_of_issue_categories 2
       number_of_subprojects 0
@@ -12,24 +12,24 @@ FactoryGirl.define do
     end
     # name 'Test project'
     sequence(:name){ |n| "Project ##{n}" }
-    identifier { name.parameterize }
+    sequence(:identifier){ |n| "#{name.parameterize}#{n}" }
 
     after(:create) do |project, evaluator|
       trackers = Array.wrap(evaluator.trackers)
       trackers = Tracker.all.to_a if trackers.empty?
-      trackers.concat( [FactoryGirl.create(:tracker), FactoryGirl.create(:bug_tracker)] ) if evaluator.create_trackers || trackers.empty?
+      trackers.concat( [FactoryBot.create(:tracker), FactoryBot.create(:bug_tracker)] ) if evaluator.create_trackers || trackers.empty?
       project.trackers = trackers
-      project.time_entry_activities = [FactoryGirl.create(:time_entry_activity)]
+      project.time_entry_activities = [FactoryBot.create(:time_entry_activity)]
     end
     after :create do |project, evaluator|
-      FactoryGirl.create_list :issue, evaluator.number_of_issues, :project => project
-      FactoryGirl.create_list :member, evaluator.number_of_members, :project => project, :roles => [FactoryGirl.create(:role)]
+      FactoryBot.create_list :issue, evaluator.number_of_issues, :project => project
+      FactoryBot.create_list :member, evaluator.number_of_members, :project => project, :roles => [FactoryBot.create(:role)]
       project.enabled_module_names += evaluator.add_modules
     end
 
     after :create do |project, evaluator|
       evaluator.members.each do |user|
-        FactoryGirl.create(:member, project: project, user: user)
+        FactoryBot.create(:member, project: project, user: user)
       end
     end
 
@@ -39,19 +39,19 @@ FactoryGirl.define do
         milestone_options Hash.new
       end
       after :create do |project, evaluator|
-        FactoryGirl.create_list :version, evaluator.number_of_versions, evaluator.milestone_options.merge( :project => project )
+        FactoryBot.create_list :version, evaluator.number_of_versions, evaluator.milestone_options.merge( :project => project )
       end
     end
 
     trait :with_subprojects do
       after :create do |project, evaluator|
-        FactoryGirl.create_list :project, evaluator.number_of_subprojects, :parent => project
+        FactoryBot.create_list :project, evaluator.number_of_subprojects, :parent => project
       end
     end
 
     trait :with_categories do
       after :create do |project, evaluator|
-        FactoryGirl.create_list :issue_category, evaluator.number_of_issue_categories, :project => project
+        FactoryBot.create_list :issue_category, evaluator.number_of_issue_categories, :project => project
       end
     end
   end
@@ -71,7 +71,7 @@ FactoryGirl.define do
     user
 
     after :build do |member, evaluator|
-      member.member_roles << FactoryGirl.build(:member_role, member: member)
+      member.member_roles << FactoryBot.build(:member_role, member: member)
     end
 
     trait :without_roles do

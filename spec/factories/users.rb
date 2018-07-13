@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :user do
     firstname 'John'
     sequence(:lastname) {|n| 'Doe' + n.to_s }

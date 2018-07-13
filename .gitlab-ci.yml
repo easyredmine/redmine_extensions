@@ -10,9 +10,12 @@ before_script:
   - ''
   - export BRANCH=devel
   - ''
-  - rvm use ruby 2.3.3 > /dev/null 2>&1
+  - rvm use ruby 2.4.2 > /dev/null 2>&1
   - ruby -v
   - export REDMINE_SUBDIR="spec/redmine"
+  - export REDMINE_VERSION="3.4-stable"
+  - export REDMINE_REPO="https://github.com/redmine/redmine.git"
+  - export EASY_REPO="ssh://git@git.easy.cz/easyredmine/devel-2016.git"
 
 Check syntax error:
   stage: linter
@@ -26,7 +29,7 @@ Spec / MySQL:
   - export DB_USERNAME="root"
   - export DB_PWD=$MYSQL_PASS
   - export ONLY_SPEC='true'
-  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.3-stable spec/redmine
+  - git clone --depth 1 $REDMINE_REPO -b $REDMINE_VERSION spec/redmine
   - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
   - $SHELL ./.run-tests.sh
   except:
@@ -39,7 +42,7 @@ Spec / Postgresql:
   - export DB_USERNAME="postgres"
   - export DB_PWD=""
   - export ONLY_SPEC='true'
-  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.3-stable spec/redmine
+  - git clone --depth 1 $REDMINE_REPO -b $REDMINE_VERSION spec/redmine
   - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
   - $SHELL ./.run-tests.sh
   except:
@@ -47,11 +50,12 @@ Spec / Postgresql:
 
 Pure Redmine / MySQL:
   stage: tests
+  allow_failure: true
   script:
   - export ADAPTER="mysql2"
   - export DB_USERNAME="root"
   - export DB_PWD=$MYSQL_PASS
-  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.3-stable spec/redmine
+  - git clone --depth 1 $REDMINE_REPO -b $REDMINE_VERSION spec/redmine
   - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
   - $SHELL ./.run-tests.sh
   except:
@@ -59,11 +63,12 @@ Pure Redmine / MySQL:
 
 Pure Redmine / Postgresql:
   stage: tests
+  allow_failure: true
   script:
   - export ADAPTER="postgresql"
   - export DB_USERNAME="postgres"
   - export DB_PWD=""
-  - git clone --depth 1 https://github.com/redmine/redmine.git -b 3.3-stable spec/redmine
+  - git clone --depth 1 $REDMINE_REPO -b $REDMINE_VERSION spec/redmine
   - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
   - $SHELL ./.run-tests.sh
   except:
@@ -73,7 +78,7 @@ Easy Redmine Fast / Mysql:
    stage: tests
    script:
    - rm -rf spec/redmine
-   - git clone --depth 1 ssh://git@git.easy.cz/easyredmine/devel-2016.git spec/redmine
+   - git clone --depth 1 $EASY_REPO spec/redmine
    - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
    - export EASY='true'
    - export ADAPTER="mysql2"
@@ -89,7 +94,7 @@ Easy Redmine Fast / Postgresql:
    stage: tests
    script:
    - rm -rf spec/redmine
-   - git clone --depth 1 ssh://git@git.easy.cz/easyredmine/devel-2016.git spec/redmine
+   - git clone --depth 1 $EASY_REPO spec/redmine
    - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
    - export EASY='true'
    - export ADAPTER="postgresql"
@@ -105,7 +110,7 @@ Easy Redmine Slow / Mysql:
    stage: tests
    script:
    - rm -rf spec/redmine
-   - git clone --depth 1 ssh://git@git.easy.cz/easyredmine/devel-2016.git spec/redmine
+   - git clone --depth 1 $EASY_REPO spec/redmine
    - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
    - export EASY='true'
    - export ADAPTER="mysql2"
@@ -121,7 +126,7 @@ Easy Redmine Slow / Postgresql:
    stage: tests
    script:
    - rm -rf spec/redmine
-   - git clone --depth 1 ssh://git@git.easy.cz/easyredmine/devel-2016.git spec/redmine
+   - git clone --depth 1 $EASY_REPO spec/redmine
    - sed "s/..\/Gemfile/..\/..\/..\/Gemfile/" -i spec/redmine/config/boot.rb
    - export EASY='true'
    - export ADAPTER="postgresql"
