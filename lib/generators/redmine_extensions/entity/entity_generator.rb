@@ -87,7 +87,29 @@ module RedmineExtensions
       template 'model.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}.rb"
       template 'new.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.html.erb"
       template 'new.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.js.erb"
-      template 'query.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_query.rb"
+
+      if Redmine::Plugin.installed?(:easy_extensions)
+        template 'easy_query.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_query.rb"
+        template 'entity_attribute_helper_patch.rb.erb', "#{plugin_path}/extra/easy_patch/easy_extensions/helpers/entity_attribute_helper_patch.rb"
+
+        if File.exists?("#{plugin_path}/extra/easy_patch/easy_extensions/helpers/entity_attribute_helper_patch.rb")
+
+          inject_into_file "#{plugin_path}/extra/easy_patch/easy_extensions/helpers/entity_attribute_helper_patch.rb",
+              "\n       def format_html_#{model_name_underscored}_attribute(entity_class, attribute, unformatted_value, options={})" +
+              "\n          value = format_entity_attribute(entity_class, attribute, unformatted_value, options)" +
+              "\n          case attribute.name" +
+              "\n          when :name" +
+              "\n            link_to(value, #{model_name_underscored.singularize}_path(options[:entity].id))" +
+              "\n          else" +
+              "\n            h(value)" +
+              "\n          end" +
+              "\n        end" +
+              "\n", after: "base.class_eval do"
+
+        end
+      else
+        template 'query.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_query.rb"
+      end
 
       if File.exists?("#{plugin_path}/config/routes.rb")
         if project?

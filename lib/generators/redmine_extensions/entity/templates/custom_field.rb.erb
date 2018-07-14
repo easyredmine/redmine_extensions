@@ -4,4 +4,8 @@ class <%= model_name %>CustomField < CustomField
     :label_<%= @model_name_pluralize_underscored %>
   end
 
+  def form_fields
+    [:is_filter, :searchable, :is_required]
+  end
+
 end

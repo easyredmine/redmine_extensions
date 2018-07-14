@@ -1,0 +1,11 @@
+<% half_size = (custom_field_values.size / 2.0).ceil %>
+<% 0.upto(half_size - 1).each do |row|
+  left_value = custom_field_values[row]
+  right_value = custom_field_values[row + half_size] %>
+  <tr>
+    <th><%= left_value ? h(left_value.custom_field.translated_name) : '' %></th>
+    <td><%= left_value ? show_value(left_value, true) : '' %></td>
+    <th><%= right_value ? h(right_value.custom_field.translated_name) : '' %></th>
+    <td><%= right_value ? show_value(right_value, true) : '' %></td>
+  </tr>
+<% end %>

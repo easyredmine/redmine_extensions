@@ -1,9 +1,38 @@
+<% if Redmine::Plugin.installed?(:easy_extensions) %>
 <%%= render @query %>
 <%% ### PAGE CUSTOMS ########################################################## %>
-<%%= context_menu context_menu_<%= model_name_pluralize_underscored %>_path(:project_id => @project) %>
+<%%= context_menu context_menu_<%= model_name_pluralize_underscored %>_path(project_id: @project) %>
 <%% content_for :sidebar do %>
-  <%%= render :partial => '<%= model_name_pluralize_underscored %>/sidebar' %>
-  <% if Redmine::Plugin.installed?(:easy_extensions) %>
-  <%%= render :partial => 'sidebar/saved_easyqueries_by_type', :locals => {:query_class => @query.class, :project => @project} %>
-  <% end %>
+  <%%= render partial: '<%= model_name_pluralize_underscored %>/sidebar' %>
+  <%%= render partial: 'sidebar/saved_easyqueries_by_type', locals: {query_class: @query.class, project: @project} %>
 <%% end %>
+<% else %>
+<div class="contextual">
+  <%% if User.current.allowed_to?(:add_<%= model_name_pluralize_underscored %>, @project, global: true) %>
+    <%%= link_to l(:button_<%= model_name_underscored %>_new), new_<%= model_name_underscored %>_path, class: 'icon icon-add' %>
+  <%% end %>
+</div>
+<h2><%%= @query.queried_class.to_s %></h2>
+<div id="query_form_with_buttons" class="hide-when-print">
+  <div id="query_form_content">
+    <table class="list issues">
+      <thead>
+        <%% @query.available_columns.each do |column| %>
+          <th>
+            <%%= column.caption %>
+          </th>
+        <%% end %>
+      </thead>
+      <tbody>
+        <%% @query.<%= model_name_pluralize_underscored %>.each do |entity| %>
+          <tr>
+            <%% @query.available_columns.each do |column| %>
+              <%%= content_tag('td', column_content(column, entity)) %>
+            <%% end %>
+          </tr>
+        <%% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% end %>

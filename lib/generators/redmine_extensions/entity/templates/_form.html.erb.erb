@@ -26,6 +26,14 @@
   </p>
   <%% end %>
   <%- end -%>
+  <% associations.each do |assoc| %>
+    <%- next if assoc[1][:type] == 'has_many' -%>
+    <% association_name = assoc[0] %>
+    <p>
+      <%%= f.label l(:label_<%= association_name %>) %>
+      <%%= f.select :<%= association_name %>_id, <%= association_name.camelcase %>.visible.sorted.map{ |<%= association_name %>| [<%= association_name %>.to_s, <%= association_name %>.id]} %>
+    </p>
+  <% end %>
   <%- if acts_as_customizable? -%>
   <%% custom_field_values = <%= model_name_underscored %>.visible_custom_field_values %>
   <%% custom_field_values.each do |value| %>

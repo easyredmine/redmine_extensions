@@ -2,12 +2,12 @@ class <%= controller_class %>Controller < ApplicationController
 
   menu_item :<%= model_name_pluralize_underscored %>
 
-  before_filter :find_<%= model_name_underscored %>, only: [:show, :edit, :update]
-  before_filter :find_<%= model_name_pluralize_underscored %>, only: [:context_menu, :bulk_edit, :bulk_update, :destroy]
+  before_action :authorize_global
+  before_action :find_<%= model_name_underscored %>, only: [:show, :edit, :update]
+  before_action :find_<%= model_name_pluralize_underscored %>, only: [:context_menu, :bulk_edit, :bulk_update, :destroy]
   <%- if project? -%>
-  before_filter :find_project
+  before_action :find_project
   <%- end -%>
-  before_filter :authorize_global
 
   helper :<%= model_name_pluralize_underscored %>
   helper :custom_fields
@@ -19,7 +19,11 @@ class <%= controller_class %>Controller < ApplicationController
   accept_api_auth :index, :show, :create, :update, :destroy
 
   def index
+    <% if Redmine::Plugin.installed?(:easy_extensions) %>
     index_for_easy_query(<%= model_name %>Query)
+    <% else %>
+    retrieve_query(<%= model_name %>Query)
+    <% end %>
   end
 
   def show
