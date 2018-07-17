@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe EasySetting, type: :model do
 
-  let(:project) { FactoryGirl.create(:project, name: 'My project') }
+  let(:project) { FactoryBot.create(:project, name: 'My project') }
   let!(:easy_setting) { EasySetting.create(name: 'my_setting', value: 'my_value', project_id: project.id) }
   let!(:easy_setting_global) { EasySetting.create(name: 'my_setting', value: 'my_value_global') }
 

@@ -1,9 +1,9 @@
-FactoryGirl.define do
+FactoryBot.define do
 
   factory :tracker do
     sequence(:name) {|n| "Feature ##{n}"}
 
-    default_status { IssueStatus.first || FactoryGirl.create(:issue_status) }
+    default_status { IssueStatus.first || FactoryBot.create(:issue_status) }
 
     trait :bug do
       sequence(:name) {|n| "Bug ##{n}"}

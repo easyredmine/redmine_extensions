@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :easy_query do
     name 'Test name'
     project nil

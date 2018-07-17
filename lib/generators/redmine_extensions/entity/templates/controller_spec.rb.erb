@@ -1,8 +1,8 @@
 require Rails.root.join('plugins', 'easyproject', 'easy_plugins', 'easy_extensions/test/spec/spec_helper')
 
 describe <%= controller_class %>Controller, logged: true do
-  let(:<%= model_name_underscored %>) { FactoryGirl.create(:<%= model_name_underscored %>) }
-  let(:<%= model_name_pluralize_underscored %>) { FactoryGirl.create_list(:<%= model_name_underscored %>, 5) }
+  let(:<%= model_name_underscored %>) { FactoryBot.create(:<%= model_name_underscored %>) }
+  let(:<%= model_name_pluralize_underscored %>) { FactoryBot.create_list(:<%= model_name_underscored %>, 5) }
 
   before(:each) do
     role = Role.non_member
@@ -40,7 +40,7 @@ describe <%= controller_class %>Controller, logged: true do
   end
 
   it 'create with valid' do
-    post :create, {<%= model_name_underscored %>: FactoryGirl.attributes_for(:<%= model_name_underscored %>)}
+    post :create, {<%= model_name_underscored %>: FactoryBot.attributes_for(:<%= model_name_underscored %>)}
     expect(response).to have_http_status(:success)
     expect(assigns[:<%= model_name_underscored %>]).not_to be_a_new(<%= model_name %>)
     expect(response).to redirect_to(<%= model_name_underscored %>_path(assigns[:<%= model_name_underscored %>]))

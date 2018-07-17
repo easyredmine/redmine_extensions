@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :easy_setting do
 
     name 'my_setting'
