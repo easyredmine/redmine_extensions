@@ -118,7 +118,7 @@ module RedmineExtensions
         end
       html_options.reverse_merge!({type:'application/javascript'})
       priority = html_options.delete(:priority) || 0
-      content = "  EASY.schedule.late(function(){#{content}  }, #{priority});"
+      content = "  EasyGem.schedule.late(function(){#{content}  }, #{priority});"
 
       content_tag(:script, javascript_cdata_section(content), html_options)
     end
