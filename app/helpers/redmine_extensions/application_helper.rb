@@ -123,13 +123,6 @@ module RedmineExtensions
       content_tag(:script, javascript_cdata_section(content), html_options)
     end
 
-    def include_jasmine_framework
-      unless @jasmine_framework_included
-        @jasmine_framework_included = true
-        render(partial: 'redmine_extensions/jasmine')
-      end
-    end
-
     def get_jasmine_tags
       tags = params[:jasmine]
       return [] if tags == 'true'

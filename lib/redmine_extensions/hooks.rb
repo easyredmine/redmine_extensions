@@ -23,6 +23,9 @@ module RedmineExtensions
           context[:template].require_asset('redmine_extensions/application')
         end
       end
+      if Rails.env.development? || Rails.env.test?
+        render_on :view_layouts_base_html_head, partial: 'redmine_extensions/jasmine'
+      end
     else
       ### JAVASCRIPTS IN REDMINE ###
       def view_layouts_base_html_head(context = {})
@@ -39,7 +42,8 @@ module RedmineExtensions
           javascript_include_tag('redmine_extensions/easy_togglers') +
           javascript_include_tag('redmine_extensions/jquery.entityarray') +
           javascript_include_tag('redmine_extensions/render_polyfill') +
-          javascript_include_tag('redmine_extensions/redmine_extensions')
+          javascript_include_tag('redmine_extensions/redmine_extensions') +
+          (render partial: 'redmine_extensions/jasmine' if Rails.env.development? || Rails.env.test?)
       end
     end
 
