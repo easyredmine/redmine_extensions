@@ -50,7 +50,7 @@
       var fail = window.jsApiReporter.specs().some(function (spec) {
         return spec.failedExpectations.length;
       });
-      var logo = document.getElementById("logo");
+      var logo = document.getElementById("logo") || document.getElementsByTagName("h1")[0];
       logo.classList.add("logo-jasmine");
       logo.classList.add("logo-jasmine--" + (fail ? "fail" : "pass"));
       var link = document.createElement('link');

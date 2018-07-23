@@ -43,7 +43,7 @@ module RedmineExtensions
           javascript_include_tag('redmine_extensions/jquery.entityarray') +
           javascript_include_tag('redmine_extensions/render_polyfill') +
           javascript_include_tag('redmine_extensions/redmine_extensions') +
-          (render partial: 'redmine_extensions/jasmine' if Rails.env.development? || Rails.env.test?)
+          (context[:controller].send(:render_to_string, partial: 'redmine_extensions/jasmine') if Rails.env.development? || Rails.env.test?)
       end
     end
 
