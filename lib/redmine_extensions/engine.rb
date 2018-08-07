@@ -19,7 +19,7 @@ module RedmineExtensions
     config.eager_load_paths << config.root.join('app', 'models', 'easy_queries')
     config.assets.precompile << 'redmine_extensions/applications.js'
     config.assets.precompile << 'redmine_extensions/blocking.js'
-    if Rails.env.development? || Rails.env.test?
+    unless Rails.env.production?
       config.assets.precompile << 'redmine_extensions/jasmine_lib/jasmine_lib.js'
       config.assets.precompile << 'redmine_extensions/jasmine.css'
     end
