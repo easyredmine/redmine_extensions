@@ -118,11 +118,22 @@ module RedmineExtensions
         end
       html_options.reverse_merge!({type:'application/javascript'})
       priority = html_options.delete(:priority) || 0
-      content = "  EASY.schedule.late(function(){#{content}  }, #{priority});"
+      content = "  EasyGem.schedule.late(function(){#{content}  }, #{priority});"
 
       content_tag(:script, javascript_cdata_section(content), html_options)
     end
 
+    def get_jasmine_tags
+      tags = params[:jasmine]
+      return [] if tags == 'true'
+      if tags.is_a?(String)
+        [tags.to_sym]
+      elsif tags.is_a?(Array)
+        tags.map &:to_sym
+      else
+        []
+      end
+    end
 
     def easy_avatar_url(user = nil)
       user ||= User.current

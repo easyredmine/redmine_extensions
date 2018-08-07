@@ -16,6 +16,7 @@ module PluginGenerator
 
   def self.generate_autocomplete!
     generate_dummy_entity!
+    generate_entities_view!
     generate_autocomplete_controller!
     generate_autocomplete_routes!
     generate_autocomplete_view!
@@ -100,6 +101,18 @@ module PluginGenerator
 
         <%= form_for(DummyEntity.new(array_of_dummies: ['value1'])) do |f| %>
           <%= f.autocomplete_field(:array_of_dummies, ['value1', 'value2'], {}, id: 'dummy_entities_autocomplete') %>
+        <% end %>
+      END_ERB
+    end
+  end
+
+  def self.generate_entities_view!
+    dir = Rails.root.join('plugins', 'dummy_plugin', 'app', 'views', 'dummy_entities')
+    Dir.mkdir dir
+    File.open(dir.join('index.html.erb'), 'w') do |file|
+      file.write( <<-END_ERB )
+        <% DummyEntity.all.each do |entity| %>
+          <%= entity.name %>: <%= entity.value %>
         <% end %>
       END_ERB
     end

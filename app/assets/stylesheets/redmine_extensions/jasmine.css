@@ -1,0 +1,35 @@
+.jasmine-specs {
+  margin: 0;
+}
+
+.jasmine_html-reporter {
+  margin-left: 100px;
+  margin-right: 100px;
+}
+
+.logo-jasmine {
+  width: 60px;
+  font-size: 0;
+  text-align: center;
+  color: white;
+  background-color: #fe7d99;
+  font-weight: normal;
+}
+
+.logo-jasmine--pass {
+  background-color: #01c8a9;
+}
+
+.logo-jasmine:before {
+  content: '\2620';
+  font-size: 40px;
+}
+
+.logo-jasmine--pass:before {
+  content: '\2705';
+}
+
+.logo-jasmine * {
+  height: 0 !important;
+  background-image: none !important;
+}

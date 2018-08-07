@@ -1,0 +1,7 @@
+<% if params[:jasmine] %>
+  <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.1.0/jasmine.js"></script>
+  <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.1.0/jasmine-html.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.1.0/jasmine.css">
+  <%= javascript_include_tag('redmine_extensions/jasmine_lib/jasmine_lib.js') %>
+  <%= stylesheet_link_tag('redmine_extensions/jasmine.css') %>
+<% end %>
