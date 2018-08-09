@@ -391,10 +391,14 @@ module RedmineExtensions
 
         oktp_klass = easy_constantize(original_klass_to_patch)
 
-        if @options[:prepend]
-          oktp_klass.prepend pm_klass # unless oktp_klass.include?(pm_klass)
+        if oktp_klass.include?(pm_klass)
+          puts "Patch (#{oktp_klass} #{pm_klass}) is already included!"
         else
-          oktp_klass.include pm_klass # unless oktp_klass.include?(pm_klass)
+          if @options[:prepend]
+            oktp_klass.prepend pm_klass
+          else
+            oktp_klass.include pm_klass
+          end
         end
       end
 
