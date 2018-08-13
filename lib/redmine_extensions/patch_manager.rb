@@ -151,12 +151,8 @@ module RedmineExtensions
             helper_klass_symbol = helper_klass_name[0, helper_klass_name.index('Helper')]
           end
 
-          #if controller_klass.include?(helper_klass)
-          #  puts "Patch (#{controller_klass} #{helper_klass_name}) is already included!"
-          #else
-            controller_klass.class_eval "helper :#{helper_klass_symbol.underscore}" if helper_klass_symbol
-            controller_klass.class_eval "include #{helper_klass_name}"
-          #end
+          controller_klass.class_eval "helper :#{helper_klass_symbol.underscore}" if helper_klass_symbol
+          controller_klass.class_eval "include #{helper_klass_name}"
         end
       end
     end
