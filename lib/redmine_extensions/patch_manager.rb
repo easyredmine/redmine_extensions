@@ -146,7 +146,6 @@ module RedmineExtensions
         controller_klass = controller_klass_name.constantize
 
         @registered_easy_page_helpers.each do |helper_klass_name|
-          #helper_klass = helper_klass_name.constantize
           if helper_klass_name.end_with?('Helper')
             helper_klass_symbol = helper_klass_name[0, helper_klass_name.index('Helper')]
           end
