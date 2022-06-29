@@ -1,5 +1,4 @@
 source 'https://rubygems.org'
-source 'https://gems.easysoftware.com'
 
 # Possible directories for dummy application
 possible_app_dirs = [
