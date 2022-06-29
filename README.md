@@ -2,6 +2,10 @@
 [![Gem Version](https://badge.fury.io/rb/redmine_extensions.svg)](http://badge.fury.io/rb/redmine_extensions)
 [![Build Status](https://travis-ci.org/easyredmine/redmine_extensions.svg?branch=master)](https://travis-ci.org/easyredmine/redmine_extensions)
 
+
+⚠️ This gem working only with Redmine 4.x
+
+---
 This gem provides an extended funcionality for a Redmine project
 
 ## Provided funcionalities
