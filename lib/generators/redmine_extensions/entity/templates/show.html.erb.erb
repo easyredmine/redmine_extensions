@@ -24,7 +24,7 @@
       <hr />
     <%%= render partial: 'redmine_extensions/custom_field_rows', locals: { custom_field_values: @<%= model_name_underscored %>.visible_custom_field_values } %>
     <%- end -%>
-    <%%= call_hook(:view_<%= model_name_pluralize_underscored %>_show_details_bottom, :<%= model_name_underscored%>: @<%= model_name_underscored %>) %>
+    <%%= call_hook(:view_<%= model_name_pluralize_underscored %>_show_details_bottom, <%= model_name_underscored%>: @<%= model_name_underscored %>) %>
   </table>
 <%- if description_column? -%>
   <%% if !@<%= model_name_underscored %>.<%= description_column %>.blank? %>
