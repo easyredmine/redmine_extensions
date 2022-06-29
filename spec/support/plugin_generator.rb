@@ -4,13 +4,6 @@ module PluginGenerator
   def self.generate_test_plugin!
     Rails::Generators.invoke 'redmine_extensions:plugin', ['DummyPlugin'], behavior: :revoke, destination_root: Rails.root
     Rails::Generators.invoke 'redmine_extensions:plugin', ['DummyPlugin'], behavior: :invoke, destination_root: Rails.root
-    # if Rails::VERSION::MAJOR >= 5
-    #   Rails.application.reloader.reload!
-    # else
-    #   ActionDispatch::Reloader.cleanup!
-    #   ActionDispatch::Reloader.prepare!
-    # end
-
     generate_autocomplete!
   end
 
@@ -25,7 +18,7 @@ module PluginGenerator
   def self.generate_dummy_entity!
     File.open( Rails.root.join('plugins', 'dummy_plugin', 'db', 'migrate', '20162010160230_create_dummy_entities.rb'), 'w' ) do |file|
       file.write( <<-END_RUBY )
-        class CreateDummyEntities < ActiveRecord::Migration
+        class CreateDummyEntities < ActiveRecord::Migration[4.2]
           def change
             create_table :dummy_entities do |t|
               t.string :name
@@ -46,8 +39,6 @@ module PluginGenerator
                           'value',
                           'project_id',
                           'array_of_dummies'
-
-          attr_protected :id
 
           serialize :array_of_dummies, Array
         end

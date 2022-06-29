@@ -1,0 +1,62 @@
+<%%= labelled_form_for([@project, @<%= model_name_underscored %>], html: { multipart: <%= acts_as_attachable? %>, id: '<%= model_name_underscored %>_form', class: 'tabular', remote: request.xhr? }) do |f| %>
+  <%%= error_messages_for @<%= model_name_underscored %> %>
+
+  <div class="box">
+    <%- if project? -%>
+      <%% if <%= model_name_underscored %>.safe_attribute?('project_id') && !@project %>
+      <p>
+        <%%= f.label :project_id, ::<%= model_name %>.human_attribute_name(:project_id) %>
+        <%%= f.select :project_id, Project.allowed_to(:manage_<%= model_name_pluralize_underscored %>).collect{|x| [x.name, x.id]}, include_blank: true %>
+      </p>
+      <%% end %>
+      <%- end -%>
+      <%- safe_columns.each do |column_name, column_options| -%>
+      <%% if <%= model_name_underscored %>.safe_attribute?('<%= column_name %>') %>
+      <p>
+        <%%= f.label :<%= column_name %>, ::<%= model_name %>.human_attribute_name(:<%= column_name %>) %>
+        <%- if column_options[:query_type] == 'string' || column_options[:query_type] == 'integer' -%>
+        <%%= f.text_field :<%= column_name %> %>
+        <%- elsif column_options[:query_type] == 'list' || column_options[:query_type] == 'list_optional' -%>
+        <%%= f.select :<%= column_name %>, <%= column_options[:class] %>.all.collect{|x| [x.<%= column_options[:list_class_name] %>, x.id]}.sort, include_blank: true %>
+        <%- elsif column_options[:query_type] == 'text' -%>
+        <%%= f.text_area :<%= column_name %>, :cols => 60, :rows => (<%= model_name_underscored %>.<%= column_name %>.blank? ? 10 : [[10, <%= model_name_underscored %>.<%= column_name %>.length / 50].max, 100].min), :accesskey => accesskey(:edit), :class => 'wiki-edit' %>
+        <%%= wikitoolbar_for '<%= model_name_underscored %>_<%= column_name %>' %>
+        <%- elsif column_options[:query_type] == 'boolean' -%>
+        <%%= f.radio_button :<%= column_name %>, false %>
+        <%- else -%>
+        <%%= f.text_field :<%= column_name %> %>
+        <%- end -%>
+      </p>
+      <%% end %>
+      <%- end -%>
+      <% associations.each do |assoc| %>
+        <%- next if assoc[1][:type] == 'has_many' -%>
+        <% association_name = assoc[0] %>
+        <p>
+          <%%= f.label l(:label_<%= association_name %>) %>
+          <%%= f.select :<%= association_name %>_id, <%= association_name.camelcase %>.visible.sorted.map{ |<%= association_name %>| [<%= association_name %>.to_s, <%= association_name %>.id]} %>
+        </p>
+      <% end %>
+      <%- if acts_as_customizable? -%>
+      <%% custom_field_values = <%= model_name_underscored %>.visible_custom_field_values %>
+      <%% custom_field_values.each do |value| %>
+      <p>
+        <%%= custom_field_tag_with_label :<%= model_name_underscored %>, value %>
+      </p>
+      <%% end %>
+      <%- end -%>
+      <%- if acts_as_attachable? -%>
+      <p id="attachments_form"><label><%%= l(:label_attachment_plural) %></label><%%= render :partial => 'attachments/form', :locals => {:container => <%= model_name_underscored %>} %></p>
+      <%- end -%>
+  </div>
+
+  <%% if !request.xhr? %>
+    <p>
+      <%% if f.object.new_record? %>
+        <%%= submit_tag l(:button_create), title: l(:button_create), class: "button-positive" %>
+      <%% else %>
+        <%%= submit_tag l(:button_update), title: l(:button_update), class: "button-positive" %>
+      <%% end %>
+    </p>
+  <%% end %>
+<%% end %>

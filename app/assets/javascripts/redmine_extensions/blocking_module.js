@@ -4,12 +4,31 @@
   var moduleInstances = {};
   /** @type {Object.<String,EasyModule>} */
   var moduleDefinitions = {};
-  /** @type {Array.<Waiter>} */
+  /** @type {Array.<OptionWaiter|CallbackWaiter>} */
   var waiters = [];
   /** @type {Object.<String,String>} */
   var urls = {};
 
-  function Waiter(dependencies, callback) {
+  /**
+   * @param {Array.<String>} dependencies
+   * @param {Array} options
+   * @property {Array} options
+   * @property {Array.<String>} dependencies
+   * @constructor
+   */
+  function OptionWaiter(dependencies, options) {
+    this.dependencies = dependencies;
+    this.options = options;
+  }
+
+  /**
+   * @param {Array.<String>} dependencies
+   * @param {Function} callback
+   * @property {Function} callback
+   * @property {Array.<String>} dependencies
+   * @constructor
+   */
+  function CallbackWaiter(dependencies, callback) {
     this.dependencies = dependencies;
     this.callback = callback;
   }
@@ -17,7 +36,7 @@
   /**
    * @property {String} name
    * @property {Array.<String>} dependencies
-   * @property {Array.<Waiter>} waiters
+   * @property {Array.<CallbackWaiter>} waiters
    * @constructor
    */
   function EasyModule(moduleName) {
@@ -35,6 +54,7 @@
     var instance = {};
     var waiters = this.waiters;
     for (var i = 0; i < waiters.length; i++) {
+      /** @type {CallbackWaiter} */
       var waiter = waiters[i];
       var instances = waiter.dependencies.map(function (moduleName) {
         return moduleInstances[moduleName];
@@ -67,7 +87,15 @@
     var instances = waiter.dependencies.map(function (moduleName) {
       return moduleInstances[moduleName];
     });
-    waiter.callback.apply(window, instances);
+    if (waiter.callback) {
+      waiter.callback.apply(window, instances);
+    } else {
+      instances.forEach(function (instance) {
+        if (instance.call) {
+          instance.apply(window, waiter.options);
+        }
+      });
+    }
   }
 
   function executeWaiters() {
@@ -117,6 +145,24 @@
   }
 
   /**
+   * @param {Array.<String>} moduleNames
+   * @param {Array} options
+   */
+  function prepareModuleOrder(moduleNames, options) {
+    if (options.length === 1 && options[0].call) {
+      var waiter = new CallbackWaiter(moduleNames, options[0]);
+    } else {
+      waiter = new OptionWaiter(moduleNames, options);
+    }
+    if (checkDependencies(moduleNames)) {
+      executeWaiter(waiter);
+    } else {
+      waiters.push(waiter);
+      setTimeout(findMissingModules, 5000);
+    }
+  }
+
+  /**
    *
    * @type {{urls: Object<String, String>, module: EasyGem.module.module, part: EasyGem.module.part, transform: EasyGem.module.transform, setUrl: EasyGem.module.setUrl}}
    */
@@ -132,7 +178,11 @@
     urls: urls,
     /**
      * Define module in one separate file. Use this method as first line of the file
+     * Modules can be constructed by returning a function (simple one-method modules),
+     *   returning Object (complex, but one-file modules)
+     *   or by directly setting methods or properties with [this], because context is set to newly created module.
      * Module can be downloaded on-demand by loadModules() if url is provided by setUrl() function.
+     * [prerequisites] argument can be omitted if no prerequisites are required
      * @example
      *   EasyGem.module.module("myModule", ["jQuery", "c3"], function($, c3) {
      *     return {
@@ -141,18 +191,29 @@
      *       }
      *     }
      *   }
+     * @example - same as above but simpler
+     *   EasyGem.module.module("myModule", ["jQuery", "c3"], function($, c3) {
+     *     this.init = function(){
+     *       c3.init($("#graph"));
+     *     }
+     *   }
      * @param {String} moduleName
-     * @param {Array.<String>} prerequisites - other modules needed for construction of module
-     * @param {Function} getter - factory function
+     * @param {Array.<String>|Function} prerequisites - other modules needed for construction of module, can be omitted
+     * @param {Function} [getter] - factory function
      */
     module: function (moduleName, prerequisites, getter) {
       var module = moduleDefinitions[moduleName] = new EasyModule(moduleName);
+      if (getter === undefined) {
+        getter = prerequisites;
+        prerequisites = [];
+      }
       module.dependencies = prerequisites;
-      module.waiters = [new Waiter(prerequisites, getter)];
+      module.waiters = [new CallbackWaiter(prerequisites, getter)];
     },
     /**
      * Define module part if module code is distributed into many separate files.
      *   For dynamic loading by url, all files have to be combine by pipeline into one.
+     * You can append methods to module, just use [this].
      * Module is executed only if all [prerequisites] from all parts of the module is fulfilled, but only part's
      *   [prerequisites] will be used as arguments for [getter].
      * [prerequisites] argument can be omitted if no prerequisites are required
@@ -166,12 +227,12 @@
         prerequisites = [];
       }
       var module = moduleDefinitions[moduleName];
-      if (!module){
+      if (!module) {
         module = moduleDefinitions[moduleName] = new EasyModule(moduleName);
         module.waiters = [];
         module.dependencies = [];
       }
-      module.waiters.push(new Waiter(prerequisites, getter));
+      module.waiters.push(new CallbackWaiter(prerequisites, getter));
       for (var i = 0; i < prerequisites.length; i++) {
         var prerequisite = prerequisites[i];
         if (module.dependencies.indexOf(prerequisite) === -1) {
@@ -210,32 +271,41 @@
     }
   };
   /**
-   * Load specified modules and execute [callback].
-   * Module instances are constructed if not constructed before.
-   * Missing modules are downloaded if url is provided.
+   * Load [moduleNames] modules and do something afterward.
+   * Try to download the modules if url is provided by EasyGem.module.setUrl() or EasyGem.module.urls=.
+   * Downloaded (or already registered) modules are constructed and result is stored for further invocation of the module.
+   * There are two types of action after all module results are obtained.
+   * If [options] is only one function, this function is executed with the module results as the arguments.
+   * Otherwise, the module results, which are functions, are executed with [options] as the arguments.
+   * Error is thrown if any module hasn't been constructed in 5 seconds
    * @param {Array.<String>} moduleNames
-   * @param {Function} callback - function with module instances as arguments
+   * @param {...*} options - options for module function OR function with module instances as arguments
    * @example
+   *   // suitable for smaller modules with one method
+   *   EasyGem.module.module("colorizeBackground", function() {
+   *     return function(element, color) {
+   *       element.style.backgroundColor = color;
+   *     }
+   *   });
+   *   EasyGem.loadModules(["colorizeBackground"], document.getElementById("my_button"), "red");
+   * @example
+   *   // suitable for modules with many methods
    *   EasyGem.loadModules(["jQuery", "myModule"], function($, myModule) {
    *     myModule.init($("#my_module_container"));
    *   });
    */
-  EasyGem.loadModules = function (moduleNames, callback) {
-    var waiter = new Waiter(moduleNames, callback);
-    if (checkDependencies(moduleNames)) {
-      executeWaiter(waiter);
-    } else {
-      waiters.push(waiter);
-      setTimeout(findMissingModules, 5000);
-    }
+  EasyGem.loadModules = function (moduleNames, options) {
+    options = Array.prototype.slice.call(arguments, 1);
+    prepareModuleOrder(moduleNames, options);
   };
   /**
    * Same as EasyGem.loadModules, but only for one module.
    * @param {String} moduleName
-   * @param {Function} callback - function with the module instance as first argument
+   * @param {...*} options - options for module function OR function with module instances as arguments
    */
-  EasyGem.loadModule = function (moduleName, callback) {
-    this.loadModules([moduleName], callback);
+  EasyGem.loadModule = function (moduleName, options) {
+    options = Array.prototype.slice.call(arguments, 1);
+    prepareModuleOrder([moduleName], options);
   };
   var transform = EasyGem.module.transform;
   transform("jQuery", "jQuery");

@@ -1,0 +1,42 @@
+class <%= model_name %>Query < EasyQuery
+
+  self.queried_class = <%= model_name %>
+
+  def initialize_available_filters
+    on_filter_group(default_group_label) do
+    <%- db_columns.each do |column_name, column_options| -%>
+      <%- if project? && column_name == 'project_id' -%>
+      if project.nil?
+        add_available_filter '<%= column_name %>', name: <%= model_name %>.human_attribute_name(:<%= column_name %>), type: :<%= column_options[:query_type] %>, values: all_projects_values
+      end
+      <%- else -%>
+      add_available_filter '<%= column_name %>', name: <%= model_name %>.human_attribute_name(:<%= column_name %>), type: :<%= column_options[:query_type] %>
+      <%- end -%>
+    <%- end -%>
+    <%- if acts_as_customizable? -%>
+      add_custom_fields_filters(<%= model_name %>CustomField)
+    <%- end -%>
+    end
+  end
+
+  def initialize_available_columns
+    tbl = entity.table_name
+  <%- author_col = db_columns.delete 'author_id' %>
+    on_filter_group(default_group_label) do
+    <%- db_columns.each do |column_name, column_options| -%>
+      add_available_column '<%= column_options[:query_column_name] || column_name %>', caption: <%= model_name %>.human_attribute_name(:<%= column_name %>), title: <%= model_name %>.human_attribute_name(:<%= column_name %>)#, sortable: "#{tbl}.<%= column_name %>"
+    <%- end -%>
+    <%- if author_col -%>
+      add_available_column 'author', caption: <%= model_name %>.human_attribute_name(:author_id), title: <%= model_name %>.human_attribute_name(:author_id), sortable: proc { User.fields_for_order_statement('authors') }, preload: [author: (Setting.gravatar_enabled? ? :email_addresses : :easy_avatar)]
+    <%- end %>
+    <%- if acts_as_customizable? -%>
+      add_available_columns <%= model_name %>CustomField.sorted.visible.collect { |cf| EasyQueryCustomFieldColumn.new(cf, group: l(:label_filter_group_custom_fields)) }
+    <%- end -%>
+    end
+  end
+
+  def default_list_columns
+    super.presence || <%= db_columns.collect{|column_name, column_options| (column_options[:query_column_name] || column_name).to_s}[0..3].to_s %>.flat_map { |c| [c.to_s, c.to_sym] }
+  end
+
+end

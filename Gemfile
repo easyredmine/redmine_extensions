@@ -1,28 +1,48 @@
 source 'https://rubygems.org'
 
-# Declare your gem's dependencies in redmine_extensions.gemspec.
-# Bundler will treat runtime dependencies like base dependencies, and
-# development dependencies will be added by default to the :development group.
-gemspec
+# Possible directories for dummy application
+possible_app_dirs = [
+  ENV['DUMMY_PATH'],
+  File.join(Dir.pwd, 'test/dummy'),
+  Bundler.root.join('test/dummy'),
+]
 
-stored = []
-stored << @dependencies.find { |d| d.name == 'redmine_extensions' }
-stored.compact!
-stored.each{|dep| @dependencies.delete dep }
+# Find first gemfile on the possible directories
+# Keep it at the end of the file (because of abort on the bottom)
+gems_rb_found = false
+gems_rb = ['Gemfile', 'gems.rb']
+possible_app_dirs.each do |dir|
+  break if gems_rb_found
+  next if !dir
+  next if !Dir.exist?(dir)
 
-# Declare any dependencies that are still in development here instead of in
-# your gemspec. These might include edge Rails or gems from your path or
-# Git. Remember to move these dependencies to your gemspec before releasing
-# your gem to rubygems.org.
+  gems_rb.each do |gems_rb|
+    gems_rb = File.expand_path(File.join(dir, gems_rb))
 
-# To use a debugger
-# gem 'byebug', group: [:development, :test]
-group :development, :test do
-  gem 'pry-rails'
-  Dir.glob File.expand_path("../spec/redmine/Gemfile", __FILE__) do |file|
-    eval_gemfile file
+    if File.exist?(gems_rb)
+      eval_gemfile(gems_rb)
+      gems_rb_found = true
+      break
+    end
   end
 end
 
-@dependencies.delete @dependencies.find { |d| d.name == 'redmine_extensions' }
-@dependencies.concat(stored)
+if !gems_rb_found
+  abort("Dummy application's gemfile not found")
+end
+
+# Current gem specification file
+gemspec_file = Dir.glob(File.join(__dir__, '*.gemspec')).first
+
+# Not valid gem
+if gemspec_file.nil? || !File.exist?(gemspec_file)
+  abort('Gemspec not found')
+end
+
+# Dummy application may already include this gem
+# You cannot specify the same gem twice
+current_gem_spec = Bundler.load_gemspec(gemspec_file)
+@dependencies.delete_if {|d| d.name == current_gem_spec.name }
+
+# Load current gem and its dependencies
+gemspec

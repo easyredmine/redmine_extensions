@@ -21,7 +21,7 @@ module EasySettings
           Key
         end
 
-      key_class.new(name, options)
+      key_class.new(name, **options)
     end
 
     def initialize(name, **options)

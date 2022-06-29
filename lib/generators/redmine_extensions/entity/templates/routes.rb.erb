@@ -1,13 +1,15 @@
+
 <% if project? %>
 resources :projects do
   resources :<%= model_name_pluralize_underscored %>
 end
 <% end %>
-resources :<%= model_name_pluralize_underscored %> do
-  collection do
-    get 'autocomplete'
-    get 'bulk_edit'
-    post 'bulk_update'
-    get 'context_menu'
+  resources :<%= model_name_pluralize_underscored %> do
+    collection do
+      get 'autocomplete'
+      get 'bulk_edit'
+      post 'bulk_update'
+      get 'context_menu'
+    end
   end
-end
+

@@ -99,8 +99,7 @@
   var data = {
     _locks: [],
     _timeout: null,
-    tags: {},
-    topMenuHeight: 60
+    tags: {}
   };
   var start = function () {
     if (new Date() - data._timeout > 5000) {
@@ -230,12 +229,8 @@
         element = element[0];
       }
       if (!element) throw new Error("missing element");
-      element.scrollIntoView();
+      element.scrollIntoView({block: "center", behavior: "instant"});
       var box = element.getBoundingClientRect();
-      if (box.top < data.topMenuHeight) {
-        window.scrollBy({top: -data.topMenuHeight});
-        box = element.getBoundingClientRect();
-      }
       var pointX = (box.left + box.right) / 2;
       var pointY = (box.top + box.bottom) / 2;
       var target = document.elementFromPoint(pointX, pointY);

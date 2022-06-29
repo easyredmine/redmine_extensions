@@ -4,3 +4,5 @@ en:
   label_no_output: No output has been selected
   label_easy_query_outputs: Outputs
   text_modal_is_closing: This modal dialog will be closed automatically, please wait.
+  error_entity_name_is_used: "Entity name %{entity_name} is already used. Please use different"
+  error_plugin_name_is_used: "Plugin name %{plugin_name} is already used. Please use different"

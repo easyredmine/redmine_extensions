@@ -20,7 +20,7 @@ module RedmineExtensions
       else
         presenter = RedmineExtensions::BasePresenter.present(model, self, options)
       end
-      if block_given?
+      if block
         yield presenter
       else
         presenter
@@ -110,7 +110,7 @@ module RedmineExtensions
 
     def late_javascript_tag(content_or_options_with_block = nil, html_options = {}, &block)
       content =
-        if block_given?
+        if block
           html_options = content_or_options_with_block if content_or_options_with_block.is_a?(Hash)
           capture(&block)
         else
@@ -121,6 +121,22 @@ module RedmineExtensions
       content = "  EasyGem.schedule.late(function(){#{content}  }, #{priority});"
 
       content_tag(:script, javascript_cdata_section(content), html_options)
+    end
+
+    def require_javascript_tag(content_or_options_with_block = nil, html_options = {}, &block)
+      content =
+        if block_given?
+          html_options = content_or_options_with_block if content_or_options_with_block.is_a?(Hash)
+          capture(&block)
+        else
+          content_or_options_with_block
+        end
+      html_options.reverse_merge!(type: 'application/javascript')
+      html_options[:data] ||= { container: '' }
+      html_options[:data][:container].slice!("#module_inside_")
+      content = "EasyGem.schedule.require(function(){#{content}}, function(){ return EASY.asyncModules.states['#{html_options[:data][:container]}']});"
+
+      javascript_tag content.html_safe, html_options
     end
 
     def get_jasmine_tags
@@ -183,8 +199,8 @@ module RedmineExtensions
 
       def container_class
         s = (@container_class.presence || css_classes[:container]).to_s
-        s << ' collapsible' if collapsible?
-        s << ' collapsed' if collapsed?
+        s += ' collapsible' if collapsible?
+        s += ' collapsed' if collapsed?
 
         s
       end
@@ -264,7 +280,6 @@ module RedmineExtensions
     # * +load_immediately+ - tells if values should be loaded immediatelly after page loaded, or wait for first use of the field.
     #                       Warning! if this option is false, selected values passed in first format will be ignored till it is loaded.
     #                         Please use second format for proper functionality.
-    # * +show_toggle_button+ - only valid with <tt>multiple: true, preload: true</tt> options set. Shows toggle button to expand select to the multiselect tag.
     # * +select_first_value+ - if selectd_values are empty, with this option first available value will be selected.
     #                          Available only with <tt>preload: true</tt> option.
     #                          With <tt>load_immediately: false</tt> it will appear kinda weird for user because it will select the value after user starts to interact with input.
@@ -272,7 +287,7 @@ module RedmineExtensions
     # * +rootElement+ - Has sence only if jsonpath is used for available values. It tells if the json response has values wrapped under root element.
     #                     For response like <tt>{projects: [[<name>, <id>], [<name2>, <id2>]]}</tt> user option <tt>rootElement: 'projects'</tt>
     def autocomplete_field_tag(name, jsonpath_or_array, selected_values, options = {})
-      options.reverse_merge!({select_first_value: false, show_toggle_button: false, load_immediately: false, preload: true, multiple: true, combo: false})
+      options.reverse_merge!({select_first_value: false, load_immediately: false, preload: true, multiple: true, combo: false})
       options[:id] ||= sanitize_to_id(name)
 
       selected_values ||= []
@@ -284,8 +299,8 @@ module RedmineExtensions
       end
 
       content_tag(:span, :class => 'easy-multiselect-tag-container') do
-        text_field_tag('', '', (options[:html_options] || {}).merge(id: options[:id])) +
-          late_javascript_tag("$('##{options[:id]}').easymultiselect({multiple: #{options[:multiple]}, rootElement: #{options[:rootElement].to_json}, inputName: '#{name}', preload: #{options[:preload]}, combo: #{options[:combo]}, source: #{source}, selected: #{selected_values.to_json}, show_toggle_button: #{options[:show_toggle_button]}, select_first_value: #{options[:select_first_value]}, load_immediately: #{options[:load_immediately]}, autocomplete_options: #{(options[:jquery_auto_complete_options]||{}).to_json} });")
+        search_field_tag('', '', (options[:html_options] || {}).merge(id: options[:id])) +
+          late_javascript_tag("$('##{options[:id]}').easymultiselect({multiple: #{options[:multiple]}, rootElement: #{options[:rootElement].to_json}, inputName: '#{name}', preload: #{options[:preload]}, combo: #{options[:combo]}, source: #{source}, selected: #{selected_values.to_json}, select_first_value: #{options[:select_first_value]}, load_immediately: #{options[:load_immediately]}, autocomplete_options: #{(options[:jquery_auto_complete_options]||{}).to_json} });")
       end
     end
 
@@ -297,13 +312,12 @@ module RedmineExtensions
     # HTML options can be passed as a hash with +html_options+. These options will be passed to the input element.
     #
     # ==== Examples
-    #   autocomplete_field(:issue, :tag_ids, Tag.all.pluck(:name, :id), multiple: true, show_toggle_button: true)
+    #   autocomplete_field(:issue, :tag_ids, Tag.all.pluck(:name, :id), multiple: true)
     #   # => <span class="easy-multiselect-tag-container"> \
     #         <input type="text" id="issue_tags"  /> \
     #         <button type="button" tabindex="-1" class="..." role="button" ...>
     #           <span class="ui-button-icon-primary ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-text">&nbsp;</span>
     #         </button>
-    #         <a class="icon icon-add clear-link"></a> # toggle button to the multiselect tag from show_toggle_button option
     #         ...(wraping service tags)
     #           <input type="hidden" name="issue[tag_ids][]" value="#{@issue.tag_ids.first}" />
     #           <input type="hidden" name="issue[tag_ids][]" value="#{@issue.tag_ids.second}" />

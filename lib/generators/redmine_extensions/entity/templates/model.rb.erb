@@ -4,11 +4,9 @@ class <%= model_name %> < ActiveRecord::Base
   <%= 'belongs_to :project' if project? %>
   <%= 'belongs_to :author, class_name: \'User\'' if author? %>
 
-  scope :visible, lambda { |*args|
-    where(<%= model_name %>.visible_condition(args.shift || User.current, *args))<%= '.joins(:project)' if project? %>
-  }
+  scope :visible, ->(*args) { where(<%= model_name %>.visible_condition(args.shift || User.current, *args))<%= '.joins(:project)' if project? %> }
   <% if name_column? %>
-  scope :sorted, lambda { order("#{table_name}.<%= name_column %> ASC") }
+  scope :sorted, -> { order("#{table_name}.<%= name_column %> ASC") }
   <% end %>
 
   <%- if acts_as_searchable? -%>
@@ -35,8 +33,7 @@ class <%= model_name %> < ActiveRecord::Base
 
   <%= 'validates :project_id, presence: true' if project? %>
   <%= 'validates :author_id, presence: true' if author? %>
-
-  attr_protected :id
+  <%= "validates :#{safe_columns.keys.first}, presence: true" if safe_columns.any? %>
 
   <%- if associations.any? -%>
   <%- associations.each do |assoc_name, values| -%>
@@ -49,7 +46,7 @@ class <%= model_name %> < ActiveRecord::Base
   <%- attributes += safe_columns.keys if safe_columns.any? -%>
   <%- attributes += ['custom_field_values', 'custom_fields'] if acts_as_customizable? -%>
   <%-attributes += associations.keys.map{ |assoc| "#{assoc}_id" } -%>
-  safe_attributes *%w(<%= attributes.join(' ') %>)
+  safe_attributes *%w[<%= attributes.join(' ') %>]
   <%- if project? -%>
   safe_attributes 'project_id', if: ->(<%= model_name_underscored %>, _user) { <%= model_name_underscored %>.new_record? }
   <%- end -%>
@@ -59,7 +56,7 @@ class <%= model_name %> < ActiveRecord::Base
   after_update :send_update_notification
   <%- end -%>
 
-  def self.visible_condition(user, options={})
+  def self.visible_condition(user, options = {})
   <%- if project? -%>
     Project.allowed_to_condition(user, :<%= view_permission %>, options)
   <%- else -%>
@@ -71,6 +68,10 @@ class <%= model_name %> < ActiveRecord::Base
     'icon icon-user'
   end
 
+  def editable_by?(user)
+    editable?(user)
+  end
+
   <%- if !project? -%>
   def project
     nil
@@ -79,17 +80,17 @@ class <%= model_name %> < ActiveRecord::Base
 
   def visible?(user = nil)
     user ||= User.current
-    user.allowed_to?(:<%= view_permission %>, self.project, global: true)
+    user.allowed_to?(:<%= view_permission %>, project, global: true)
   end
 
   def editable?(user = nil)
     user ||= User.current
-    user.allowed_to?(:<%= edit_permission %>, self.project, global: true)
+    user.allowed_to?(:<%= edit_permission %>, project, global: true)
   end
 
   def deletable?(user = nil)
     user ||= User.current
-    user.allowed_to?(:<%= delete_permission %>, self.project, global: true)
+    user.allowed_to?(:<%= delete_permission %>, project, global: true)
   end
 
   def attachments_visible?(user = nil)
@@ -110,13 +111,8 @@ class <%= model_name %> < ActiveRecord::Base
   end
   <%- end -%>
 
-  def created_on
-    created_at
-  end
-
-  def updated_on
-    updated_at
-  end
+  alias_attribute :created_on, :created_at
+  alias_attribute :updated_on, :updated_at
 
   <%- if mail? -%>
   def notified_users
@@ -129,13 +125,17 @@ class <%= model_name %> < ActiveRecord::Base
 
   def send_create_notification
     # if Setting.notified_events.include?('<%= model_name_underscored %>_added')
-    <%= model_name %>Mailer.<%= model_name_underscored %>_added(self).deliver
+    notified_users.each do |user|
+      <%= model_name %>Mailer.<%= model_name_underscored %>_added(user, self).deliver
+    end
     # end
   end
 
   def send_update_notification
     # if Setting.notified_events.include?('<%= model_name_underscored %>_updated')
-    <%= model_name %>Mailer.<%= model_name_underscored %>_updated(self).deliver
+    notified_users.each do |user|
+      <%= model_name %>Mailer.<%= model_name_underscored %>_updated(user, self).deliver
+    end
     # end
   end
   <%- end -%>

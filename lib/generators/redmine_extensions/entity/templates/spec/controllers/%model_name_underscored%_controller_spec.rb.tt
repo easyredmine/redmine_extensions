@@ -1,0 +1,94 @@
+<%- unless rys %>
+require "easy_extensions/spec_helper"
+
+<% end %>
+RSpec.describe <%= controller_class %>Controller, logged: true do
+
+  describe "#index" do
+    before :each do
+      role = Role.non_member
+      role.add_permission! :view_<%= model_name_pluralize_underscored %>
+    end
+
+    it "html" do
+      get :index
+      expect(response).to have_http_status :success
+    end
+
+    it "json" do
+      get :index, params: { format: "json" }
+      expect(response).to have_http_status :ok
+    end
+  end
+
+  describe "#show" do
+    before :each do
+      role = Role.non_member
+      role.add_permission! :view_<%= model_name_pluralize_underscored %>
+    end
+    subject { FactoryBot.create(:<%= model_name_underscored %>) }
+
+    it "with id" do
+      get :show, params: { id: subject.id }
+      expect(response).to have_http_status :success
+    end
+
+    it "not found" do
+      get :show, params: { id: "invalid" }
+      expect(response).to have_http_status :not_found
+    end
+  end
+
+  context "manage <%= model_name_pluralize_underscored %>" do
+    before :each do
+      role = Role.non_member
+      role.add_permission! :manage_<%= model_name_pluralize_underscored %>
+    end
+    describe "#create" do
+      it "valid" do
+        expect {
+          post :create, params: { <%= model_name_underscored %>: FactoryBot.attributes_for(:<%= model_name_underscored %>), format: "json" }
+        }.to change(<%= model_name %>, :count).by 1
+        expect(response).to have_http_status :success
+      end
+
+      it "invalid" do
+        expect {
+          post :create, params: { <%= model_name_underscored %>: { <%= safe_columns.first[0] %>: "" }, format: "xml" }
+        }.to change(<%= model_name %>, :count).by 0
+        expect(response).to have_http_status :unprocessable_entity
+      end
+    end
+
+    describe "#update" do
+      subject { FactoryBot.create(:<%= model_name_underscored %>, <%= safe_columns.first[0] %>: 'value1') }
+      it "valid" do
+        expect {
+          put :update, params: { id: subject, <%= model_name_underscored %>: FactoryBot.attributes_for(:<%= model_name_underscored %>), format: "json" }; subject.reload
+        }.to change(subject, :<%= safe_columns.first[0] %>)
+        expect(response).to have_http_status :success
+      end
+
+      it "invalid" do
+        expect {
+          put :update, params: { id: subject, <%= model_name_underscored %>: { <%= safe_columns.first[0] %>: '' }, format: "xml" }; subject.reload
+        }.not_to change(subject, :<%= safe_columns.first[0] %>)
+        expect(response).to have_http_status :unprocessable_entity
+      end
+    end
+
+    describe "#destroy" do
+      before :each do
+        Role.non_member.add_permission! :view_<%= model_name_pluralize_underscored %>
+      end
+      subject! { FactoryBot.create(:<%= model_name_underscored %>) }
+      it { expect { delete :destroy, params: { id: subject } }.to change(<%= model_name %>, :count).by -1 }
+
+      it "record not found" do
+        expect { delete :destroy, params: { id: "none", format: "json" } }.to change(<%= model_name %>, :count).by 0
+        expect(response).to have_http_status :not_found
+      end
+    end
+  end
+
+end

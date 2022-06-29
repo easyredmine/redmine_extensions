@@ -69,12 +69,12 @@ module RedmineExtensions
       end
 
       def render_edit
-        outputs.map{ |output| output.render_edit }.join('').html_safe
+        outputs.map{ |output| output.render_edit }.join.html_safe
       end
 
       def render_data
         if outputs.any?
-          outputs.map{ |output| output.render_data }.join('').html_safe
+          outputs.map{ |output| output.render_data }.join.html_safe
         else
           view_context.l(:label_no_output)
         end

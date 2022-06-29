@@ -1,5 +1,3 @@
-require 'rails_helper'
-
 RSpec.describe EasySetting, type: :model do
 
   let(:project) { FactoryBot.create(:project, name: 'My project') }

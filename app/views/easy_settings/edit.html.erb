@@ -4,7 +4,7 @@
   <%= render "easy_settings/#{@plugin.id}", easy_settings: @easy_settings, settings: @settings, form: f %>
 
   <div class="form-actions">
-    <%= f.submit l(:button_update_easy_settings), class: 'button-1' %>
+    <%= f.submit l(:button_update_easy_settings), class: 'button-positive' %>
 
     <% if params[:back_url].present? %>
       <%= link_to l(:button_back), params[:back_url], class: 'button' %>

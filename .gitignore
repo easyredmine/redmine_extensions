@@ -11,3 +11,7 @@ spec/{dummy,redmine}/.sass-cache
 Gemfile.lock
 navod.txt
 /.tags
+test/
+.ruby-version
+coverage/
+public/

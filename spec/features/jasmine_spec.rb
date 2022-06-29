@@ -1,6 +1,4 @@
-require 'rails_helper'
-
-RSpec.describe 'jasmine', type: :feature, js: true do
+RSpec.describe 'jasmine', type: :feature, js: true, logged: :admin do
 
   it 'run tests' do
     visit "/dummy_entities?jasmine=true"

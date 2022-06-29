@@ -1,4 +1,4 @@
-REDMINE_EXTENSIONS = {
+window.REDMINE_EXTENSIONS = {
 
   toggleDiv: function (el_or_id) {
     var el;
@@ -88,9 +88,9 @@ EasyGem.schedule.require(function () {
       },
       activate_on_input_click: true,
       load_immediately: false,
-      show_toggle_button: true,
       select_first_value: true,
-      autocomplete_options: {}
+      autocomplete_options: {},
+      multiselectOnChange: null // onchange of multiselect input function
     },
 
     _create: function () {
@@ -102,7 +102,7 @@ EasyGem.schedule.require(function () {
       if (Array.isArray(this.options.source)) {
         this.options.preload = true;
         this._initData(this.options.source);
-      } else if (this.options.preload && this.options.load_immediately) {
+      } else if ( (this.options.preload || this.options.select_first_value) && this.options.load_immediately )  {
         this.load();
       } else if (this.selectedValues) {
         this.setValue(this.selectedValues);
@@ -118,9 +118,6 @@ EasyGem.schedule.require(function () {
       if (this.options.multiple) { // multiple values
         this.valueElement = $('<span></span>');
         this.tag.after(this.valueElement);
-
-        if (this.options.show_toggle_button)
-          this._createToggleButton();
 
         this.valueElement.entityArray({
           inputNames: this.inputName,
@@ -138,31 +135,11 @@ EasyGem.schedule.require(function () {
         this.element.css('margin-right', 0);
       }
     },
-
-    _createToggleButton: function () {
-      var that = this;
-      this.link_ac_toggle = $('<a>').attr('class', 'icon icon-add clear-link');
-      this.link_ac_toggle.click(function (evt) {
-        var $elem = $(this);
-        evt.preventDefault();
-        that.load(function () {
-          var select = $('<select>').prop('multiple', true).prop('size', 5).prop('name', that.inputName);
-          var option;
-          $.each(that.possibleValues, function (i, v) {
-            option = $('<option>').prop('value', v.id).text(v.value);
-            option.prop('selected', that.getValue().indexOf(v.id) > -1);
-            select.append(option);
-          });
-          var $container = $elem.closest('.easy-multiselect-tag-container');
-          $container.find(':input').prop('disabled', true);
-          $container.children().hide();
-          $container.append(select);
-          that.valueElement = select;
-          that.expanded = true;
-        });
-      });
-      this.element.parent().addClass('input-append');
-      this.element.after(this.link_ac_toggle);
+    setMultiselectOnChange: function (fn) {
+      this.options.multiselectOnChange = fn;
+    },
+    multiselectOnChange: function(select, fn) {
+      if (fn) select.on("change", fn);
     },
 
     _createAutocomplete: function () {
@@ -278,7 +255,7 @@ EasyGem.schedule.require(function () {
       this.valuesLoaded = true;
 
       this.selectedValues = this.selectedValues ? this.selectedValues : [];
-      if (this.selectedValues.length === 0 && this.options.preload && this.options.select_first_value && this.possibleValues.length > 0) {
+      if (this.selectedValues.length === 0 && this.options.select_first_value && this.possibleValues.length > 0) {
         this.selectedValues.push(this.possibleValues[0]['id']);
       }
 
@@ -373,7 +350,7 @@ EasyGem.schedule.require(function () {
       for (var i = values.length - 1; i >= 0; i--) {
         if (values[i] instanceof Object && !Array.isArray(values[i]) && values[i] !== null) {
           selected.push(values[i]);
-        } else if (this.options.preload) {
+        } else if (this.options.preload || this.options.select_first_value) {
           var that = this;
           if (!Array.isArray(that.possibleValues))
             return;

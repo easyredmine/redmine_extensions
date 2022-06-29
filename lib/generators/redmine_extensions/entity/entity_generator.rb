@@ -6,6 +6,8 @@ module RedmineExtensions
     argument :model_name, type: :string, required: true, banner: 'Post'
     argument :attributes, type: :array, required: true, banner: 'field[:type][:index] field[:type][:index]'
 
+    class_option :rys, type: :boolean, default: false, required: false, desc: 'Use in case of RYS'
+
     class_option :associations, type: :array, required: false, banner: '--associations association_type[:association_name][:association_class]'
 
     class_option :project, type: :boolean, default: true, banner: '', :desc => 'make model depends on project'
@@ -25,12 +27,17 @@ module RedmineExtensions
     attr_reader :controller_class, :model_name_underscored, :model_name_pluralize_underscored
     attr_reader :db_columns
     attr_reader :associations
-
+    attr_reader :rys
     def initialize(*args)
       super
+      @model_name_camelized = model_name.camelize
+      check_existing_const
+
+      @rys = !!options['rys']
       @plugin_name_underscored = plugin_name.underscore
       @plugin_pretty_name = @plugin_name_underscored.titleize
-      @plugin_path = "plugins/#{@plugin_name_underscored}"
+
+      @plugin_path = rys ? '.' : "plugins/#{@plugin_name_underscored}"
       @plugin_title = @plugin_name_underscored.camelize
 
       @model_name_underscored = model_name.underscore
@@ -40,17 +47,26 @@ module RedmineExtensions
       prepare_columns
     end
 
+    def check_existing_const
+      begin
+        @model_name_camelized.constantize
+        raise I18n.t(:error_entity_name_is_used, entity_name: @model_name_camelized)
+      rescue LoadError, NameError
+        # OK
+      end
+    end
+
     def copy_templates
-      template '_form.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/_form.html.erb"
       template '_sidebar.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/_sidebar.html.erb"
       template 'context_menu.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/context_menu.html.erb"
       template 'controller.rb.erb', "#{plugin_path}/app/controllers/#{model_name_pluralize_underscored}_controller.rb"
       template('custom_field.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_custom_field.rb") if acts_as_customizable?
-      template 'edit.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/edit.html.erb"
       template 'edit.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/edit.js.erb"
 
-      template 'controller_spec.rb.erb', "#{plugin_path}/test/spec/controllers/#{model_name_pluralize_underscored}_controller_spec.rb"
-      template 'factories.rb.erb', "#{plugin_path}/test/factories/#{model_name_underscored}.rb"
+      tests_root = rys ? './spec' : "#{plugin_path}/test"
+      template 'spec/factories.rb.erb', "#{tests_root}/factories/#{model_name_underscored}.rb"
+      template 'spec/controllers/%model_name_underscored%_controller_spec.rb.tt', "#{tests_root}/controllers/#{model_name_underscored}_controller_spec.rb"
+      template 'spec/requests/%model_name_underscored%_spec.rb.tt', "#{tests_root}/requests/#{model_name_underscored}.rb"
 
       if File.exists?("#{plugin_path}/config/locales/en.yml")
         original_langfile = YAML.load_file("#{plugin_path}/config/locales/en.yml")
@@ -61,7 +77,7 @@ module RedmineExtensions
           File.delete("#{plugin_path}/tmp/tmp_en.yml")
 
           merged_langfile = original_langfile.deep_merge(added_translations)
-          File.open("#{plugin_path}/config/locales/en.yml", "w") do |file|
+          File.open("#{plugin_path}/config/locales/en.yml", 'w') do |file|
             file.write merged_langfile.to_yaml
           end
         end
@@ -74,6 +90,7 @@ module RedmineExtensions
       template 'index.api.rsb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.api.rsb"
       template 'index.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.html.erb"
       template 'index.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/index.js.erb"
+      template '_list.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/_list.html.erb"
 
       if mail?
         template 'mailer.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_mailer.rb"
@@ -85,49 +102,49 @@ module RedmineExtensions
 
       template 'migration.rb.erb', "#{plugin_path}/db/migrate/#{Time.now.strftime('%Y%m%d%H%M%S%L')}_create_#{@model_name_pluralize_underscored}.rb"
       template 'model.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}.rb"
-      template 'new.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.html.erb"
       template 'new.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/new.js.erb"
 
-      if Redmine::Plugin.installed?(:easy_extensions)
-        template 'easy_query.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_query.rb"
+      if easy?
+        easy_model_template '%model_name_underscored%_query.rb'
         template 'entity_attribute_helper_patch.rb.erb', "#{plugin_path}/extra/easy_patch/easy_extensions/helpers/entity_attribute_helper_patch.rb"
 
         if File.exists?("#{plugin_path}/extra/easy_patch/easy_extensions/helpers/entity_attribute_helper_patch.rb")
 
           inject_into_file "#{plugin_path}/extra/easy_patch/easy_extensions/helpers/entity_attribute_helper_patch.rb",
-              "\n       def format_html_#{model_name_underscored}_attribute(entity_class, attribute, unformatted_value, options={})" +
-              "\n          value = format_entity_attribute(entity_class, attribute, unformatted_value, options)" +
-              "\n          case attribute.name" +
-              "\n          when :name" +
-              "\n            link_to(value, #{model_name_underscored.singularize}_path(options[:entity].id))" +
-              "\n          else" +
-              "\n            h(value)" +
-              "\n          end" +
-              "\n        end" +
-              "\n", after: "base.class_eval do"
+                           "\n       def format_html_#{model_name_underscored}_attribute(entity_class, attribute, unformatted_value, options={})" +
+                             "\n          value = format_entity_attribute(entity_class, attribute, unformatted_value, options)" +
+                             "\n          case attribute.name" +
+                             "\n          when :name" +
+                             "\n            link_to(value, #{model_name_underscored.singularize}_path(options[:entity].id))" +
+                             "\n          else" +
+                             "\n            h(value)" +
+                             "\n          end" +
+                             "\n        end" +
+                             "\n", after: 'base.class_eval do'
 
         end
       else
         template 'query.rb.erb', "#{plugin_path}/app/models/#{model_name_underscored}_query.rb"
       end
 
-      if File.exists?("#{plugin_path}/config/routes.rb")
+      routes_file = "#{plugin_path}/config/routes.rb"
+      if File.exists?(routes_file)
         if project?
-          append_to_file "#{plugin_path}/config/routes.rb" do
-            "\nresources :projects do " +
-              "\n  resources :#{model_name_pluralize_underscored}" +
-              "\nend\n"
+          insert_into_file routes_file, before: (rys ? /^end$/ : /\z/) do
+            "\n  resources :projects do " +
+              "\n    resources :#{model_name_pluralize_underscored}" +
+              "\n  end\n"
           end
         end
-        append_to_file "#{plugin_path}/config/routes.rb" do
-          "\nresources :#{model_name_pluralize_underscored} do" +
-            "\n  collection do " +
-            "\n    get 'autocomplete'" +
-            "\n    get 'bulk_edit'" +
-            "\n    post 'bulk_update'" +
-            "\n    get 'context_menu'" +
-            "\n  end" +
-            "\nend"
+        insert_into_file routes_file, before: (rys ? /^end$/ : /\z/) do
+          "\n  resources :#{model_name_pluralize_underscored} do" +
+            "\n    collection do " +
+            "\n      get 'autocomplete'" +
+            "\n      get 'bulk_edit'" +
+            "\n      post 'bulk_update'" +
+            "\n      get 'context_menu'" +
+            "\n    end" +
+            "\n  end\n"
         end
       else
         template 'routes.rb.erb', "#{plugin_path}/config/routes.rb"
@@ -166,15 +183,78 @@ module RedmineExtensions
         s << "\nend"
 
         append_to_file "#{plugin_path}/after_init.rb", s
+      elsif rys
+        s = ''
+        s << "\n  Redmine::AccessControl.map do |map|"
+        s << "\n    map.easy_category :#{model_name_pluralize_underscored} do |pmap|"
+        s << "\n      pmap.permission :view_#{model_name_pluralize_underscored}, { #{model_name_pluralize_underscored}: [:index, :show, :autocomplete, :context_menu] }, read: true"
+        s << "\n      pmap.permission :manage_#{model_name_pluralize_underscored}, { #{model_name_pluralize_underscored}: [:new, :create, :edit, :update, :destroy, :bulk_edit, :bulk_update] }"
+        s << "\n    end "
+        s << "\n  end\n"
+        append_to_file './config/initializers/01_access_control.rb', s
+
+        s = ''
+        s << "\n  Redmine::MenuManager.map :top_menu do |menu|"
+        s << "\n    menu.push :#{model_name_pluralize_underscored}, { controller: '#{model_name_pluralize_underscored}', action: 'index', project_id: nil }, caption: :label_#{model_name_pluralize_underscored}"
+        s << "\n  end\n"
+        if project?
+          s << "\n  Redmine::MenuManager.map :project_menu do |menu|"
+          s << "\n    menu.push :#{model_name_pluralize_underscored}, { controller: '#{model_name_pluralize_underscored}', action: 'index' }, param: :project_id, caption: :label_#{model_name_pluralize_underscored}"
+          s << "\n  end\n"
+        end
+        append_to_file './config/initializers/02_menu_manager.rb', s
+        s = ''
+        if acts_as_customizable?
+          s << "\n  CustomFieldsHelper::CUSTOM_FIELDS_TABS << {name: '#{model_name}CustomField', partial: 'custom_fields/index', label: :label_#{model_name_pluralize_underscored}}\n"
+        end
+        if acts_as_searchable?
+          s << "\n  Redmine::Search.map do |search|"
+          s << "\n    search.register :#{model_name_pluralize_underscored}"
+          s << "\n  end\n"
+        end
+        if acts_as_activity_provider?
+          s << "\n  Redmine::Activity.map do |activity|"
+          s << "\n    activity.register :#{model_name_pluralize_underscored}, {class_name: %w(#{model_name}), default: false}"
+          s << "\n  end\n"
+        end
+        other_initializer = './config/initializers/06_others.rb'
+        if File.exist?(other_initializer)
+          append_file other_initializer do
+            s
+          end
+        else
+          create_file other_initializer do
+            s
+          end
+        end
+
       end
 
 
       template 'show.api.rsb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/show.api.rsb"
       template 'show.html.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/show.html.erb"
       template 'show.js.erb.erb', "#{plugin_path}/app/views/#{model_name_pluralize_underscored}/show.js.erb"
+
+      # New templates
+      easy_view_template '_%model_name_underscored%.api.rsb'
+      easy_view_template '_form.html.erb'
+      easy_view_template 'new.html.erb'
+      easy_view_template 'edit.html.erb'
     end
 
     private
+
+    def easy_model_template(name)
+      template "app/models/#{name}", "#{plugin_path}/app/models/#{name}"
+    end
+
+    def easy_view_template(name)
+      template "app/views/%model_name_pluralize_underscored%/#{name}", "#{plugin_path}/app/views/%model_name_pluralize_underscored%/#{name}"
+    end
+
+    def easy?
+      Redmine::Plugin.installed?(:easy_extensions)
+    end
 
     def assocs
       options[:associations]
@@ -239,15 +319,15 @@ module RedmineExtensions
         if attr_type == 'timestamp'
           @timestamp_exist = true
         else
-          @db_columns[attr_name] = {type: attr_type || 'string', idx: attr_idx, null: true, safe: true, query_type: attr_type || 'string', lang_key: lang_key}
+          @db_columns[attr_name] = { type: attr_type || 'string', idx: attr_idx, null: true, safe: true, query_type: attr_type || 'string', lang_key: lang_key }
         end
       end
 
-      @db_columns['project_id'] = {type: 'integer', idx: nil, null: false, safe: false, class: 'Project', list_class_name: 'name', query_type: 'list_optional', query_column_name: 'project', lang_key: "field_#{model_name_underscored}_project"} if project? && !@db_columns.key?('project_id')
-      @db_columns['author_id'] = {type: 'integer', idx: nil, null: false, safe: true, class: 'User', list_class_name: 'name', query_type: 'list', query_column_name: 'author', lang_key: "field_#{model_name_underscored}_author"} if author? && !@db_columns.key?('author_id')
+      @db_columns['project_id'] = { type: 'integer', idx: nil, null: false, safe: false, class: 'Project', list_class_name: 'name', query_type: 'list_optional', query_column_name: 'project', lang_key: "field_#{model_name_underscored}_project" } if project? && !@db_columns.key?('project_id')
+      @db_columns['author_id'] = { type: 'integer', idx: nil, null: false, safe: true, class: 'User', list_class_name: 'name', query_type: 'list', query_column_name: 'author', lang_key: "field_#{model_name_underscored}_author" } if author? && !@db_columns.key?('author_id')
 
-      @db_columns['created_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date', lang_key: "field_#{model_name_underscored}_created_at"}
-      @db_columns['updated_at'] = {type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date', lang_key: "field_#{model_name_underscored}_updated_at"}
+      @db_columns['created_at'] = { type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date', lang_key: "field_#{model_name_underscored}_created_at" }
+      @db_columns['updated_at'] = { type: 'datetime', idx: nil, null: false, safe: false, query_type: 'date', lang_key: "field_#{model_name_underscored}_updated_at" }
     end
 
     def prepare_associations
@@ -259,7 +339,7 @@ module RedmineExtensions
         assoc_type, assoc_name, assoc_class = assoc.split(':')
         next if assoc_type.blank? || assoc_name.blank?
 
-        @associations[assoc_name] = {type: assoc_type, class: assoc_class}
+        @associations[assoc_name] = { type: assoc_type, class: assoc_class }
 
         assoc_model_class = assoc_class.presence || assoc_name.singularize.camelize
         assoc_model_filename = assoc_model_class.underscore
@@ -283,7 +363,7 @@ module RedmineExtensions
             end
           end
 
-          @db_columns["#{assoc_model_class.underscore.singularize}_id"] = {type: 'integer', idx: true, lang_key: assoc_model_class.underscore, query_type: 'list_optional', null: true}
+          @db_columns["#{assoc_model_class.underscore.singularize}_id"] = { type: 'integer', idx: true, lang_key: assoc_model_class.underscore, query_type: 'list_optional', null: true }
         end
       end
     end
@@ -305,7 +385,7 @@ module RedmineExtensions
     end
 
     def name_column
-      'name' if string_columns.keys.include?('name')
+      'name' if string_columns.key?('name')
       string_columns.keys.first
     end
 
@@ -314,7 +394,7 @@ module RedmineExtensions
     end
 
     def description_column
-      'description' if text_columns.keys.include?('description')
+      'description' if text_columns.key?('description')
       text_columns.keys.first
     end
 

@@ -119,7 +119,7 @@ module RedmineExtensions
     end
 
     def method_missing(meth, *attrs)
-      if @plugin && @plugin.settings[:easy_settings] && @plugin.settings[:easy_settings].keys.include?(meth.to_sym)
+      if @plugin && @plugin.settings[:easy_settings] && @plugin.settings[:easy_settings].key?(meth.to_sym)
         EasySetting.value(prefix+meth.to_s, project_id)
       else
         super
