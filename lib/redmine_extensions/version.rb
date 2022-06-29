@@ -1,3 +1,3 @@
 module RedmineExtensions
-  VERSION = '0.2.14'
+  VERSION = '0.4.4'
 end

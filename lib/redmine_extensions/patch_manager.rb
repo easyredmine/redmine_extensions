@@ -57,7 +57,7 @@ module RedmineExtensions
         @@patches_locations[patching_module] = const.methods(false).map{|m| const.method(m) }.first.source_location.first
       rescue
         # [0] is register_*_patch
-        from_location = caller_locations[1]
+        from_location = caller_locations(2..2).first
         @@patches_locations[patching_module] = from_location.absolute_path
       end
 
@@ -78,7 +78,7 @@ module RedmineExtensions
       end
       section ||= :others
 
-      raise ArgumentError, "EasyPatchManager->register_patch: The section (#{section}) must be one of x#{@@registered_patches.keys.join(', ')}x " unless @@registered_patches.keys.include?(section)
+      raise ArgumentError, "EasyPatchManager->register_patch: The section (#{section}) must be one of x#{@@registered_patches.keys.join(', ')}x " unless @@registered_patches.key?(section)
 
       original_klasses_to_patch.each do |original_klass_to_patch|
         pcollection = @@registered_patches[section].move_and_get_or_insert( original_klass_to_patch, options )
@@ -191,17 +191,13 @@ module RedmineExtensions
         # raise ArgumentError, 'Section order has to be a integer!' unless order.is_a?(Numeric)
         # @name = name
         # @order = order
-        @patches_collections = Array.new
+        @patches_collections = []
         @last_order = 0
       end
 
       def each(&block)
         @patches_collections.each do |patch_collection|
-          if block_given?
-            block.call patch_collection
-          else
-            yield patch_collection
-          end
+          yield patch_collection
         end
       end
 
@@ -335,11 +331,7 @@ module RedmineExtensions
       def each(&block)
 
         @patches.each do |patch|
-          if block_given?
-            block.call patch
-          else
-            yield patch
-          end
+          yield patch
         end
 
       end

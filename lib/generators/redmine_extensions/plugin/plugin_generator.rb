@@ -15,6 +15,16 @@ module RedmineExtensions
 
       @plugin_path = (easy_plugin ? "plugins/easyproject/easy_plugins" : "plugins") + "/#{plugin_name_underscored}"
       @plugin_title = @plugin_name_underscored.camelize
+      check_existing_const
+    end
+
+    def check_existing_const
+      begin
+        @plugin_title.constantize
+        raise I18n.t(:error_plugin_name_is_used, plugin_name: @plugin_title)
+      rescue LoadError, NameError
+        # OK
+      end
     end
 
     def copy_templates

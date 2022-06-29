@@ -1,0 +1,19 @@
+RSpec.describe "<%= model_name_pluralize_underscored %>", type: :request do
+  describe "API" do
+    context "logged", logged: true do
+      before(:each) do
+        role = Role.non_member
+        role.add_permission! :view_<%= model_name_pluralize_underscored %>
+      end
+
+      it "list" do
+        FactoryBot.create_list :<%= model_name_underscored %>, 2
+        get <%= model_name_pluralize_underscored %>_path(format: "json")
+        expect(response).to have_http_status :success
+        expect(response.body).to include "limit", "offset"
+        expect(response.body).to match /total_count.{,2}:2/
+      end
+    end
+
+  end
+end

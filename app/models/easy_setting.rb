@@ -78,7 +78,7 @@ class EasySetting < ActiveRecord::Base
   @@mapper = EasySettings::Mapper.new
 
   def self.map(&block)
-    if block_given?
+    if block
       @@mapper.instance_eval(&block)
     else
       @@mapper

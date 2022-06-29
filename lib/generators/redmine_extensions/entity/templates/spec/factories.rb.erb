@@ -1,0 +1,11 @@
+FactoryBot.define do
+
+  factory :<%= model_name_underscored %> do
+    <%- string_columns.each_key do |c| -%>
+    sequence(:<%= c %>) { |n| "<%= c %>-#{n}"}
+        <%-  end -%>
+    <%= 'association :author, factory: :user' if author? %>
+    <%= 'project' if project? %>
+  end
+
+end

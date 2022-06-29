@@ -4,7 +4,7 @@
 <%%= context_menu context_menu_<%= model_name_pluralize_underscored %>_path(project_id: @project) %>
 <%% content_for :sidebar do %>
   <%%= render partial: '<%= model_name_pluralize_underscored %>/sidebar' %>
-  <%%= render partial: 'sidebar/saved_easyqueries_by_type', locals: {query_class: @query.class, project: @project} %>
+  <%%= render partial: 'sidebar/saved_easyqueries_by_type', locals: { query_class: @query.class, project: @project } %>
 <%% end %>
 <% else %>
 <div class="contextual">
@@ -13,26 +13,18 @@
   <%% end %>
 </div>
 <h2><%%= @query.queried_class.to_s %></h2>
-<div id="query_form_with_buttons" class="hide-when-print">
-  <div id="query_form_content">
-    <table class="list issues">
-      <thead>
-        <%% @query.available_columns.each do |column| %>
-          <th>
-            <%%= column.caption %>
-          </th>
-        <%% end %>
-      </thead>
-      <tbody>
-        <%% @query.<%= model_name_pluralize_underscored %>.each do |entity| %>
-          <tr>
-            <%% @query.available_columns.each do |column| %>
-              <%%= content_tag('td', column_content(column, entity)) %>
-            <%% end %>
-          </tr>
-        <%% end %>
-      </tbody>
-    </table>
-  </div>
-</div>
+
+<%%= form_tag(<%= model_name_pluralize_underscored %>_path, method: :get, id: 'query_form') do %>
+  <%%= render partial: 'queries/query_form' %>
+<%% end %>
+
+<%% if @query.valid? %>
+  <%% if @entities.empty? %>
+    <p class="nodata"><%%= l(:label_no_data) %></p>
+  <%% else %>
+    <%%= render_query_totals(@query) %>
+    <%%= render partial: 'list', locals: { entities: @entities }%>
+    <span class="pagination"><%%= pagination_links_full @entity_pages, @entity_count %></span>
+  <%% end %>
+<%% end %>
 <% end %>

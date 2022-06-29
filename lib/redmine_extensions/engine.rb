@@ -2,6 +2,7 @@ require 'active_support/dependencies'
 require_relative './patch_manager'
 require_relative './redmine_patches/controllers/application_controller_patch'
 require_relative './redmine_patches/models/project_patch'
+require_relative './redmine_patches/models/custom_field_patch'
 
 require_relative './query_output'
 
@@ -17,11 +18,16 @@ module RedmineExtensions
 
     config.autoload_paths << config.root.join('lib')
     config.eager_load_paths << config.root.join('app', 'models', 'easy_queries')
-    config.assets.precompile << 'redmine_extensions/applications.js'
-    config.assets.precompile << 'redmine_extensions/blocking.js'
-    unless Rails.env.production?
-      config.assets.precompile << 'redmine_extensions/jasmine_lib/jasmine_lib.js'
-      config.assets.precompile << 'redmine_extensions/jasmine.css'
+
+    initializer 'redmine_extensions.assets' do
+      if config.respond_to?(:assets)
+        config.assets.precompile << 'redmine_extensions/applications.js'
+        config.assets.precompile << 'redmine_extensions/blocking.js'
+        unless Rails.env.production?
+          config.assets.precompile << 'redmine_extensions/jasmine_lib/jasmine_lib.js'
+          config.assets.precompile << 'redmine_extensions/jasmine.css'
+        end
+      end
     end
 
     #config.to_prepare goes after Reloader.to_prepare
@@ -57,7 +63,7 @@ module RedmineExtensions
 
     # include helpers
     initializer 'redmine_extensions.rails_patching', before: :load_config_initializers do |app|
-      ActiveSupport.on_load :action_controller do
+      ActiveSupport.on_load(Rails::VERSION::MAJOR >= 5 ? :action_controller_base : :action_controller) do
         helper RedmineExtensions::ApplicationHelper
         # helper RedmineExtensions::EasyQueryHelper
       end

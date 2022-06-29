@@ -1,0 +1,18 @@
+local_assigns[:api].<%= model_name_underscored %> do
+  local_assigns[:api].id <%= model_name_underscored %>.id
+  <%- db_columns.keys.each do |column_name| -%>
+  local_assigns[:api].<%= column_name %> <%= model_name_underscored %>.<%= column_name %>
+  <%- end -%>
+  <%- if acts_as_customizable? -%>
+  render_api_custom_values <%= model_name_underscored %>.visible_custom_field_values, local_assigns[:api]
+  <%- end -%>
+  <%- if acts_as_attachable? -%>
+  local_assigns[:api].array :attachments do
+    <%= model_name_underscored %>.attachments.each do |attachment|
+      render_api_attachment attachment, local_assigns[:api]
+    end
+  end if include_in_api_response?('attachments')
+  <%- end -%>
+
+  call_hook :helper_render_api_<%= model_name_underscored %>, { api: local_assigns[:api], <%= model_name_underscored %>: <%= model_name_underscored %> }
+end

@@ -24,13 +24,18 @@ class <%= model_name %>Query < Query
     group = l("label_filter_group_#{self.class.name.underscore}")
 
     <%- db_columns.each do |column_name, column_options| -%>
-    @available_columns << QueryColumn.new('<%= column_options[:query_column_name] || column_name %>', caption: <%= model_name %>.human_attribute_name(:<%= column_name %>), title: <%= model_name %>.human_attribute_name(:<%= column_name %>), group: group)
+    @available_columns << QueryColumn.new(:<%= column_options[:query_column_name] || column_name %>, caption: <%= model_name %>.human_attribute_name(:<%= column_name %>), title: <%= model_name %>.human_attribute_name(:<%= column_name %>), group: group)
       <%- end -%>
     <%- if acts_as_customizable? -%>
     @available_columns += <%= model_name %>CustomField.visible.collect { |cf| QueryCustomFieldColumn.new(cf) }
     <%- end -%>
 
     @available_columns
+  end
+
+  def initialize(attributes=nil, *args)
+    super attributes
+    self.filters ||= { "<%= db_columns.first[0] %>" => {:operator => "*", :values => []} }
   end
 
   def default_columns_names

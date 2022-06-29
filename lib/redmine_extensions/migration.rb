@@ -1,5 +1,5 @@
 module RedmineExtensions
-  if Rails.version.start_with?('5')
+  if Rails::VERSION::MAJOR >= 5
     class Migration < ActiveRecord::Migration[4.2]
     end
   else

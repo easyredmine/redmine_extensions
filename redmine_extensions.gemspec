@@ -16,15 +16,6 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir["{app,config,db,lib}/**/*", "LICENSE", "Rakefile", "README.rdoc"]
 
-  spec.add_dependency "rails", ">= 4.2", "< 6"
-  spec.add_dependency "actionpack", ">= 4.2", "< 6"
-
-  spec.required_ruby_version = '>= 2.1'
-
-  spec.add_development_dependency 'sqlite3', '~> 1.3'
-  spec.add_development_dependency 'rspec-rails', '~> 3.4'
-  spec.add_development_dependency 'capybara', '~> 3.3.1'
-  spec.add_development_dependency 'factory_bot_rails', '~> 4.6'
-  spec.add_development_dependency 'poltergeist', '~> 1.10'
-  spec.add_development_dependency 'database_cleaner', '~> 1.5'
+  spec.add_dependency "rails", ">= 4.2", "< 6.2"
+  spec.required_ruby_version = '>= 2.5'
 end

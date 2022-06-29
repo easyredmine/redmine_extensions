@@ -10,20 +10,20 @@ class <%= controller_class %>Controller < ApplicationController
   <%- end -%>
 
   helper :<%= model_name_pluralize_underscored %>
-  helper :custom_fields
-  helper :context_menus
-  helper :attachments
-  helper :issues
+  helper :custom_fields, :context_menus, :attachments, :issues
   include_query_helpers
 
   accept_api_auth :index, :show, :create, :update, :destroy
 
   def index
-    <% if Redmine::Plugin.installed?(:easy_extensions) %>
+    <%- if Redmine::Plugin.installed?(:easy_extensions) %>
     index_for_easy_query(<%= model_name %>Query)
     <% else %>
     retrieve_query(<%= model_name %>Query)
-    <% end %>
+    @entity_count = @query.<%= model_name_pluralize_underscored %>.count
+    @entity_pages = Paginator.new @entity_count, per_page_option, params['page']
+    @entities = @query.<%= model_name_pluralize_underscored %>(offset: @entity_pages.offset, limit: @entity_pages.per_page)
+    <%- end %>
   end
 
   def show
@@ -48,7 +48,7 @@ class <%= controller_class %>Controller < ApplicationController
   end
 
   def create
-    @<%= model_name_underscored %> = <%= model_name %>.new
+    @<%= model_name_underscored %> = <%= model_name %>.new <%= "author: User.current" if author? %>
     <%- if project? -%>
     @<%= model_name_underscored %>.project = @project
     <%- end -%>
@@ -57,17 +57,15 @@ class <%= controller_class %>Controller < ApplicationController
     @<%= model_name_underscored %>.save_attachments(params[:attachments] || (params[:<%= model_name_underscored %>] && params[:<%= model_name_underscored %>][:uploads]))
     <%- end -%>
 
-    if @<%= model_name_underscored %>.save
-      respond_to do |format|
-        format.html {
+    respond_to do |format|
+      if @<%= model_name_underscored %>.save
+        format.html do
           flash[:notice] = l(:notice_successful_create)
           redirect_back_or_default <%= model_name_underscored %>_path(@<%= model_name_underscored %>)
-        }
+        end
         format.api { render action: 'show', status: :created, location: <%= model_name_underscored %>_url(@<%= model_name_underscored %>) }
         format.js { render template: 'common/close_modal' }
-      end
-    else
-      respond_to do |format|
+      else
         format.html { render action: 'new' }
         format.api { render_validation_errors(@<%= model_name_underscored %>) }
         format.js { render action: 'new' }
@@ -90,17 +88,15 @@ class <%= controller_class %>Controller < ApplicationController
     @<%= model_name_underscored %>.save_attachments(params[:attachments] || (params[:<%= model_name_underscored %>] && params[:<%= model_name_underscored %>][:uploads]))
     <%- end -%>
 
-    if @<%= model_name_underscored %>.save
-      respond_to do |format|
-        format.html {
+    respond_to do |format|
+      if @<%= model_name_underscored %>.save
+        format.html do
           flash[:notice] = l(:notice_successful_update)
           redirect_back_or_default <%= model_name_underscored %>_path(@<%= model_name_underscored %>)
-        }
+        end
         format.api { render_api_ok }
         format.js { render template: 'common/close_modal' }
-      end
-    else
-      respond_to do |format|
+      else
         format.html { render action: 'edit' }
         format.api { render_validation_errors(@<%= model_name_underscored %>) }
         format.js { render action: 'edit' }
@@ -109,15 +105,13 @@ class <%= controller_class %>Controller < ApplicationController
   end
 
   def destroy
-    @<%= model_name_pluralize_underscored %>.each do |<%= model_name_underscored %>|
-      <%= model_name_underscored %>.destroy
-    end
+    @<%= model_name_pluralize_underscored %>.each(&:destroy)
 
     respond_to do |format|
-      format.html {
+      format.html do
         flash[:notice] = l(:notice_successful_delete)
         redirect_back_or_default <%= model_name_pluralize_underscored %>_path
-      }
+      end
       format.api { render_api_ok }
     end
   end
@@ -195,6 +189,7 @@ class <%= controller_class %>Controller < ApplicationController
     @<%= model_name_underscored %> = @<%= model_name_pluralize_underscored %>.first if @<%= model_name_pluralize_underscored %>.count == 1
     raise ActiveRecord::RecordNotFound if @<%= model_name_pluralize_underscored %>.empty?
     raise Unauthorized unless @<%= model_name_pluralize_underscored %>.all?(&:visible?)
+
     @projects = @<%= model_name_pluralize_underscored %>.collect(&:project).compact.uniq
     @project = @projects.first if @projects.size == 1
   rescue ActiveRecord::RecordNotFound

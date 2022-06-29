@@ -1,5 +1,3 @@
-require 'rails_helper'
-
 module EasySettings
   RSpec.describe ParamsWrapper, clear_cache: true do
 
@@ -14,6 +12,8 @@ module EasySettings
       end
 
       it 'create project setting' do
+        EasySetting.where(name: ['key', 'key2']).destroy_all
+
         presenter = EasySettings::ParamsWrapper.from_params({'key' => 'value', 'key2' => 'value2'}, project: project)
         expect{ presenter.save }.to change(EasySetting, :count).by(2)
         expect( EasySetting.where(project_id: project.id).count ).to eq(2)

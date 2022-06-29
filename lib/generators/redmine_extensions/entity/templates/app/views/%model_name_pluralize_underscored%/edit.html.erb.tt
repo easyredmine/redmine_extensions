@@ -1,0 +1,8 @@
+<%%= title l(:heading_<%= model_name_underscored %>_edit) %>
+
+<%%= render partial: 'form', locals: { <%= model_name_underscored %>: @<%= model_name_underscored %> } %>
+
+<%% ### PAGE CUSTOMS ########################################################## %>
+<%% content_for :sidebar do %>
+  <%%= render partial: '<%= model_name_pluralize_underscored %>/sidebar' %>
+<%% end %>

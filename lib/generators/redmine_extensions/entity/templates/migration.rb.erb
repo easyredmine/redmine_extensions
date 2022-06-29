@@ -1,11 +1,16 @@
-class Create<%= model_name_pluralize_underscored.camelize %> < ActiveRecord::Migration
+class Create<%= model_name_pluralize_underscored.camelize %> < ActiveRecord::Migration[<%= ActiveRecord::Migration::Current.current_version %>]
   def change
-    create_table :<%= model_name_pluralize_underscored %>, force: true do |t|
+    create_table :<%= model_name_pluralize_underscored %> do |t|
       <%- columns = db_columns.reject{|k| k.in?(["created_at", "updated_at"])} -%>
+      <%- author_col = db_columns.delete "author_id" %>
+      <%- project_col = db_columns.delete "project_id" %>
       <%- columns.each do |column_name, column_attrs| -%>
       t.<%= column_attrs[:type] %> :<%= column_name %>, null: <%= column_attrs[:null] %>
       <%- end -%>
-      t.timestamps null: false
+      <%= "t.belongs_to :author" if author_col  %>
+      <%= "t.belongs_to :project" if project_col  %>
+
+      t.timestamps
     end
   end
 end

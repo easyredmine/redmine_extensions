@@ -10,20 +10,20 @@ module EasySettings
     def key(name, **options, &block)
       name = name.to_s
 
-      if block_given?
+      if block
         key_dsl = EasySettings::KeyDSL.new
         key_dsl.instance_eval(&block)
         options = options.merge(key_dsl.options)
       end
 
       EasySetting.mapper_clear_caches
-      @all_keys[name] = EasySettings::Key.init(name, options)
+      @all_keys[name] = EasySettings::Key.init(name, **options)
     end
     alias_method :add_key, :key
 
     def keys(*names, **options, &block)
       names.each do |name|
-        key(name, options, &block)
+        key(name, **options, &block)
       end
     end
     alias_method :add_keys, :keys

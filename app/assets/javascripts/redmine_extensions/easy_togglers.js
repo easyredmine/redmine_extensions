@@ -1,4 +1,4 @@
-var EasyToggler = new function() {
+window.EasyToggler = new function() {
   // EasyToggler storage store object where key is ID of container and value is 0 - for hidden default state or 1 - for shown default state
   // Example:
   // localStorage # => {"easy-toggle-state": {myDiv: 0, history: 1}} # where myDiv is by default hidden, and now will be shown as visible and history is vice versa
@@ -46,10 +46,18 @@ var EasyToggler = new function() {
     var list = document.querySelectorAll('*[data-toggle]');
     for (var i = 0; i < list.length; ++i) {
       var item = list.item(i);
-      var container = document.getElementById(item.dataset.toggle);
-      if (!!storage[item.dataset.toggle]) {
-        toggle(container);
-      }
+      window.EasyToggler.ensureToggleItem(item);
+    }
+    return this;
+  };
+
+  /**
+  * @param {HTMLElement} item
+  */
+  this.ensureToggleItem = function(item) {
+    var container = document.getElementById(item.dataset.toggle);
+    if (!!storage[item.dataset.toggle]) {
+      toggle(container);
     }
     return this;
   };

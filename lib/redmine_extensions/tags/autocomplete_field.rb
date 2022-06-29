@@ -18,7 +18,7 @@ module RedmineExtensions
 
       def render
         options = @options.stringify_keys
-        options["value"] = options.fetch("value") { value_before_type_cast(object) }
+        options["value"] = options.fetch("value") { value_before_type_cast }
         add_default_name_and_id(options)
         @template_object.autocomplete_field_tag(options.delete('name'), @choices, options.delete('value'), options.symbolize_keys)
       end

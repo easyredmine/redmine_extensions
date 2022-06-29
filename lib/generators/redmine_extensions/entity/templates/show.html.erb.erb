@@ -22,9 +22,9 @@
     <%% end %>
     <%- if acts_as_customizable? -%>
       <hr />
-    <%%= render partial: 'redmine_extensions/custom_field_rows', :locals => { :custom_field_values => @<%= model_name_underscored %>.visible_custom_field_values } %>
+    <%%= render partial: 'redmine_extensions/custom_field_rows', locals: { custom_field_values: @<%= model_name_underscored %>.visible_custom_field_values } %>
     <%- end -%>
-    <%%= call_hook(:view_<%= model_name_pluralize_underscored %>_show_details_bottom, :<%= model_name_underscored %> => @<%= model_name_underscored %>) %>
+    <%%= call_hook(:view_<%= model_name_pluralize_underscored %>_show_details_bottom, :<%= model_name_underscored%>: @<%= model_name_underscored %>) %>
   </table>
 <%- if description_column? -%>
   <%% if !@<%= model_name_underscored %>.<%= description_column %>.blank? %>
@@ -38,13 +38,13 @@
   <%% end %>
 <%- end -%>
 <%- if acts_as_attachable? -%>
-  <%% if @<%= model_name_underscored %>.attachments.any? -%>
+  <%% if @<%= model_name_underscored %>.attachments.any? %>
     <hr />
-    <%%= link_to_attachments @<%= model_name_underscored %>, :thumbnails => true %>
+    <%%= link_to_attachments @<%= model_name_underscored %>, thumbnails: true %>
   <%% end %>
 <%- end -%>
 </div>
 <%% ### PAGE CUSTOMS ########################################################## %>
 <%% content_for :sidebar do %>
-  <%%= render :partial => '<%= model_name_pluralize_underscored %>/sidebar' %>
+  <%%= render partial: '<%= model_name_pluralize_underscored %>/sidebar' %>
 <%% end %>
